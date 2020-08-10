@@ -124,9 +124,13 @@ class NoLangSpecified(ValueError):
     pass
 
 
-class LegalEntityMustHaveBirthPlace(ValueError):
+class SysException(Exception):
     pass
 
 
-class SoleTraderMustHaveTaxPayerNumber(ValueError):
+class LegalEntityMustHaveBirthPlace(SysException):
+    pass
+
+
+class SoleTraderMustHaveTaxPayerNumber(SysException):
     pass
