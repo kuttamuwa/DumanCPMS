@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # project aps
-    'checkaccount'
+    'checkaccount',
+    'debug_toolbar'
 ]
 
 MIDDLEWARE = [
@@ -55,12 +56,17 @@ MIDDLEWARE = [
     # CORS
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8081',
 )
+INTERNAL_IPS = [
+    '127.0.0.1'
+]
 
 ROOT_URLCONF = 'DumanCPMS.urls'
 

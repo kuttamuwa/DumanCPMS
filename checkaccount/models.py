@@ -33,6 +33,9 @@ class Cities(GeoModel):
             models.Index(fields=['city_name'])
         ]
 
+    def __str__(self):
+        return self.city_name
+
 
 class Districts(GeoModel):
     district_name = models.CharField(max_length=50, db_column='DISTRICT_NAME')
@@ -50,6 +53,10 @@ class Districts(GeoModel):
             models.Index(fields=['objectid', 'district_name'])
         ]
 
+    # todo : ilce isimleri ile gore filtrelenerek getirilmeli. Kontrol icin admin sayfasına bak.
+    def __str__(self):
+        return self.district_name
+
 
 class SysDepartments(models.Model):
     department_name = models.CharField(max_length=50, unique=True, db_column='DEPARTMENT_NAME')
@@ -61,6 +68,9 @@ class SysDepartments(models.Model):
             models.Index(fields=['department_name', 'objectid'])
         ]
 
+    def __str__(self):
+        return self.department_name
+
 
 class Sectors(models.Model):
     name = models.CharField(max_length=50, unique=True, db_column='SECTOR_NAME')
@@ -68,6 +78,9 @@ class Sectors(models.Model):
 
     class Meta:
         db_table = 'SECTORS'
+
+    def __str__(self):
+        return self.name
 
 
 class SysPersonnel(models.Model):
@@ -85,6 +98,9 @@ class SysPersonnel(models.Model):
             models.Index(fields=['firstname', 'personnel_id', 'department']),
             models.Index(fields=['personnel_id', 'firstname', 'surname'])
         ]
+
+    def __str__(self):
+        return f"{self.username}"
 
 
 class CheckAccount(models.Model):
@@ -127,6 +143,9 @@ class CheckAccount(models.Model):
             models.Index(fields=['customer_id', 'representative_person', 'firm_key_contact_personnel', 'birthplace'])
         ]
 
+    def __str__(self):
+        return self.firm_full_name
+
     def save(self, *args, **kwargs):
         # validators kullanılmayan kurallar
 
@@ -144,6 +163,7 @@ class CheckAccount(models.Model):
 
 
 class AccountDocuments(models.Model):
+    # todo:
     activity_certificate = models.FilePathField(
         verbose_name=AccountDocumentsSpec.get_activity_certificate_verbose_name(),
         db_column='ACTIVITY_CERTIFICATE_PATH')
@@ -157,12 +177,17 @@ class AccountDocuments(models.Model):
 
     # if customer was deleted?
     customer_id = models.ForeignKey(CheckAccount, on_delete=models.CASCADE)
+    attachment_title = models.CharField(unique=False, null=True, blank=True, max_length=50, db_column='TITLE')
+    description = models.CharField(unique=False, null=True, blank=True, max_length=250, db_column='DESCRIPTION')
 
     class Meta:
         db_table = 'ACCOUNT_DOCUMENTS'
         indexes = [
             models.Index(fields=['attachment_id', 'customer_id'])
         ]
+
+    def __str__(self):
+        return f"attach_certificates//{self.customer_id}"
 
 
 class PartnershipDocuments(models.Model):
@@ -179,6 +204,8 @@ class PartnershipDocuments(models.Model):
     # if customer was deleted?
     customer_id = models.ForeignKey(CheckAccount, on_delete=models.CASCADE, db_column='CUSTOMER_ID')
     attachment_id = models.AutoField(primary_key=True)
+    attachment_title = models.CharField(unique=False, null=True, blank=True, max_length=50, db_column='TITLE')
+    description = models.CharField(unique=False, null=True, blank=True, max_length=250, db_column='DESCRIPTION')
 
     class Meta:
         db_table = 'PARTNERSHIP_DOCUMENTS'
@@ -189,6 +216,8 @@ class PartnershipDocuments(models.Model):
     def save(self, *args, **kwargs):
         super(PartnershipDocuments, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return f"attach//{self.customer_id}//{self.attachment_id}"
 # class RelatedBlackList(models.Model):
 #     objectid = models.AutoField(primary_key=True)
 #     customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
@@ -197,3 +226,7 @@ class PartnershipDocuments(models.Model):
 #
 #     class Meta:
 #         db_table = 'BLACK_LIST'
+
+
+# todo: musterinin calistigi banka bilgileri modeli eklenecek
+# todo: SORU -> birden fazla banka ile calisabilir mi?
