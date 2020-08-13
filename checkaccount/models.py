@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 from .geo_models import GeoModel
 from .model_sys_specs import CariHesapSpecs, AccountDocumentsSpec, PartnershipDocumentsSpecs, \
@@ -100,7 +101,7 @@ class SysPersonnel(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.username}"
+        return self.username
 
 
 class CheckAccount(models.Model):
@@ -143,6 +144,10 @@ class CheckAccount(models.Model):
             models.Index(fields=['customer_id', 'representative_person', 'firm_key_contact_personnel', 'birthplace'])
         ]
 
+    @classmethod
+    def get_auto_fields(cls):
+        return 'customer_id',
+
     def __str__(self):
         return self.firm_full_name
 
@@ -163,7 +168,6 @@ class CheckAccount(models.Model):
 
 
 class AccountDocuments(models.Model):
-    # todo:
     activity_certificate = models.FilePathField(
         verbose_name=AccountDocumentsSpec.get_activity_certificate_verbose_name(),
         db_column='ACTIVITY_CERTIFICATE_PATH')

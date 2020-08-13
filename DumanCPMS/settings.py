@@ -25,7 +25,7 @@ SECRET_KEY = '-^jezq)+g@xp--tla4y=95e!2a+xlb#pv4g+$=2ip61woh7yvc'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.42', '127.0.0.1']
 
 # Application definition
 
@@ -42,8 +42,13 @@ INSTALLED_APPS = [
     # project aps
     'checkaccount',
     'debug_toolbar',
-    'snippets'
+    'snippets',
+    'rest_framework',
+    'crispy_forms',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
