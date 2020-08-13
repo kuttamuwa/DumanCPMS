@@ -10,5 +10,7 @@ urlpatterns = [
     path('api/checkaccount/', views.CheckAccountAPI.as_view()),
 
     # pages and forms
-    path('checkaccount/', views.CheckAccountFormCreateView.as_view(), name='checkaccount-create')
+    path('checkaccount/', views.checkaccount_mainpage),
+    path('checkaccount/retrieve', views.CheckAccountFormView.as_view(), name='checkaccount-retrieve'),
+    path('checkaccount/create', views.CheckAccountFormCreateView.as_view(), name='checkaccount-create')
 ]
