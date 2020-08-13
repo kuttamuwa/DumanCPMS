@@ -17,8 +17,12 @@ from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
 
+from checkaccount import views
+
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
     path('admin/', admin.site.urls),
+    path('', include('checkaccount.urls')),
+    path('', include('snippets.urls'))
 
 ]

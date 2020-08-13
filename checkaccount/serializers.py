@@ -1,14 +1,5 @@
 from rest_framework import serializers
-from .models import Tutorial, CheckAccount
-
-
-class TutorialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tutorial
-        fields = ('id',
-                  'title',
-                  'description',
-                  'published')
+from .models import CheckAccount
 
 
 class CheckAccountSerializer(serializers.ModelSerializer):
@@ -16,9 +7,8 @@ class CheckAccountSerializer(serializers.ModelSerializer):
         model = CheckAccount
         fields = ('firm_type',
                   'firm_full_name',
-                  'people_id',
                   'birthplace',
-                  'tax_number',
+                  'taxpayer_number',
                   'tax_department',
                   'firm_address',
                   'firm_key_contact_personnel',
@@ -26,7 +16,8 @@ class CheckAccountSerializer(serializers.ModelSerializer):
                   'city',
                   'district',
                   'phone_number',
-                  'fax', 'web_url', 'email_addr', 'customer_id'
+                  'fax', 'web_url', 'email_addr',
+                  'customer_id',
                   'representative_person'
                   )
 

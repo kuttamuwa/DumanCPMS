@@ -52,7 +52,7 @@ class CitiesTest(ImportFromShapefile):
             c_name = i[1][self.city_name_field]
             p_number = i[1][self.plate_number_field][4:]
             print(f"city : {c_name}  -  plate : {p_number}")
-            Cities.objects.create(city_name=c_name, city_plate_number=p_number)
+            Cities.objects.get_or_create(city_name=c_name, city_plate_number=p_number)
 
 
 class DistrictTest(ImportFromShapefile):
@@ -68,8 +68,8 @@ class DistrictTest(ImportFromShapefile):
             related_c_name = i[1][self.city_name_field]
             d_name = i[1][self.district_name_field]
             print(f"related city name : {related_c_name}   -   district name : {d_name}")
-            Districts.objects.create(related_city_name=Cities.objects.get(city_name=related_c_name),
-                                     district_name=d_name)
+            Districts.objects.get_or_create(related_city_name=Cities.objects.get(city_name=related_c_name),
+                                            district_name=d_name)
 
         print("all districts are imported")
 
@@ -77,11 +77,11 @@ class DistrictTest(ImportFromShapefile):
 class SysDepartmentsTest(TestCase):
     @staticmethod
     def test_create_test_departments():
-        SysDepartments.objects.create(department_name='FINANCE')
-        SysDepartments.objects.create(department_name='HR')
-        SysDepartments.objects.create(department_name='IT')
-        SysDepartments.objects.create(department_name='GIS')
-        SysDepartments.objects.create(department_name='MIS')
+        SysDepartments.objects.get_or_create(department_name='FINANCE')
+        SysDepartments.objects.get_or_create(department_name='HR')
+        SysDepartments.objects.get_or_create(department_name='IT')
+        SysDepartments.objects.get_or_create(department_name='GIS')
+        SysDepartments.objects.get_or_create(department_name='MIS')
 
     @staticmethod
     def test_get_all_departments():
@@ -94,27 +94,28 @@ class SysPersonnelTest(TestCase):
     def test_create_personels():
         SysDepartmentsTest.test_create_test_departments()
 
-        SysPersonnel.objects.create(firstname='mert', surname='öner', username='moner',
-                                    department=SysDepartments.objects.get(department_name='FINANCE'),
-                                    position='MARKETING')
-        SysPersonnel.objects.create(firstname='umut', surname='ucok', username='uucok',
-                                    department=SysDepartments.objects.get(department_name='MIS'),
-                                    position='ENGINEER')
-        SysPersonnel.objects.create(firstname='mustafa', surname='duman', username='mduman',
-                                    department=SysDepartments.objects.get(department_name='IT'),
-                                    position='CEO')
-        SysPersonnel.objects.create(firstname='salim', surname='onurbilen', username='sonurbilen',
-                                    department=SysDepartments.objects.get(department_name='GIS'),
-                                    position='ENGINEER')
-        SysPersonnel.objects.create(firstname='enes', surname='duman', username='eduman',
-                                    department=SysDepartments.objects.get(department_name='IT'),
-                                    position='CTO')
+        SysPersonnel.objects.get_or_create(firstname='mert', surname='öner', username='moner',
+                                           department=SysDepartments.objects.get(department_name='FINANCE'),
+                                           position='MARKETING')
+        SysPersonnel.objects.get_or_create(firstname='umut', surname='ucok', username='uucok',
+                                           department=SysDepartments.objects.get(department_name='MIS'),
+                                           position='ENGINEER')
+        SysPersonnel.objects.get_or_create(firstname='mustafa', surname='duman', username='mduman',
+                                           department=SysDepartments.objects.get(department_name='IT'),
+                                           position='CEO')
+        SysPersonnel.objects.get_or_create(firstname='salim', surname='onurbilen', username='sonurbilen',
+                                           department=SysDepartments.objects.get(department_name='GIS'),
+                                           position='ENGINEER')
+        SysPersonnel.objects.get_or_create(firstname='enes', surname='duman', username='eduman',
+                                           department=SysDepartments.objects.get(department_name='IT'),
+                                           position='CTO')
         print("many users were created !")
 
 
 class SectorTest(TestCase):
     @staticmethod
     def test_create_sectors():
+        Sectors.objects.get_or_create(name='FINANCE')
         Sectors.objects.get_or_create(name='GIS')
         Sectors.objects.get_or_create(name='IT')
         Sectors.objects.get_or_create(name='IOT')
@@ -134,16 +135,19 @@ class CheckAccountTest(TestCase, ImportFromExcelfile):
         # district also imports cities
         DistrictTest().test_import_all_districts_shp()
 
-        CheckAccount.objects.create(firm_type='SAHIS_ISLETMESI', firm_full_name='UMUT TEST AS',
-                                    taxpayer_number=18319776776,
-                                    birthplace=Cities.objects.get(city_name='CORUM'),
-                                    tax_department='UMRANIYE VERGI DAIRESI',
-                                    firm_address='sample address',
-                                    firm_key_contact_personnel='someone',
-                                    sector=Sectors.objects.get(name='GIS'), city=Cities.objects.get(city_name='CORUM'),
-                                    district=Districts.objects.get(district_name='ISKILIP'), phone_number='05063791026',
-                                    fax='02122451517', web_url='https://dumanarge.com', email_addr='info@dumanarge.com',
-                                    representative_person=SysPersonnel.objects.get(username='sonurbilen'))
+        CheckAccount.objects.get_or_create(firm_type='SAHIS_ISLETMESI', firm_full_name='UMUT TEST AS',
+                                           taxpayer_number=18319776776,
+                                           birthplace=Cities.objects.get(city_name='CORUM'),
+                                           tax_department='UMRANIYE VERGI DAIRESI',
+                                           firm_address='sample address',
+                                           firm_key_contact_personnel='someone',
+                                           sector=Sectors.objects.get(name='GIS'),
+                                           city=Cities.objects.get(city_name='CORUM'),
+                                           district=Districts.objects.get(district_name='ISKILIP'),
+                                           phone_number='05063791026',
+                                           fax='02122451517', web_url='https://dumanarge.com',
+                                           email_addr='info@dumanarge.com',
+                                           representative_person=SysPersonnel.objects.get(username='sonurbilen'))
 
     def test_create_accounts_from_excel(self):
         # required tables and data
@@ -154,6 +158,9 @@ class CheckAccountTest(TestCase, ImportFromExcelfile):
         DistrictTest().test_import_all_districts_shp()
 
         df = self.read_from_excel()
+        print("excel verisi : \n"
+              "{}".format(df))
+
         for index, i in df.iterrows():
             firm_type = i['firm_type']
             firm_full_name = i['firm_full_name']
@@ -193,6 +200,4 @@ class CheckAccountTest(TestCase, ImportFromExcelfile):
                                         fax=fax, web_url=web_url, email_addr=email_addr,
                                         representative_person=representative_person)
 
-
 # attachment tests
-

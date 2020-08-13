@@ -195,6 +195,7 @@ class PartnershipDocuments(models.Model):
     partnership_structure_identity_copies = models.FilePathField(
         PartnershipDocumentsSpecs.get_partnership_structure_id_copies_verbose_name(), allow_folders=True,
         db_column='PARTNERSHIP_STRUCTURE_PATH')
+
     identity_copies = models.FilePathField(PartnershipDocumentsSpecs.get_identity_copies_verbose_name(),
                                            allow_folders=True,
                                            db_column='IDENTITY_COPIES_PATH')
@@ -218,6 +219,21 @@ class PartnershipDocuments(models.Model):
 
     def __str__(self):
         return f"attach//{self.customer_id}//{self.attachment_id}"
+
+
+class CustomerBank(models.Model):
+    # musteri silinirse kayit da silinir
+    customer_id = models.ForeignKey(CheckAccount, on_delete=models.CASCADE)
+    objectid = models.AutoField(primary_key=True, db_column='OBJECTID')
+    bank_name = models.CharField(max_length=60, unique=False, db_column='BANK_NAME')
+
+    # diger bilgiler gelir.
+    class Meta:
+        db_table = "CUSTOMER_BANK"
+
+    def __str__(self):
+        return self.bank_name
+
 # class RelatedBlackList(models.Model):
 #     objectid = models.AutoField(primary_key=True)
 #     customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
