@@ -7,6 +7,8 @@ urlpatterns = [
     # api
     path('api/get/', views.CheckAccountAPI.as_view()),
 
+    path('testcustomer/<int:customer_id>', views.test_check_account_view),
+
     # pages and forms
     path('', views.checkaccount_mainpage),
     # path('checkaccount/retrieve', views.CheckAccountFormView.as_view(), name='checkaccount-retrieve'),

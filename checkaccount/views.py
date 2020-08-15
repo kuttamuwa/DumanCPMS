@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from checkaccount.forms import CheckAccountCreateForm
 from checkaccount.models import CheckAccount
 from checkaccount.serializers import CheckAccountSerializer
+from .filters import CheckAccountFilter
 
 
 def main_page(request):
@@ -23,6 +24,19 @@ checkaccount_shown_fields = [i.name for i in CheckAccount._meta.get_fields() if 
 # Site views
 def checkaccount_mainpage(request):
     return render(request, 'checkaccount/checkaccount_main.html')
+
+
+def test_check_account_view(request, customer_id):
+    checkaccount = CheckAccount.objects.get(customer_id=customer_id)
+    print(f"check account : {checkaccount}")
+
+    account_filter = CheckAccountFilter(request.GET)
+
+    context = {'checkaccount': checkaccount,
+               'account_filter': account_filter,
+               }
+
+    return render(request, context=context, template_name='checkaccount/account_with_filter.html')
 
 
 # API VIEW
