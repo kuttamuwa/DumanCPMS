@@ -1,16 +1,14 @@
+from django.contrib.auth.decorators import login_required
 from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 # Create your views here.
 from django.views.generic.base import View
-from django.views.generic.detail import DetailView
-from django.views.generic.edit import FormView, DeleteView, UpdateView, CreateView
+from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from django.views.generic.list import ListView
 from rest_framework import status
 from rest_framework.views import APIView
 
-# from checkaccount.forms import CheckAccountForm
-# from checkaccount.forms import CheckAccountForm
-from checkaccount.forms import CheckAccountForm, SearchCheckAccountForm
+from checkaccount.forms import CheckAccountCreateForm
 from checkaccount.models import CheckAccount
 from checkaccount.serializers import CheckAccountSerializer
 
@@ -46,7 +44,7 @@ class CheckAccountAPI(APIView):
 
 
 class CheckAccountFormView(View):
-    form_class = CheckAccountForm
+    form_class = CheckAccountCreateForm
     initial = {'key': 'value'}
     template_name = 'checkaccount/checkaccount_form.html'
 
@@ -82,10 +80,14 @@ class CheckAccountFormDeleteView(DeleteView):
 
 
 class CheckAccountFormUpdateView(UpdateView):
-    # model = CheckAccountForm
+    # model = CheckAccountCreateForm
     fields = checkaccount_shown_fields
 
 
 class CheckAccountSearchView(ListView):
     model = CheckAccount
     template_name = 'checkaccount/searchresults.html'
+
+
+def NotImplementedPage(request):
+    return render(request, 'checkaccount/not_implemented_yet.html')

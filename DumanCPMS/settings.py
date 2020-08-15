@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'snippets',
     'rest_framework',
     'crispy_forms',
+    # 'haystack',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -106,6 +107,12 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': 5432,
     }
+}
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+    },
 }
 
 # Password validation

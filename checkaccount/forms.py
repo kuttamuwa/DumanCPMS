@@ -1,19 +1,18 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Column, Row, Fieldset, ButtonHolder
 from crispy_forms.tests.forms import forms
 
-from checkaccount.model_sys_specs import CariHesapSpecs
 from checkaccount.models import CheckAccount
 
 
-class CheckAccountForm(forms.ModelForm):
+class CheckAccountCreateForm(forms.ModelForm):
     class Meta:
         model = CheckAccount
         fields = '__all__'
+        # fields = ['firm_type', 'firm_full_name', 'taxpayer_number', 'birthplace', 'tax_department',
+        #           'firm_address', 'firm_key_contact_personnel', 'sector', 'city', 'district',
+        #           'phone_number', 'fax', 'web_url', 'email_addr', 'representative_person']
+        # labels = {
+        #     'taxpayer_number': 'Mükellef numarası',
+        # }
+        # help_texts = {'taxpayer_number': 'Sahis firmasi ise TCKNO, Tuzel Kisilik ise Vergi No'}
+        # error_messages = {'taxpayer_number': 'Tax payer field cannot be more than 15 characters'}
 
-
-class SearchCheckAccountForm(forms.Form):
-    firm_full_name = forms.ModelChoiceField(label="Firm Full Name", queryset=CheckAccount.objects.all(),
-                                            widget=forms.Select(attrs={'class': 'form-control input-sm'}))
-    city = forms.ModelChoiceField(label='City', queryset=CheckAccount.objects.all(),
-                                  widget=forms.Select(attrs={'class': 'form-control input-sm'}))

@@ -11,6 +11,12 @@ urlpatterns = [
 
     # pages and forms
     path('checkaccount/', views.checkaccount_mainpage),
-    path('checkaccount/retrieve', views.CheckAccountFormView.as_view(), name='checkaccount-retrieve'),
+    # path('checkaccount/retrieve', views.CheckAccountFormView.as_view(), name='checkaccount-retrieve'),
+    path('checkaccount/retrieve', views.NotImplementedPage, name='not-implemented-page'),
     path('checkaccount/create', views.CheckAccountFormCreateView.as_view(), name='checkaccount-create')
 ]
+
+"""
+search
+Elasticsearch ile cebellesmemiz lazim..
+"""
