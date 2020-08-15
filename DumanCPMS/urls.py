@@ -22,7 +22,14 @@ from checkaccount import views
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
     path('admin/', admin.site.urls),
-    path('', include('checkaccount.urls')),
-    path('', include('snippets.urls'))
 
+    # application
+    # home page
+    path('', include('home.urls')),
+
+    # check account - api and page
+    path('checkaccount/', include('checkaccount.urls')),
+
+    # financial Check Up - api
+    path('finance_checkup/', include('finance_checkup.urls')),
 ]

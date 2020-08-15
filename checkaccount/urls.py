@@ -4,16 +4,14 @@ from django.urls import path
 from checkaccount import views
 
 urlpatterns = [
-    path('', views.main_page),
-
     # api
-    path('api/checkaccount/', views.CheckAccountAPI.as_view()),
+    path('api/get/', views.CheckAccountAPI.as_view()),
 
     # pages and forms
-    path('checkaccount/', views.checkaccount_mainpage),
+    path('', views.checkaccount_mainpage),
     # path('checkaccount/retrieve', views.CheckAccountFormView.as_view(), name='checkaccount-retrieve'),
-    path('checkaccount/retrieve', views.NotImplementedPage, name='not-implemented-page'),
-    path('checkaccount/create', views.CheckAccountFormCreateView.as_view(), name='checkaccount-create')
+    path('retrieve/', views.NotImplementedPage, name='not-implemented-page'),
+    path('create', views.CheckAccountFormCreateView.as_view(), name='checkaccount-create')
 ]
 
 """

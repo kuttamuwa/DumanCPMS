@@ -23,6 +23,14 @@ Bu ekranda da son 5 rapor verisi altlata gösterilir
 """
 
 
+def finance_checkup_page(request):
+    return render(request, 'finance_checkup/main_page.html')
+
+
+def api_guide(request):
+    return render(request, 'finance_checkup/api_guide.html')
+
+
 class RiskReportSummary(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]

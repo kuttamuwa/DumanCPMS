@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     # project aps
     'checkaccount',
     'debug_toolbar',
-    'snippets',
     'rest_framework',
     'crispy_forms',
     # 'haystack',
