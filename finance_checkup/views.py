@@ -23,6 +23,7 @@ Bu ekranda da son 5 rapor verisi altlata gösterilir
 """
 
 
+# some pages
 def finance_checkup_page(request):
     return render(request, 'finance_checkup/main_page.html')
 
@@ -77,6 +78,9 @@ class CheckReportSummary(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
+        return True
+
+    def post(self, request, format=None):
         return True
 
 
