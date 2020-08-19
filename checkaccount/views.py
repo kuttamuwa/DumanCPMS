@@ -26,8 +26,17 @@ def checkaccount_mainpage(request):
     return render(request, 'checkaccount/checkaccount_main.html')
 
 
-def test_check_account_view(request, customer_id):
-    checkaccount = CheckAccount.objects.get(customer_id=customer_id)
+def checkaccount_loginpage(request):
+    if request.method == 'GET':
+        return render(request, 'checkaccount/registration/login.html')
+
+    elif request.method == 'POST':
+        usr = request
+
+
+@login_required
+def check_account_search(request):
+    checkaccount = CheckAccount.objects.all()
     print(f"check account : {checkaccount}")
 
     account_filter = CheckAccountFilter(request.GET)
