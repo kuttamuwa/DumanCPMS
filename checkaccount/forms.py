@@ -1,4 +1,5 @@
 from crispy_forms.tests.forms import forms
+from django.contrib.auth.models import User
 
 from checkaccount.models import CheckAccount
 
@@ -15,4 +16,10 @@ class CheckAccountCreateForm(forms.ModelForm):
         # }
         # help_texts = {'taxpayer_number': 'Sahis firmasi ise TCKNO, Tuzel Kisilik ise Vergi No'}
         # error_messages = {'taxpayer_number': 'Tax payer field cannot be more than 15 characters'}
+
+
+class LoginUserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('username', 'password')
 

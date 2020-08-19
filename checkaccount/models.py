@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
@@ -250,3 +251,18 @@ class CustomerBank(models.Model):
 
 # todo: musterinin calistigi banka bilgileri modeli eklenecek
 # todo: SORU -> birden fazla banka ile calisabilir mi?
+
+
+class ClientLogins(models.Model):
+    """
+    This is a helper model table that stores the logins dates of the client
+    """
+    client = models.ForeignKey(
+        User,
+        verbose_name='Client',
+        on_delete=models.DO_NOTHING
+    )
+    date = models.DateTimeField(verbose_name="Date login")
+
+    def __str__(self):
+        return '{}'.format(self.client)

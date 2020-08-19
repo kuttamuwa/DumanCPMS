@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
 
-from checkaccount import views
+from checkaccount import views as cviews
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
@@ -33,5 +34,6 @@ urlpatterns = [
     # financial Check Up - api
     path('finance_checkup/', include('finance_checkup.urls')),
 
-    path('testlogin/', include('django.contrib.auth.urls'))
+    path('login/', cviews.LoginUserView.as_view()),
+    path('logout/', cviews.LogoutUserView.as_view())
 ]
