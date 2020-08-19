@@ -10,11 +10,12 @@ urlpatterns = [
     path('', views.checkaccount_mainpage),
     # path('checkaccount/retrieve', views.CheckAccountFormView.as_view(), name='checkaccount-retrieve'),
     path('retrieve/', views.check_account_search, name='checkaccount-retrieve'),
-    path('create/', views.CheckAccountFormCreateView.as_view(), name='checkaccount-create'),
+    path('create/', views.CheckAccountFormCreateView.as_view(success_url='/checkaccount/succeed'),
+         name='checkaccount-create'),
 
+    path('succeed/', views.succeed_create_check_account),
     path('loginapp/', auth_views.LoginView.as_view(), name='app-login')
 ]
-
 
 """
 search

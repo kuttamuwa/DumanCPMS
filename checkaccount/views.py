@@ -3,6 +3,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render
 # Create your views here.
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
@@ -36,6 +37,10 @@ def not_in_checkaccount_group(user):
     # todo : https://stackoverflow.com/questions/29682704/how-to-use-the-user-passes-test-decorator-in-class-based-views
     # todo: permissions ekleyelim
     # or user.user_permissions
+
+
+def succeed_create_check_account(request):
+    return render(request, 'checkaccount/succeed_form.html')
 
 
 @login_required(login_url='/login')
@@ -94,7 +99,7 @@ class CheckAccountFormView(View):
 class CheckAccountFormCreateView(CreateView):  # , LoginRequiredMixin):
     template_name = 'checkaccount/checkaccount_form.html'
     # form_class = CheckAccountForm
-    # success_url = 'checkaccount/succeeded_form.html'
+    # success_url = 'checkaccount/succeed_form.html'
     model = CheckAccount
 
     fields = '__all__'
