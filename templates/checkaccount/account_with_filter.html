@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <br>
+    <div class="row">
+        <div class="col">
+            <div class="card card-body">
+                <form method="get">
+                    {{ account_filter.form }}
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    <br>
+
+    {% for ch in checkaccount %}
+
+        <div class="row">
+            <div class="col-md">
+                <div class="card card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Firm Type</th>
+                            <th>Firm full name</th>
+                            <th>Tax Payer Number</th>
+                            <th>Birth place</th>
+                            <th>Tax department</th>
+                            <th>Firm address</th>
+                            <th>Firm key contact personnel</th>
+                            <th>Sector</th>
+                            <th>City</th>
+                            <th>District</th>
+                            <th>Phone number</th>
+                            <th>Fax</th>
+                            <th>Web url</th>
+                            <th>Email addr</th>
+                            <th>Representative person</th>
+                        </tr>
+
+                        <tr>
+                            <td>{{ ch.firm_type }}</td>
+                            <td>{{ ch.firm_full_name }}</td>
+                            <td>{{ ch.taxpayer_number }}</td>
+                            <td>{{ ch.birthplace }}</td>
+                            <td>{{ ch.tax_department }}</td>
+                            <td>{{ ch.firm_address }}</td>
+                            <td>{{ ch.firm_key_contact_personnel }}</td>
+                            <td>{{ ch.sector }}</td>
+                            <td>{{ ch.city }}</td>
+                            <td>{{ ch.district }}</td>
+                            <td>{{ ch.phone_number }}</td>
+                            <td>{{ ch.fax }}</td>
+                            <td>{{ ch.web_url }}</td>
+                            <td>{{ ch.email_addr }}</td>
+                            <td>{{ ch.representative_person }}</td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

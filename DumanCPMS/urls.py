@@ -32,4 +32,6 @@ urlpatterns = [
 
     # financial Check Up - api
     path('finance_checkup/', include('finance_checkup.urls')),
+
+    path('testlogin/', include('django.contrib.auth.urls'))
 ]

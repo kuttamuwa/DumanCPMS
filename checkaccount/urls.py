@@ -12,7 +12,9 @@ urlpatterns = [
     path('retrieve/', views.check_account_search, name='checkaccount-retrieve'),
     path('create/', views.CheckAccountFormCreateView.as_view(), name='checkaccount-create'),
 
+    path('loginapp/', auth_views.LoginView.as_view(), name='app-login')
 ]
+
 
 """
 search

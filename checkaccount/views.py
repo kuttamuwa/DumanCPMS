@@ -1,3 +1,4 @@
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -28,13 +29,14 @@ def checkaccount_mainpage(request):
 
 def checkaccount_loginpage(request):
     if request.method == 'GET':
+        # context = {'form': }
         return render(request, 'checkaccount/registration/login.html')
 
     elif request.method == 'POST':
         usr = request
 
 
-@login_required
+@login_required(login_url='/checkaccount/loginapp')
 def check_account_search(request):
     checkaccount = CheckAccount.objects.all()
     print(f"check account : {checkaccount}")
