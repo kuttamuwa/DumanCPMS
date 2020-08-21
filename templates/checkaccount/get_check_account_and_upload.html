@@ -55,12 +55,45 @@
             </div>
         </div>
 
-        <div class="card border-secondary mb-3" style="max-width: 20rem;">
-            <div class="card-header">About Account</div>
-            <div class="card-body">
-                <h4 class="card-title">Did you upload related documents?</h4>
-                <p class="card-text"><a href="/checkaccount/get/{{ checkaccount.customer_id }}/upload"> To upload your files </a></p>
+        {#        Account Document situations#}
+        {% if acc_doc_state %}
+            <div class="card border-secondary mb-3" style="max-width: 20rem;">
+                <div class="card-header">About Account Documents</div>
+                <div class="card-body">
+                    <h4 class="card-title">Did you upload related Account documents?
+                    Like activity certificate tax return and authorized signatures list</h4>
+                    <p class="card-text"><a href="/checkaccount/get/{{ checkaccount.customer_id }}/upload"> To upload
+                        your files </a></p>
+                </div>
             </div>
-        </div>
+        {% endif %}
+
+
+        {#        Partnership Document situations#}
+        {% if part_doc_state %}
+            <div class="card border-secondary mb-3" style="max-width: 20rem;">
+                <div class="card-header">About Partnership Documents </div>
+                <div class="card-body">
+                    <h4 class="card-title">Did you upload related Partnership documents?
+                     Like partnership_structure_identity_copies, identity_copies, board_management</h4>
+                    <p class="card-text"><a href="/checkaccount/get/{{ checkaccount.customer_id }}/upload"> To upload
+                        your files </a></p>
+                </div>
+            </div>
+        {% endif %}
+
+
+        {#        Customer Bank situations#}
+{#        {% if bank_state %}#}
+{#            <div class="card border-secondary mb-3" style="max-width: 20rem;">#}
+{#                <div class="card-header">About Account</div>#}
+{#                <div class="card-body">#}
+{#                    <h4 class="card-title">Did you upload related documents?</h4>#}
+{#                    <p class="card-text"><a href="/checkaccount/get/{{ checkaccount.customer_id }}/upload"> To upload#}
+{#                        your files </a></p>#}
+{#                </div>#}
+{#            </div>#}
+{#        {% endif %}#}
+
     </div>
 {% endblock %}

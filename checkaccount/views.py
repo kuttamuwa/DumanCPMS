@@ -14,7 +14,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
-from checkaccount.models import CheckAccount, AccountDocuments
+from checkaccount.models import CheckAccount, AccountDocuments, PartnershipDocuments, CustomerBank
 from checkaccount.serializers import CheckAccountSerializer
 
 
@@ -44,7 +44,7 @@ def succeed_create_check_account(request):
     return render(request, 'checkaccount/succeed_form.html')
 
 
-def get_customer(request, customer_id, state=1):
+def get_customer(request, customer_id, state=0):
     """
 
     :param request:
@@ -59,8 +59,35 @@ def get_customer(request, customer_id, state=1):
     except CheckAccount.DoesNotExist:
         return render(request, 'checkaccount/no_check_account_error.html')
 
+    # related account documents checking
+    acc_doc_state = False
+    try:
+        AccountDocuments.objects.get(customer_id=customer_id)
+        acc_doc_state = True
+
+    except AccountDocuments.DoesNotExist:
+        pass
+
+    # related partnership documents checking
+    part_doc_state = False
+    try:
+        PartnershipDocuments.objects.get(customer_id=customer_id)
+        part_doc_state = True
+    except PartnershipDocuments.DoesNotExist:
+        pass
+
+    # related Customer Bank Information
+    bank_state = False
+    try:
+        CustomerBank.objects.get(customer_id=customer_id)
+        bank_state = True
+
+    except CustomerBank.DoesNotExist:
+        pass
+
     if request.method == 'GET':
-        context = {'checkaccount': check_account, 'state': state}
+        context = {'checkaccount': check_account, 'state': state, 'acc_doc_state': acc_doc_state,
+                   'part_doc_state': part_doc_state, 'bank_state': bank_state}
 
         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
@@ -83,6 +110,7 @@ class CheckAccountAPI(APIView):
         return HttpResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# todo: replace with get_customer function !
 class CheckAccountFormView(View):
     form_class = CheckAccountCreateForm
     initial = {'key': 'value'}
