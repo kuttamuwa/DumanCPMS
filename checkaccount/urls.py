@@ -13,17 +13,21 @@ urlpatterns = [
     # pages and forms
     path('', views.checkaccount_mainpage),
     path('retrieve/', CheckAccountSearchView.as_view(filterset_class=CheckAccountFilter,
-                                                     template_name='checkaccount/account_with_filter.html'),
+                                                     template_name='checkaccount/checkaccount_retrieve.html'),
          name='checkaccount-search'),
 
-    path('create/', views.CheckAccountFormCreateView.as_view(success_url='/checkaccount/succeed'),
+    path('create/', views.CheckAccountFormCreateView.as_view(),
          name='checkaccount-create'),
 
-    # path('attachmentest/', views.upload_file),
-    path('get/<int:customer_id>', views.get_customer),
+    path('get/<int:customer_id>/<str:state>', views.get_customer),
+    path('get/<int:customer_id>/', views.get_customer),
 
     path('succeed/', views.succeed_create_check_account),
-    path('loginapp/', auth_views.LoginView.as_view(), name='app-login')
+    path('loginapp/', auth_views.LoginView.as_view(), name='app-login'),
+
+    # attachment
+    # path('attach/<int:customer_id>', views),
+
 ]
 
 """

@@ -8,14 +8,6 @@ class CheckAccountCreateForm(forms.ModelForm):
     class Meta:
         model = CheckAccount
         fields = '__all__'
-        # fields = ['firm_type', 'firm_full_name', 'taxpayer_number', 'birthplace', 'tax_department',
-        #           'firm_address', 'firm_key_contact_personnel', 'sector', 'city', 'district',
-        #           'phone_number', 'fax', 'web_url', 'email_addr', 'representative_person']
-        # labels = {
-        #     'taxpayer_number': 'Mükellef numarası',
-        # }
-        # help_texts = {'taxpayer_number': 'Sahis firmasi ise TCKNO, Tuzel Kisilik ise Vergi No'}
-        # error_messages = {'taxpayer_number': 'Tax payer field cannot be more than 15 characters'}
 
 
 class LoginUserForm(forms.ModelForm):
@@ -24,12 +16,6 @@ class LoginUserForm(forms.ModelForm):
         fields = ('username', 'password')
 
 
-class TestFileUpload(forms.Form):
-    path = forms.CharField(max_length=50)
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length=50)
     file = forms.FileField()
-
-    @staticmethod
-    def handle_uploaded_file(f, path):
-        with open(path, 'wb+') as destination:
-            for chunk in f.chunks():
-                destination.write(chunk)

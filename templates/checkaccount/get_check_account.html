@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% if state == "true" %}
+        <div class="alert alert-dismissible alert-success">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Well done!</strong> You successfully created check account.
+            Now you may want to upload your other files.
+
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md">
+            <div class="card card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th>Firm Type</th>
+                        <th>Firm full name</th>
+                        <th>Tax Payer Number</th>
+                        <th>Birth place</th>
+                        <th>Tax department</th>
+                        <th>Firm address</th>
+                        <th>Firm key contact personnel</th>
+                        <th>Sector</th>
+                        <th>City</th>
+                        <th>District</th>
+                        <th>Phone number</th>
+                        <th>Fax</th>
+                        <th>Web url</th>
+                        <th>Email addr</th>
+                        <th>Representative person</th>
+                    </tr>
+
+                    <tr>
+                        <td>{{ checkaccount.firm_type }}</td>
+                        <td>{{ checkaccount.firm_full_name }}</td>
+                        <td>{{ checkaccount.taxpayer_number }}</td>
+                        <td>{{ checkaccount.birthplace }}</td>
+                        <td>{{ checkaccount.tax_department }}</td>
+                        <td>{{ checkaccount.firm_address }}</td>
+                        <td>{{ checkaccount.firm_key_contact_personnel }}</td>
+                        <td>{{ checkaccount.sector }}</td>
+                        <td>{{ checkaccount.city }}</td>
+                        <td>{{ checkaccount.district }}</td>
+                        <td>{{ checkaccount.phone_number }}</td>
+                        <td>{{ checkaccount.fax }}</td>
+                        <td>{{ checkaccount.web_url }}</td>
+                        <td>{{ checkaccount.email_addr }}</td>
+                        <td>{{ checkaccount.representative_person }}</td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="exampleInputFile">Trade Registry Formation Certificate </label>
+            <input type="file" class="form-control-file" id="exampleInputFile" aria-describedby="fileHelp" multiple>
+            <small id="fileHelp" class="form-text text-muted">Activity Certificate, Tax Statement and Authorized
+                Signatures List should be uploaded.
+            </small>
+        </div>
+    </div>
+{% endblock %}
