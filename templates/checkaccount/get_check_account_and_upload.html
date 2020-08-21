@@ -56,7 +56,7 @@
         </div>
 
         {#        Account Document situations#}
-        {% if acc_doc_state %}
+        {% if not acc_doc_state %}
             <div class="card border-secondary mb-3" style="max-width: 20rem;">
                 <div class="card-header">About Account Documents</div>
                 <div class="card-body">
@@ -70,7 +70,7 @@
 
 
         {#        Partnership Document situations#}
-        {% if part_doc_state %}
+        {% if not part_doc_state %}
             <div class="card border-secondary mb-3" style="max-width: 20rem;">
                 <div class="card-header">About Partnership Documents </div>
                 <div class="card-body">

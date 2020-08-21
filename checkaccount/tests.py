@@ -122,6 +122,8 @@ class SectorTest(TestCase):
         Sectors.objects.get_or_create(name='GAME DEVELOPMENT')
         Sectors.objects.get_or_create(name='AKILLI EV')
 
+        print("Many sectors are created")
+
 
 class CheckAccountTest(TestCase, ImportFromExcelfile):
     excel_path = r"C:\Users\umut\PycharmProjects\DumanCPMS\excels\CheckAccountsTest.xls"
@@ -180,16 +182,16 @@ class CheckAccountTest(TestCase, ImportFromExcelfile):
 
             # foreign keys relations
             if CariHesapSpecs.check_legal_entity(firm_type):
-                birthplace = Cities.objects.get(city_name=birthplace)
+                birthplace = Cities.objects.get_or_create(city_name=birthplace)
             else:
                 birthplace = None
 
             # general information
-            sector = Sectors.objects.get(name=sector)
-            city = Cities.objects.get(city_name=city)
-            district = Districts.objects.get(district_name=district)
+            sector = Sectors.objects.get_or_create(name=sector)
+            city = Cities.objects.get_or_create(city_name=city)
+            district = Districts.objects.get_or_create(district_name=district)
 
-            representative_person = SysPersonnel.objects.get(username=representative_person)
+            representative_person = SysPersonnel.objects.get_or_create(username=representative_person)
 
             CheckAccount.objects.create(firm_type=firm_type, firm_full_name=firm_full_name,
                                         taxpayer_number=taxpayer_number,

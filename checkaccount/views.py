@@ -138,7 +138,8 @@ class CheckAccountFormCreateView(CreateView):
     fields = '__all__'
 
     def get_success_url(self):
-        return f'/checkaccount/get/{self.object.customer_id}/true'
+        # todo: true meselesi askıda?
+        return f'/checkaccount/get/{self.object.customer_id}'
 
     def form_valid(self, form):
         print("form took")
