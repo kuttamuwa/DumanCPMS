@@ -4,6 +4,7 @@ from django_filters.views import FilterView
 
 from checkaccount import views
 from checkaccount.filters import CheckAccountFilter
+from checkaccount.views import CheckAccountSearchView
 
 urlpatterns = [
     # api
@@ -11,10 +12,10 @@ urlpatterns = [
 
     # pages and forms
     path('', views.checkaccount_mainpage),
-    # path('checkaccount/retrieve', views.CheckAccountFormView.as_view(), name='checkaccount-retrieve'),
-    path('retrieve/', FilterView.as_view(filterset_class=CheckAccountFilter,
-                                         template_name='checkaccount/account_with_filter.html'),
+    path('retrieve/', CheckAccountSearchView.as_view(filterset_class=CheckAccountFilter,
+                                                     template_name='checkaccount/account_with_filter.html'),
          name='checkaccount-search'),
+
     path('create/', views.CheckAccountFormCreateView.as_view(success_url='/checkaccount/succeed'),
          name='checkaccount-create'),
 

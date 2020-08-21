@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from django.views.generic.list import ListView
+from django_filters.views import FilterView
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -143,15 +144,8 @@ class CheckAccountFormUpdateView(UpdateView):
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
-class CheckAccountSearchView(ListView):
-    model = CheckAccount
-    template_name = 'checkaccount/searchresults.html'
-
-    def get_queryset(self):
-        qs = self.model.objects.all()
-
-        check_account_filtered_list = CheckAccountFilter(self.request.GET, queryset=qs)
-        return check_account_filtered_list
+class CheckAccountSearchView(FilterView):
+    pass
 
 
 # Attachment
