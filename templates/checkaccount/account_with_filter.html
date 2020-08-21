@@ -6,7 +6,7 @@
         <div class="col">
             <div class="card card-body">
                 <form method="get">
-                    {{ account_filter.form }}
+                    {{ filter.form.as_table }}
                     <button class="btn btn-primary" type="submit">Search</button>
                 </form>
             </div>
@@ -15,7 +15,7 @@
     </div>
     <br>
 
-    {% for ch in checkaccount %}
+    {% for ch in filter.qs %}
 
         <div class="row">
             <div class="col-md">

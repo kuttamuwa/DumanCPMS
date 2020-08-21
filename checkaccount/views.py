@@ -1,9 +1,8 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect, HttpResponseForbidden
+from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 # Create your views here.
-from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
@@ -11,7 +10,7 @@ from django.views.generic.list import ListView
 from rest_framework import status
 from rest_framework.views import APIView
 
-from checkaccount.forms import CheckAccountCreateForm
+from checkaccount.forms import CheckAccountCreateForm, TestFileUpload
 from checkaccount.models import CheckAccount
 from checkaccount.serializers import CheckAccountSerializer
 from .filters import CheckAccountFilter
@@ -43,19 +42,42 @@ def succeed_create_check_account(request):
     return render(request, 'checkaccount/succeed_form.html')
 
 
-@login_required(login_url='/login')
-@user_passes_test(not_in_checkaccount_group, login_url='/login')
-def check_account_search(request):
-    checkaccount = CheckAccount.objects.all()
-    print(f"check account : {checkaccount}")
+def get_customer(request, customer_id):
+    check_account = CheckAccount.objects.get(customer_id=customer_id)
 
-    account_filter = CheckAccountFilter(request.GET)
+    if request.method == 'GET':
+        context = {'checkaccount': check_account}
 
-    context = {'checkaccount': checkaccount,
-               'account_filter': account_filter,
-               }
+        return render(request, context=context, template_name='checkaccount/get_check_account.html')
 
-    return render(request, context=context, template_name='checkaccount/account_with_filter.html')
+    if request.method == 'POST':
+        print("posted")
+
+
+# @login_required(login_url='/login')
+# @user_passes_test(not_in_checkaccount_group, login_url='/login')
+# def check_account_search(request):
+#     check_account_filter = CheckAccountFilter(request.GET, queryset=CheckAccount.objects.all())
+#     check_account = CheckAccount.objects.all()
+#
+#     return render(request, 'checkaccount/account_with_filter.html', {'account_filter': check_account_filter,
+#                                                                      'checkaccount': check_account})
+
+# if request.method == 'GET':
+#     account_filter = CheckAccountFilter(request.GET)
+#     checkaccount = CheckAccount.objects.all()
+#
+#     context = {'checkaccount': checkaccount,
+#                'account_filter': account_filter, }
+#     return render(request, context=context, template_name='checkaccount/account_with_filter.html')
+#
+# elif request.method == 'POST':
+#
+# context = {'checkaccount': checkaccount,
+#            'account_filter': account_filter,
+#            }
+#
+# return render(request, context=context, template_name='checkaccount/account_with_filter.html')
 
 
 # API VIEW
@@ -119,9 +141,22 @@ class CheckAccountFormUpdateView(UpdateView):
     fields = checkaccount_shown_fields
 
 
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
 class CheckAccountSearchView(ListView):
     model = CheckAccount
     template_name = 'checkaccount/searchresults.html'
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+
+        check_account_filtered_list = CheckAccountFilter(self.request.GET, queryset=qs)
+        return check_account_filtered_list
+
+
+# Attachment
+class AttachmentUploadView(CreateView):
+    pass
 
 
 class LoginUserView(LoginView):
