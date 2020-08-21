@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Account Documents (Class-Based View)</h2>
+    <table class="table mb-0">
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Tax Return</th>
+            <th>Authorized Signatures List</th>
+            <th>Download</th>
+{#            <th>Delete</th>#}
+        </tr>
+        </thead>
+        <tbody>
+        {% for doc in AccountDocuments %}
+            <tr>
+                <td>{{ doc.description }}</td>
+                <td>
+                    <a href="{{ doc.activity_certificate_pdf.url }}" download class="btn btn-primary btn-sm" >
+                        Download PDF
+                    </a>
+                </td>
+
+                <td>
+                    <a href="{{ doc.tax_return_pdf.url }}" download class="btn btn-primary btn-sm">
+                        Download PDF
+                    </a>
+                </td>
+
+                <td>
+                    <a href="{{ doc.authorized_signatures_list_pdf.url }}" download class="btn btn-primary btn-sm" >
+                        Download PDF
+                    </a>
+                </td>
+{#                <td>#}
+{#                    <form method="post" action="{% url 'delete_customer' book.pk %}">#}
+{#                        {% csrf_token %}#}
+{#                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>#}
+{#                    </form>#}
+{#                </td>#}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,7 +1,8 @@
-from django.urls import path
+from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from django_filters.views import FilterView
+from django.urls import path
 
+from DumanCPMS import settings
 from checkaccount import views
 from checkaccount.filters import CheckAccountFilter
 from checkaccount.views import CheckAccountSearchView
@@ -19,18 +20,16 @@ urlpatterns = [
     path('create/', views.CheckAccountFormCreateView.as_view(),
          name='checkaccount-create'),
 
-    path('get/<int:customer_id>/<str:state>', views.get_customer),
+    path('get/<int:customer_id>/<int:state>', views.get_customer),
     path('get/<int:customer_id>/', views.get_customer),
+
+    # upload files
+    path('get/<int:customer_id>/upload', views.UploadAccountDocumentsView.as_view(), name='upload_docs'),
+
+    path('get/<int:customer_id>/docs', views.GetAccountDocumentsList.as_view(), name='docs'),
+
+    path('get/<pk>/delete', views.CheckAccountFormDeleteView.as_view(), name='delete_customer'),
 
     path('succeed/', views.succeed_create_check_account),
     path('loginapp/', auth_views.LoginView.as_view(), name='app-login'),
-
-    # attachment
-    # path('attach/<int:customer_id>', views),
-
 ]
-
-"""
-search
-Elasticsearch ile cebellesmemiz lazim..
-"""

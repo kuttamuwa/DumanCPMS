@@ -1,7 +1,7 @@
 from crispy_forms.tests.forms import forms
 from django.contrib.auth.models import User
 
-from checkaccount.models import CheckAccount
+from checkaccount.models import CheckAccount, AccountDocuments
 
 
 class CheckAccountCreateForm(forms.ModelForm):
@@ -16,6 +16,8 @@ class LoginUserForm(forms.ModelForm):
         fields = ('username', 'password')
 
 
-class UploadFileForm(forms.Form):
-    title = forms.CharField(max_length=50)
-    file = forms.FileField()
+class UploadAccountDocumentForm(forms.ModelForm):
+    class Meta:
+        model = AccountDocuments
+        fields = ('activity_certificate_pdf', 'tax_return_pdf', 'authorized_signatures_list_pdf',
+                  'description')

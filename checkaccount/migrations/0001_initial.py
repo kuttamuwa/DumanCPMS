@@ -15,9 +15,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AccountDocuments',
             fields=[
-                ('activity_certificate', models.FilePathField(db_column='ACTIVITY_CERTIFICATE_PATH', verbose_name='FAALIYET BELGESI')),
-                ('tax_return', models.FilePathField(db_column='TAX_RETURN_PATH', verbose_name='VERGI BEYANNAMESI')),
-                ('authorized_signatures_list', models.FilePathField(db_column='AUTHORIZED_SIG_LIST', verbose_name='IMZA SIRKULERI')),
+                ('activity_certificate_pdf', models.FilePathField(db_column='ACTIVITY_CERTIFICATE_PATH', verbose_name='FAALIYET BELGESI')),
+                ('tax_return_pdf', models.FilePathField(db_column='TAX_RETURN_PATH', verbose_name='VERGI BEYANNAMESI')),
+                ('authorized_signatures_list_pdf', models.FilePathField(db_column='AUTHORIZED_SIG_LIST', verbose_name='IMZA SIRKULERI')),
                 ('attachment_id', models.AutoField(primary_key=True, serialize=False)),
             ],
             options={

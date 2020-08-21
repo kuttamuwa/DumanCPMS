@@ -1,17 +1,20 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
+from django.core.files.storage import FileSystemStorage
 from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 # Create your views here.
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
+from django.views.generic.list import ListView
 from django_filters.views import FilterView
 from rest_framework import status
 from rest_framework.views import APIView
 
-from checkaccount.forms import CheckAccountCreateForm, UploadFileForm
-from checkaccount.models import CheckAccount
+from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
+from checkaccount.models import CheckAccount, AccountDocuments
 from checkaccount.serializers import CheckAccountSerializer
 
 
@@ -41,21 +44,25 @@ def succeed_create_check_account(request):
     return render(request, 'checkaccount/succeed_form.html')
 
 
-def get_customer(request, customer_id, state=False):
+def get_customer(request, customer_id, state=1):
     """
 
     :param request:
     :param customer_id:
-    :param state: true -> comes from creating check account form.
-                  false -> just retrieve one account
+    :param state: 1 -> comes from creating check account form.
+                  0 -> just retrieve one account
     :return:
     """
-    check_account = CheckAccount.objects.get(customer_id=customer_id)
+    try:
+        check_account = CheckAccount.objects.get(customer_id=customer_id)
+
+    except CheckAccount.DoesNotExist:
+        return render(request, 'checkaccount/no_check_account_error.html')
 
     if request.method == 'GET':
         context = {'checkaccount': check_account, 'state': state}
 
-        return render(request, context=context, template_name='checkaccount/get_check_account.html')
+        return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
 
 # API VIEW
@@ -112,7 +119,14 @@ class CheckAccountFormCreateView(CreateView):
 
 class CheckAccountFormDeleteView(DeleteView):
     model = CheckAccount
-    # fields = checkaccount_shown_fields
+    template_name = 'checkaccount/delete_checkaccount_succeeded.html'
+    success_url = '/'
+
+    def get_queryset(self):
+        qs = super(CheckAccountFormDeleteView, self).get_queryset()
+        # todo : not a good way but it works
+        c_id = int(self.request.path.split("/")[3])
+        return qs.filter(customer_id=c_id)
 
 
 class CheckAccountFormUpdateView(UpdateView):
@@ -123,11 +137,6 @@ class CheckAccountFormUpdateView(UpdateView):
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
 class CheckAccountSearchView(FilterView):
-    pass
-
-
-# Attachment
-class AttachmentUploadView(CreateView):
     pass
 
 
@@ -146,19 +155,42 @@ class ErrorPages:
         return render(request, 'checkaccount/not_implemented_yet.html')
 
 
-def handle_uploaded_file(f):
-    with open('some/file/name.txt', 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
+class GetAccountDocumentsList(ListView):
+    model = AccountDocuments
+    template_name = 'checkaccount/uploaded_account_documents.html'
+    context_object_name = 'AccountDocuments'
 
 
-def upload_file(request):
-    if request.method == 'POST':
-        form = AccountDocuments(request.POST, request.FILES)
-        if form.is_valid():
-            # file is saved
-            form.save()
-            return HttpResponseRedirect('/success/url/')
-    else:
-        form = ModelFormWithFileField()
-    return render(request, 'upload.html', {'form': form})
+class UploadAccountDocumentsView(CreateView):
+    model = AccountDocuments
+    form_class = UploadAccountDocumentForm
+    # success_url = reverse_lazy('docs', kwargs={'customer_id': })
+    template_name = 'checkaccount/upload_account_document.html'
+
+    def get_success_url(self):
+        return reverse_lazy('docs', kwargs=self.kwargs)
+
+    def get_context_data(self, **kwargs):
+        customer_id = self.kwargs.get('customer_id')
+        context = super().get_context_data(**kwargs)
+
+        if customer_id is not None:
+            check_account = CheckAccount.objects.get(customer_id=customer_id)
+            context['check_account'] = check_account
+
+        return context
+
+    def form_valid(self, form):
+        form.instance.customer_id = CheckAccount.objects.get(customer_id=self.kwargs.get('customer_id'))
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+# DO NOT DELETE TO REMEMBER EASY WAY.
+# def upload_test(request):
+#     context = {}
+#     if request.method == 'POST':
+#         uploaded_file = request.FILES['document']
+#         fs = FileSystemStorage()
+#         name = fs.save(uploaded_file.name, uploaded_file)
+#         context['url'] = fs.url(name)
+#     return render(request, 'uploadtest.html', context)

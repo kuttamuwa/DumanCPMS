@@ -170,12 +170,17 @@ class CheckAccount(models.Model):
 
 
 class AccountDocuments(models.Model):
-    activity_certificate = models.FilePathField(
+    activity_certificate_pdf = models.FileField(
+        upload_to='activity_certificates/pdfs/',
         verbose_name=AccountDocumentsSpec.get_activity_certificate_verbose_name(),
         db_column='ACTIVITY_CERTIFICATE_PATH')
-    tax_return = models.FilePathField(verbose_name=AccountDocumentsSpec.get_tax_return_verbose_name(),
-                                      db_column='TAX_RETURN_PATH')
-    authorized_signatures_list = models.FilePathField(
+
+    tax_return_pdf = models.FileField(
+        upload_to='tax_return/pdfs/', verbose_name=AccountDocumentsSpec.get_tax_return_verbose_name(),
+        db_column='TAX_RETURN_PATH')
+
+    authorized_signatures_list_pdf = models.FileField(
+        upload_to='authorized_signatures_list/pdfs/',
         verbose_name=AccountDocumentsSpec.get_authorized_signatures_list_verbose_name(),
         db_column='AUTHORIZED_SIG_LIST')
 
@@ -193,7 +198,14 @@ class AccountDocuments(models.Model):
         ]
 
     def __str__(self):
-        return f"attach_certificates//{self.customer_id}"
+        return f"{self.description}//{self.customer_id}"
+
+    def delete(self, *args, **kwargs):
+        self.activity_certificate_pdf.delete()
+        self.tax_return_pdf.delete()
+        self.authorized_signatures_list_pdf.delete()
+
+        super().delete(*args, **kwargs)
 
 
 class PartnershipDocuments(models.Model):
