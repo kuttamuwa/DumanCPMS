@@ -62,11 +62,17 @@ def get_customer(request, customer_id, state=0):
     # related account documents checking
     acc_doc_state = False
     try:
-        AccountDocuments.objects.get(customer_id=customer_id)
+        AccountDocuments.objects.filter(customer_id=customer_id)
         acc_doc_state = True
 
     except AccountDocuments.DoesNotExist:
         pass
+
+    except AccountDocuments.MultipleObjectsReturned:
+        customer = CheckAccount.objects.get(customer_id=customer_id)
+        err = f'{customer.firm_full_name} has multiple documents ! This error can be solved via' \
+            f' deleting unnecessary document. Each checking account (customer) has to have only one document !'
+        return render(request, 'error_pages/DeletingDocumentErrorPage.html', context={'error': err})
 
     # related partnership documents checking
     part_doc_state = False
@@ -197,6 +203,8 @@ class UploadAccountDocumentsView(CreateView):
     template_name = 'checkaccount/upload_account_document.html'
 
     def get_success_url(self):
+        # file uploading completed
+        # referring document page
         return reverse_lazy('docs', kwargs=self.kwargs)
 
     def get_context_data(self, **kwargs):
@@ -213,6 +221,28 @@ class UploadAccountDocumentsView(CreateView):
         form.instance.customer_id = CheckAccount.objects.get(customer_id=self.kwargs.get('customer_id'))
         self.object = form.save()
         return HttpResponseRedirect(self.get_success_url())
+
+
+def delete_succeed_doc(request):
+    return render(request, 'checkaccount/success_file_delete.html')
+
+
+class DeleteAccountDocumentsView(DeleteView):
+    model = AccountDocuments
+    template_name = 'checkaccount/delete_check_account.html'
+    pk_url_kwarg = 'customer_id'
+    success_url = 'checkaccount/docs/delete/succeed/'
+
+    def get_context_data(self, **kwargs):
+        customer_id = self.kwargs.get('customer_id')
+        docs = AccountDocuments.objects.filter(customer_id=customer_id)
+
+        context = super().get_context_data(**kwargs)
+
+        if docs is not None:
+            context['docs'] = docs
+
+        return context
 
 # DO NOT DELETE TO REMEMBER EASY WAY.
 # def upload_test(request):

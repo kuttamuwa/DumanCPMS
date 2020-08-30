@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="alert alert-dismissible alert-danger">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Oh snap!</strong> <a href="docs/delete" class="alert-link">
+        An error raised ! :
+        <br>
+        {{ error }}</a>
+        <br>
+        Please contact with Administrator.
+    </div>
+
+{% endblock %}

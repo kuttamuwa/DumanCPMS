@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% for d in docs %}
+        <form method="post">{% csrf_token %}
+            <p>Are you sure you want to delete "{{ d }}"?</p>
+            <input type="submit" value="Confirm">
+        </form>
+    {% endfor %}
+
+{% endblock %}

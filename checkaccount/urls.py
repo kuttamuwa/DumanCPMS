@@ -28,8 +28,12 @@ urlpatterns = [
 
     path('get/<int:customer_id>/docs', views.GetAccountDocumentsList.as_view(), name='docs'),
 
+    path('get/<int:customer_id>/docs/delete', views.DeleteAccountDocumentsView.as_view(), name='delete_docs'),
+
     path('get/<pk>/delete', views.CheckAccountFormDeleteView.as_view(), name='delete_customer'),
 
     path('succeed/', views.succeed_create_check_account),
+    path('docs/delete/succeed/', views.delete_succeed_doc),
+
     path('loginapp/', auth_views.LoginView.as_view(), name='app-login'),
 ]

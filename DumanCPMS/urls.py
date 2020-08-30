@@ -13,14 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import debug_toolbar
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-import debug_toolbar
 
 from DumanCPMS import settings
 from checkaccount import views as cviews
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
@@ -37,7 +36,10 @@ urlpatterns = [
     path('finance_checkup/', include('finance_checkup.urls')),
 
     path('login/', cviews.LoginUserView.as_view()),
-    path('logout/', cviews.LogoutUserView.as_view())
+    path('logout/', cviews.LogoutUserView.as_view()),
+
+    # advanced filter
+    # path(r'^advanced_filters/', include('advanced_filters.urls'))
 ]
 
 if settings.DEBUG:

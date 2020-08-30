@@ -16,6 +16,7 @@ class SystemProperties:
 
 class CariHesapSpecs(SystemProperties):
     # sahis isletmesinde birthplace doldurulur.
+    # todo: t ve s -> Tuzel kisilik, Sahis isletmesi
     FIRM_TYPE_CHOICES = {'TR': (('t', 'TUZEL_KISILIK'), ('s', 'SAHIS_ISLETMESI')),
                          'EN-EN': (('l', 'LEGAL_ENTITIY'), ('s', 'SOLE_TRADER')),
                          'EN-US': (('l', 'LEGAL_ENTITIY'), ('s', 'SOLE_TRADER'))}

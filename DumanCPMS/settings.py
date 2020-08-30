@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'crispy_forms',
     # 'haystack',  # todo: elasticsearch
-    'django_filters'
+    'django_filters',
+    # 'advanced_filters',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
