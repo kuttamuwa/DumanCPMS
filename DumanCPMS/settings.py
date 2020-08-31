@@ -39,8 +39,12 @@ INSTALLED_APPS = [
     # CORS
     'corsheaders',
 
-    # project aps
+    # project apps
     'checkaccount',
+    # 'risk_analysis',
+    # 'dashboard',
+    # 'finance_checkup',
+
     'debug_toolbar',
     'rest_framework',
     'crispy_forms',
@@ -110,11 +114,11 @@ DATABASES = {
     }
 }
 
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
-    },
-}
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+#     },
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -156,3 +160,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 LOGIN_REDIRECT_URL = '/'
 
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'dashboard/static'),
+)

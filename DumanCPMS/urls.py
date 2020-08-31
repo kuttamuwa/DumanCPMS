@@ -38,8 +38,9 @@ urlpatterns = [
     path('login/', cviews.LoginUserView.as_view()),
     path('logout/', cviews.LogoutUserView.as_view()),
 
-    # advanced filter
-    # path(r'^advanced_filters/', include('advanced_filters.urls'))
+    # dashboard
+    path('dashboard/', include('dashboard.urls')),
+
 ]
 
 if settings.DEBUG:
