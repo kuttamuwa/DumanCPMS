@@ -1,8 +1,7 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
-from django.core.files.storage import FileSystemStorage
 from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 # Create your views here.
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator

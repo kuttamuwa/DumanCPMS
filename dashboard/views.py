@@ -13,5 +13,6 @@ def test_maps(request):
 def test_index(request):
     return render(request, template_name='dboards/test_index.html')
 
+
 def test_notifications(request):
     return render(request, template_name='dboards/test_notifications.html')

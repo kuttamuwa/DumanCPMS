@@ -12,7 +12,7 @@ from .models import CariHesapSpecs
 
 
 class ImportFromShapefile(TestCase, ABC):
-    shpfile_folder = r"C:\Users\umut\PycharmProjects\DumanCPMS\geodata\turkeyshp"
+    shpfile_folder = r"C:\Users\LENOVO\PycharmProjects\DumanCPMS\geodata\turkeyshp"
     target_shpfile = ""
 
     city_name_field = "adm1_en"  # related city name also
@@ -46,7 +46,7 @@ class CitiesTest(ImportFromShapefile):
     target_shpfile = 'iller/iller.shp'
 
     def test_import_cities(self):
-        print("import from shapefile test has begun - CITIES ")
+        print(f"import from shapefile test has begun - CITIES : {self.target_shpfile}")
         df = self.import_from_shapefile()
         for i in df.iterrows():
             c_name = i[1][self.city_name_field]
