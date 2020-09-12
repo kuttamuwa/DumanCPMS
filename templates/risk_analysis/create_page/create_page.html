@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div>
+        {% csrf_token %}
+        <button type="button" class="btn btn-primary btn-lg"
+        onclick="window.location.href='importform'">Import Data with Excel</button>
+
+        <button type="button" class="btn btn-primary btn-lg"
+        onclick="window.location.href='createoneform'">Create One by One</button>
+    </div>
+{% endblock %}

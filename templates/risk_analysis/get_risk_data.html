@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md">
+            <div class="card card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th>Firm Type</th>
+                        <th>Firm full name</th>
+                        <th>Tax Payer Number</th>
+                        <th>Birth place</th>
+                        <th>Tax department</th>
+                        <th>Firm address</th>
+                        <th>Firm key contact personnel</th>
+                        <th>Sector</th>
+                        <th>City</th>
+                        <th>District</th>
+                        <th>Phone number</th>
+                        <th>Fax</th>
+                        <th>Web url</th>
+                        <th>Email addr</th>
+                        <th>Representative person</th>
+                    </tr>
+
+                    <tr>
+                        <td>{{ dataset.firm_type }}</td>
+                        <td>{{ dataset.firm_full_name }}</td>
+                        <td>{{ dataset.taxpayer_number }}</td>
+                        <td>{{ dataset.birthplace }}</td>
+                        <td>{{ dataset.tax_department }}</td>
+                        <td>{{ dataset.firm_address }}</td>
+                        <td>{{ dataset.firm_key_contact_personnel }}</td>
+                        <td>{{ dataset.sector }}</td>
+                        <td>{{ dataset.city }}</td>
+                        <td>{{ dataset.district }}</td>
+                        <td>{{ dataset.phone_number }}</td>
+                        <td>{{ dataset.fax }}</td>
+                        <td>{{ dataset.web_url }}</td>
+                        <td>{{ dataset.email_addr }}</td>
+                        <td>{{ dataset.representative_person }}</td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

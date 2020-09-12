@@ -32,6 +32,9 @@ urlpatterns = [
     # check account - api and page
     path('checkaccount/', include('checkaccount.urls')),
 
+    # risk analysis - page
+    path('risk_analysis/', include('risk_analysis.urls')),
+
     # financial Check Up - api
     path('finance_checkup/', include('finance_checkup.urls')),
 

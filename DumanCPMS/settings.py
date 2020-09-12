@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # dashboard - dash
-    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
+    # 'django_plotly_dash.apps.DjangoPlotlyDashConfig',
 
     # project apps
     'checkaccount',
