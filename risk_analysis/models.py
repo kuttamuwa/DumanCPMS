@@ -68,4 +68,5 @@ class DataSetModel(models.Model):
     def __str__(self):
         return CheckAccount.objects.get(customer_id=self.customer_id)
 
-
+    class Meta:
+        db_table = 'RISK_DATA'

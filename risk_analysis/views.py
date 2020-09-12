@@ -1,23 +1,25 @@
 from abc import ABC
+from collections import Counter
 
+import os
+from DumanCPMS.settings import MEDIA_ROOT
+
+import pandas as pd
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from collections import Counter
-
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.generic.edit import CreateView, FormView
+from django.views.generic.edit import FormView
 from django_filters.views import FilterView
+
+from django.db import connections
 
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm
 from risk_analysis.models import DataSetModel
-
-import pandas as pd
-from os.path import split
 
 
 def risk_main_page(request):
@@ -76,26 +78,17 @@ class UploadRiskAnalysisDataView(FormView):
 
     def post(self, request, *args, **kwargs):
         data = request.FILES['riskDataFile']
-        p, name = split(data)
+        if not str(data.name).endswith('.xlsx'):
+            return render(request, template_name='risk_analysis/error_pages/general_error.html',
+                          context={'error': "Uploaded file must be xlsx file !"})
 
-        with default_storage.open(f'risk_analysis/uploaded_data/{name}', 'wb+') as destinator:
-            for chunk in data.chunks():
-                destinator.write(chunk)
+        p = default_storage.save(data.name, ContentFile(data.read()))
 
-    # def get_context_data(self, **kwargs):
-    #     customer_id = self.kwargs.get('customer_id')
-    #     context = super().get_context_data(**kwargs)
-    #
-    #     if customer_id is not None:
-    #         ds = DataSetModel.objects.get(customer_id=customer_id)
-    #         context['ds'] = ds
-    #
-    #     return context
-    #
-    # def form_valid(self, form):
-    #     form.instance.customer_id = DataSetModel.objects.get(customer_id=self.kwargs.get('customer_id'))
-    #     self.object = form.save()
-    #     return HttpResponseRedirect(self.get_success_url())
+        # saving process
+        p = os.path.join(MEDIA_ROOT, p)
+
+        df = pd.read_excel(p)
+        df.to_sql(DataSetModel.Meta.db_table, if_exists='append', con=connections['default'])
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
