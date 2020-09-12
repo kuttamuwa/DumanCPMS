@@ -252,15 +252,51 @@ class CustomerBank(models.Model):
     def __str__(self):
         return self.bank_name
 
-# class RelatedBlackList(models.Model):
-#     objectid = models.AutoField(primary_key=True)
-#     customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
-#
-#     # todo: and many fields
-#
-#     class Meta:
-#         db_table = 'BLACK_LIST'
+
+class RelatedBlackList(models.Model):
+    objectid = models.AutoField(primary_key=True, db_column='OBJECTID')
+    customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
+
+    # todo: and many fields
+
+    class Meta:
+        db_table = 'BLACK_LIST'
+
+    def __str__(self):
+        return f"Black list for {CheckAccount.objects.get(customer_id=self.customer_id)}"
+
+    def get_customer_name(self):
+        return CheckAccount.objects.get(customer_id=self.customer_id).firm_full_name
 
 
-# todo: musterinin calistigi banka bilgileri modeli eklenecek
-# todo: SORU -> birden fazla banka ile calisabilir mi?
+class SystemBlackList(RelatedBlackList):
+    class Meta:
+        db_table = 'SYS_BLACK_LIST'
+
+    def __str__(self):
+        return f"System Black List for {self.get_customer_name()}"
+
+
+class TaxDebtList(RelatedBlackList):
+    class Meta:
+        db_table = 'TAX_DEBTS'
+
+    def __str__(self):
+        return f"Tax Debts for  {self.get_customer_name()}"
+
+
+class SGKDebtList(RelatedBlackList):
+    class Meta:
+        db_table = 'SGK_DEBTS'
+
+    def __str__(self):
+        return f"SGK Debts for {self.get_customer_name()}"
+
+
+class KonkordatoList(RelatedBlackList):
+    class Meta:
+        db_table = 'KONKORDATO_LIST'
+
+    def __str__(self):
+        return f"Konkordato for {self.get_customer_name()}"
+

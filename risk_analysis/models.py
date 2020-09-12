@@ -1,3 +1,5 @@
+from abc import ABC
+
 from django.db import models
 
 # Create your models here.
@@ -8,15 +10,23 @@ from checkaccount.models import CheckAccount
 class DataSetManager(models.Manager):
     def create(self, *args, **kwargs):
         period_velocity = kwargs.get('period_velocity')
+        period_day = kwargs.get('period_day')
+        risk_excluded_warrant_balance = kwargs.get('risk_excluded_warrant_balance')
+
+        balance = kwargs['balance']
+        warrant = kwargs['warrant']
+
         if period_velocity is None:
             last_twelve_month_avg_order_amount = kwargs.get('last_twelve_month_avg_order_amount')
             balance = kwargs.get('balance')
 
             kwargs['period_velocity'] = last_twelve_month_avg_order_amount // balance
 
-        period_day = kwargs.get('period_day')
         if period_day is None:
             kwargs['period_day'] = 30 // period_velocity
+
+        if risk_excluded_warrant_balance is None:
+            kwargs['risk_excluded_warrant_balance'] = balance - warrant
 
         return super(DataSetManager, self).create(*args, **kwargs)
 
@@ -24,7 +34,7 @@ class DataSetManager(models.Manager):
 class DataSetModel(models.Model):
     objects = DataSetManager
 
-    customer_id = models.ForeignKey(CheckAccount, on_delete=models.CASCADE)
+    customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
     data_id = models.AutoField(primary_key=True)
     limit = models.PositiveIntegerField(db_column='LIMIT')  # 500 0000 vs
     warrant_state = models.BooleanField(db_column='WARRANT_STATE', help_text='teminat durumu')  # var yok
@@ -57,3 +67,5 @@ class DataSetModel(models.Model):
 
     def __str__(self):
         return CheckAccount.objects.get(customer_id=self.customer_id)
+
+

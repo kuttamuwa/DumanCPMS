@@ -39,22 +39,22 @@ INSTALLED_APPS = [
     # CORS
     'corsheaders',
 
+    # dashboard - dash
+    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
+
     # project apps
     'checkaccount',
-    # 'risk_analysis',
-    # 'dashboard',
-    # 'finance_checkup',
+    'risk_analysis',
+    'dashboard',
+    'finance_checkup',
 
     'debug_toolbar',
     'rest_framework',
     'crispy_forms',
-    # 'haystack',  # todo: elasticsearch
     'django_filters',
-    # 'advanced_filters',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -164,3 +164,5 @@ LOGIN_REDIRECT_URL = '/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'dashboard/static'),
 )
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
