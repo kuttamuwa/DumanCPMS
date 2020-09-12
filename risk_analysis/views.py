@@ -1,6 +1,8 @@
 from abc import ABC
 
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from collections import Counter
@@ -15,6 +17,7 @@ from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataFo
 from risk_analysis.models import DataSetModel
 
 import pandas as pd
+from os.path import split
 
 
 def risk_main_page(request):
@@ -72,10 +75,12 @@ class UploadRiskAnalysisDataView(FormView):
         return render(request, self.template_name, context={'forms': RiskAnalysisImportDataForm})
 
     def post(self, request, *args, **kwargs):
-        form = RiskAnalysisImportDataForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-        pass
+        data = request.FILES['riskDataFile']
+        p, name = split(data)
+
+        with default_storage.open(f'risk_analysis/uploaded_data/{name}', 'wb+') as destinator:
+            for chunk in data.chunks():
+                destinator.write(chunk)
 
     # def get_context_data(self, **kwargs):
     #     customer_id = self.kwargs.get('customer_id')
