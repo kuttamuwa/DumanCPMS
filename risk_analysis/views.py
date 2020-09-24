@@ -18,6 +18,7 @@ from django_filters.views import FilterView
 
 from django.db import connections
 
+from risk_analysis.algorithms import AnalyzingRiskDataSet, ControlRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm
 from risk_analysis.models import DataSetModel
 
@@ -87,8 +88,16 @@ class UploadRiskAnalysisDataView(FormView):
         # saving process
         p = os.path.join(MEDIA_ROOT, p)
 
-        df = pd.read_excel(p)
-        df.to_sql(DataSetModel.Meta.db_table, if_exists='append', con=connections['default'])
+        df = pd.read_excel(p, sheet_name="MPYS Sn")
+
+        # Control process
+        controldata = ControlRiskDataSet(df)
+
+        # Analyzing process
+        analyzedata = AnalyzingRiskDataSet(control_object=controldata)
+        analyzed_df = analyzedata.bulk_to_dataframe()
+
+        analyzed_df.to_sql(DataSetModel.Meta.db_table, if_exists='append', con=connections['default'])
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
