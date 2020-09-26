@@ -18,9 +18,10 @@ from django_filters.views import FilterView
 
 from django.db import connections
 
+from checkaccount.models import CheckAccount
 from risk_analysis.algorithms import AnalyzingRiskDataSet, ControlRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm
-from risk_analysis.models import DataSetModel
+from risk_analysis.models import DataSetModel, RiskDataSetPoints
 
 
 def risk_main_page(request):
@@ -81,6 +82,8 @@ class UploadRiskAnalysisDataView(FormView):
         data = request.FILES['riskDataFile']
         customer_id = int(request.POST['customer'])
 
+        related_check_account = CheckAccount.objects.get(customer_id=customer_id)
+
         if not str(data.name).endswith('.xlsx'):
             return render(request, template_name='risk_analysis/error_pages/general_error.html',
                           context={'error': "Uploaded file must be xlsx file !"})
@@ -94,8 +97,74 @@ class UploadRiskAnalysisDataView(FormView):
 
         # Analyzing process
         for index, row in df.iterrows():
-            risk_model_object = DataSetModel(*row, customer_id=customer_id)
-            analyzedata = AnalyzingRiskDataSet(risk_model_object)
+            limit = row.get('limit')
+            warrant_state = row.get('warrant_state')  # todo: string converting
+            warrant_amount = row.get('warrant_amount')
+
+            if pd.isna(warrant_state) or warrant_state == '' or warrant_state == 'False' or warrant_state == 'Yok' \
+                    or warrant_state is False:
+                if pd.isna(warrant_amount):
+                    warrant_amount = None
+
+            maturity = row.get('maturity')
+            payment_frequency = row.get('payment_frequency')
+            maturity_exceed_avg = row.get('maturity_exceed_avg')
+            avg_order_amount_last_twelve_months = row.get('avg_order_amount_last_twelve_months')
+
+            avg_order_amount_last_three_months = row.get('avg_order_amount_last_three_months')
+            last_3_months_aberration = row.get('last_3_months_aberration')
+            last_month_payback_perc = row.get('last_month_payback_perc')
+            last_twelve_months_payback_perc = row.get('last_twelve_months_payback_perc')
+            avg_last_three_months_payback_perc = row.get('avg_last_three_months_payback_perc')
+            last_three_months_payback_comparison = row.get('last_three_months_payback_comparison')
+            avg_delay_time = row.get('avg_delay_time')
+            avg_delay_balance = row.get('avg_delay_balance')
+            period_day = row.get('period_day')
+            period_velocity = row.get('period_velocity')
+
+            # bakiye - teminat tutarı: balance - warrant amount
+            risk_excluded_warrant_balance = row.get('risk_excluded_warrant_balance')
+
+            balance = row.get('balance')
+            profit = row.get('profit')  # d. a. ş. y.
+
+            profit_percent = row.get('profit_percent')  # kar yuzdesi davut a. v. v, ş.y.
+
+            # çek dahili toplam risk davut abinin veride var, şemada yok.
+            total_risk_including_cheque = row.get('total_risk_including_cheque')
+
+            # bu veri şemamızda yok, davut abinin gönderdiği örnek veride var.
+            last_12_months_total_endorsement = row.get('last_12_months_total_endorsement')
+            # period_percent = row.get('period_percent')
+
+            risk_model_object = DataSetModel(
+                related_customer=related_check_account,
+                last_12_months_total_endorsement=last_12_months_total_endorsement,
+                maturity=maturity,
+                limit=limit,
+                total_risk_including_cheque=total_risk_including_cheque,
+                warrant_state=warrant_state,
+                warrant_amount=warrant_amount,
+                avg_order_amount_last_twelve_months=avg_order_amount_last_twelve_months,
+                avg_order_amount_last_three_months=avg_order_amount_last_three_months,
+                last_3_months_aberration=last_3_months_aberration,
+                last_twelve_months_payback_perc=last_twelve_months_payback_perc,
+                avg_last_three_months_payback_perc=avg_last_three_months_payback_perc,
+                last_three_months_payback_comparison=last_three_months_payback_comparison,
+                avg_delay_time=avg_delay_time,
+                risk_excluded_warrant_balance=risk_excluded_warrant_balance,
+                balance=balance,
+                period_velocity=period_velocity,
+                period_day=period_day,
+                payment_frequency=payment_frequency,
+                maturity_exceed_avg=maturity_exceed_avg,
+                avg_delay_balance=avg_delay_balance,
+                last_month_payback_perc=last_month_payback_perc,
+                profit=profit,
+                profit_percent=profit_percent
+            )
+
+            analyzedata = AnalyzingRiskDataSet(risk_model_object, analyze_right_now=True)
             analyzedata.save_data()
 
 
@@ -122,6 +191,109 @@ class CreateRiskAnalysisFormView(View):
 
         return render(request, self.template_name, {'form': form})
 
+# SGK
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class UploadSGKData(FormView):
+    form_class = RiskAnalysisImportDataForm
+    template_name = 'risk_analysis/create_page/import_form.html'
+
+    def get_success_url(self):
+        # file uploading completed
+        # referring document page
+        return reverse_lazy('docs', kwargs=self.kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, context={'forms': RiskAnalysisImportDataForm})
+
+    def post(self, request, *args, **kwargs):
+        data = request.FILES['riskDataFile']
+        customer_id = int(request.POST['customer'])
+
+        related_check_account = CheckAccount.objects.get(customer_id=customer_id)
+
+        if not str(data.name).endswith('.xlsx'):
+            return render(request, template_name='risk_analysis/error_pages/general_error.html',
+                          context={'error': "Uploaded file must be xlsx file !"})
+
+        p = default_storage.save(data.name, ContentFile(data.read()))
+
+        # saving process
+        p = os.path.join(MEDIA_ROOT, p)
+
+        df = pd.read_excel(p, sheet_name="MPYS Sn")
+
+        # Analyzing process
+        for index, row in df.iterrows():
+            limit = row.get('limit')
+            warrant_state = row.get('warrant_state')  # todo: string converting
+            warrant_amount = row.get('warrant_amount')
+
+            if pd.isna(warrant_state) or warrant_state == '' or warrant_state == 'False' or warrant_state == 'Yok' \
+                    or warrant_state is False:
+                if pd.isna(warrant_amount):
+                    warrant_amount = None
+
+            maturity = row.get('maturity')
+            payment_frequency = row.get('payment_frequency')
+            maturity_exceed_avg = row.get('maturity_exceed_avg')
+            avg_order_amount_last_twelve_months = row.get('avg_order_amount_last_twelve_months')
+
+            avg_order_amount_last_three_months = row.get('avg_order_amount_last_three_months')
+            last_3_months_aberration = row.get('last_3_months_aberration')
+            last_month_payback_perc = row.get('last_month_payback_perc')
+            last_twelve_months_payback_perc = row.get('last_twelve_months_payback_perc')
+            avg_last_three_months_payback_perc = row.get('avg_last_three_months_payback_perc')
+            last_three_months_payback_comparison = row.get('last_three_months_payback_comparison')
+            avg_delay_time = row.get('avg_delay_time')
+            avg_delay_balance = row.get('avg_delay_balance')
+            period_day = row.get('period_day')
+            period_velocity = row.get('period_velocity')
+
+            # bakiye - teminat tutarı: balance - warrant amount
+            risk_excluded_warrant_balance = row.get('risk_excluded_warrant_balance')
+
+            balance = row.get('balance')
+            profit = row.get('profit')  # d. a. ş. y.
+
+            profit_percent = row.get('profit_percent')  # kar yuzdesi davut a. v. v, ş.y.
+
+            # çek dahili toplam risk davut abinin veride var, şemada yok.
+            total_risk_including_cheque = row.get('total_risk_including_cheque')
+
+            # bu veri şemamızda yok, davut abinin gönderdiği örnek veride var.
+            last_12_months_total_endorsement = row.get('last_12_months_total_endorsement')
+            # period_percent = row.get('period_percent')
+
+            risk_model_object = DataSetModel(
+                related_customer=related_check_account,
+                last_12_months_total_endorsement=last_12_months_total_endorsement,
+                maturity=maturity,
+                limit=limit,
+                total_risk_including_cheque=total_risk_including_cheque,
+                warrant_state=warrant_state,
+                warrant_amount=warrant_amount,
+                avg_order_amount_last_twelve_months=avg_order_amount_last_twelve_months,
+                avg_order_amount_last_three_months=avg_order_amount_last_three_months,
+                last_3_months_aberration=last_3_months_aberration,
+                last_twelve_months_payback_perc=last_twelve_months_payback_perc,
+                avg_last_three_months_payback_perc=avg_last_three_months_payback_perc,
+                last_three_months_payback_comparison=last_three_months_payback_comparison,
+                avg_delay_time=avg_delay_time,
+                risk_excluded_warrant_balance=risk_excluded_warrant_balance,
+                balance=balance,
+                period_velocity=period_velocity,
+                period_day=period_day,
+                payment_frequency=payment_frequency,
+                maturity_exceed_avg=maturity_exceed_avg,
+                avg_delay_balance=avg_delay_balance,
+                last_month_payback_perc=last_month_payback_perc,
+                profit=profit,
+                profit_percent=profit_percent
+            )
+
+            analyzedata = AnalyzingRiskDataSet(risk_model_object, analyze_right_now=True)
+            analyzedata.save_data()
 
 class BaseWarnings(ABC):
     template_name = 'risk_analysis/added_dataset_warning_base.html'
@@ -157,7 +329,7 @@ class DataSetWarnings(BaseWarnings):
         """
         artis_gecmis_aylara_gore = None
 
-        customer_data = DataSetModel.objects.all().filter(customer_id=self.dataset.customer_id)
+        customer_data = DataSetModel.objects.all().filter(customer_id=self.dataset.related_customer)
 
         payback_this_month = customer_data[-1].last_month_payback_comparison
         payback_back_month = customer_data[-2].last_month_payback_comparison
@@ -180,7 +352,7 @@ class DataSetWarnings(BaseWarnings):
         """
         Alacak devir hızı geçmiş aylara kıyasla artarsa veya genel müşteri ortalamasına kıyasla yüksekse
         """
-        customer_data = DataSetModel.objects.all().filter(customer_id=self.dataset.customer_id)
+        customer_data = DataSetModel.objects.all().filter(customer_id=self.dataset.related_customer)
 
         income_freq_this_month = customer_data[-1].period_velocity
         income_freq_back_month = customer_data[-2].period_velocity
@@ -205,3 +377,96 @@ class DataSetWarnings(BaseWarnings):
         todo: important.
         """
         pass
+
+
+class BaseNotifications(object):
+    customer_health_status = ('HEALTHY', 'STABLE', 'NEED TO BE MANAGED', 'SENSITIVE', 'RISKY')
+    current_status = None
+    customer_id = None
+
+    @classmethod
+    def calculate_health_status(cls, customer_id):
+        # todo :? Muhtemelen puanlama algoritması ağırlıklı toplanıp dondurulecek
+
+        try:
+            risk_data = RiskDataSetPoints.objects.get(customer_id=customer_id)
+        except RiskDataSetPoints.DoesNotExist:
+            # todo: logging
+            print("{} id ile iliskili musteri puanlaması bulunamadı !")
+
+        pass
+
+
+class BasicDashboardData:
+    def __init__(self, customer_id):
+        self.customer_id = customer_id
+        try:
+            customer = CheckAccount.objects.get(customer_id=customer_id)
+
+        except CheckAccount.DoesNotExist:
+            # todo : logging
+            print(f"{customer_id} idli musteri bulunamadı !")
+            raise ValueError
+
+        self.customer = customer
+
+    def limit_exceeds(self):
+        pass
+
+    def maturity_exceeds(self):
+        pass
+
+    def income_period_velocity(self):
+        pass
+
+    def cheque_index_unwanted_range(self):
+        """
+        ne demek bu? Hangi aralık?
+        # todo: ? Davut abi
+        """
+        pass
+
+    def arkasi_yazili_cekler(self):
+        """
+        # todo boyle bir veri yok?
+        """
+        pass
+
+    def narrowing_closing_credit_limit(self):
+        """
+        # todo boyle bir veri yok?
+        """
+        pass
+
+    def tax_debts(self):
+        """
+
+        """
+        pass
+
+    def sgk_debts(self):
+        """
+
+        """
+        pass
+
+    def sector_black_list(self):
+        """
+
+        """
+        pass
+
+    def findeks_credit_pts(self):
+        """
+
+        """
+        pass
+
+    def qr_cheque_score_parallel_warning(self):
+        """
+
+        """
+        pass
+
+    def recent_added_check_accounts(self):
+        return CheckAccount.objects[:-5]

@@ -145,7 +145,7 @@ class CheckAccountFormCreateView(CreateView):
 
     def get_success_url(self):
         # todo: true meselesi askıda?
-        return f'/checkaccount/get/{self.object.customer_id}'
+        return f'/checkaccount/get/{self.object.related_customer}'
 
     def form_valid(self, form):
         print("form took")
@@ -218,7 +218,7 @@ class UploadAccountDocumentsView(CreateView):
         return context
 
     def form_valid(self, form):
-        form.instance.customer_id = CheckAccount.objects.get(customer_id=self.kwargs.get('customer_id'))
+        form.instance.related_customer = CheckAccount.objects.get(customer_id=self.kwargs.get('customer_id'))
         self.object = form.save()
         return HttpResponseRedirect(self.get_success_url())
 

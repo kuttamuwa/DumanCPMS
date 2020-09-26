@@ -13,7 +13,17 @@ class DataSetManager(models.Manager):
         if period_velocity is not None:
             return 30 // period_velocity
         else:
-            return None
+            last_twelve_month_avg_order_amount = kwargs.get('last_twelve_month_avg_order_amount')
+            balance = kwargs.get('balance')
+
+            if last_twelve_month_avg_order_amount is None or balance is None:
+                raise ValueError("Vade hızı boş verilmiş. Hızın bulunması için gerekli diğer veriler olan son "
+                                 "12 aylık ortalama sipariş tutarı ve bakiye bilgileri de eksik. \n"
+                                 "Algoritmanın sağlıklı çalışabilmesi için ilgili verileri lütfen doldurun !")
+
+            period_velocity = DataSetManager.calc_period_velocity(last_twelve_month_avg_order_amount, balance)
+
+            return 30 // period_velocity
 
     @staticmethod
     def calc_period_velocity(last_twelve_month_avg_order_amount, balance):
@@ -71,14 +81,14 @@ class DataSetManager(models.Manager):
 class DataSetModel(models.Model):
     objects = DataSetManager
 
-    customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
+    related_customer = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
     data_id = models.AutoField(primary_key=True)
     limit = models.PositiveIntegerField(db_column='LIMIT', null=False)  # 500 0000 vs
     warrant_state = models.BooleanField(db_column='WARRANT_STATE', help_text='teminat durumu',
                                         null=True, default=False)  # var yok
     warrant_amount = models.PositiveIntegerField(db_column='WARRANT_AMOUNT', help_text='teminat tutarı',
                                                  null=False)  # 500 000 vs
-    maturity = models.IntegerField(db_column='MATURITY', help_text='vade', null=False)  # gun
+    maturity = models.IntegerField(db_column='MATURITY', help_text='vade günü', null=True)  # gun
     payment_frequency = models.PositiveSmallIntegerField(db_column='PAYMENT_FREQ',
                                                          help_text='odeme sikligi', null=False)  # 10, 5 gun
     maturity_exceed_avg = models.IntegerField(db_column='MATURITY_EXCEED_AVG',
@@ -123,13 +133,14 @@ class DataSetModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return CheckAccount.objects.get(customer_id=self.customer_id)
+        return CheckAccount.objects.get(customer_id=self.related_customer)
 
     class Meta:
         db_table = 'RISK_DATA'
 
 
 class RiskDataSetPoints(models.Model):
+    id = models.AutoField(primary_key=True)
     customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
 
     son_12ay_ortalama_sapma_pts = models.PositiveSmallIntegerField(db_column='SON_SENE_ORT_SAPMA_PTS', null=True)

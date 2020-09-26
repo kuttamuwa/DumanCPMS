@@ -23,6 +23,7 @@ Müşteri çekilirken kayıt sayısı sistemdeki ile uyuşmazsa hata verir
 class Cities(GeoModel):
     city_name = models.CharField(max_length=50, db_column='CITY_NAME', unique=True)
     city_plate_number = models.PositiveSmallIntegerField(db_column='CITY_PLATE_NUMBER', unique=True, db_index=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def import_from_shapefile(self):
         pass
@@ -43,6 +44,7 @@ class Cities(GeoModel):
 class Districts(GeoModel):
     district_name = models.CharField(max_length=50, db_column='DISTRICT_NAME')
     related_city_name = models.ForeignKey(Cities, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
 
     def import_from_shapefile(self):
         pass
@@ -64,6 +66,7 @@ class Districts(GeoModel):
 class SysDepartments(models.Model):
     department_name = models.CharField(max_length=50, unique=True, db_column='DEPARTMENT_NAME')
     objectid = models.AutoField(primary_key=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'SYS_DEPARTMENTS'
@@ -77,7 +80,8 @@ class SysDepartments(models.Model):
 
 class Sectors(models.Model):
     name = models.CharField(max_length=50, unique=True, db_column='SECTOR_NAME')
-    objectid = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'SECTORS'
@@ -94,6 +98,7 @@ class SysPersonnel(models.Model):
     position = models.CharField(max_length=50, db_column='POSITION')
 
     personnel_id = models.AutoField(primary_key=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'SYS_PERSONNEL'
@@ -137,6 +142,7 @@ class CheckAccount(models.Model):
 
     # object id
     customer_id = models.AutoField(primary_key=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = CariHesapSpecs.get_table_name()
@@ -170,6 +176,8 @@ class CheckAccount(models.Model):
 
 
 class AccountDocuments(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+
     activity_certificate_pdf = models.FileField(
         upload_to='activity_certificates/pdfs/',
         verbose_name=AccountDocumentsSpec.get_activity_certificate_verbose_name(),
@@ -209,6 +217,8 @@ class AccountDocuments(models.Model):
 
 
 class PartnershipDocuments(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+
     # klasörde depolanabilir
     partnership_structure_identity_copies = models.FilePathField(
         PartnershipDocumentsSpecs.get_partnership_structure_id_copies_verbose_name(), allow_folders=True,
@@ -242,7 +252,7 @@ class PartnershipDocuments(models.Model):
 class CustomerBank(models.Model):
     # musteri silinirse kayit da silinir
     customer_id = models.ForeignKey(CheckAccount, on_delete=models.CASCADE)
-    objectid = models.AutoField(primary_key=True, db_column='OBJECTID')
+    id = models.AutoField(primary_key=True, db_column='ID')
     bank_name = models.CharField(max_length=60, unique=False, db_column='BANK_NAME')
 
     # diger bilgiler gelir.
@@ -254,9 +264,9 @@ class CustomerBank(models.Model):
 
 
 class RelatedBlackList(models.Model):
-    objectid = models.AutoField(primary_key=True, db_column='OBJECTID')
+    id = models.AutoField(primary_key=True, db_column='ID')
     customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
-
+    created = models.DateTimeField(auto_now_add=True)
     # todo: and many fields
 
     class Meta:
@@ -270,6 +280,7 @@ class RelatedBlackList(models.Model):
 
 
 class SystemBlackList(RelatedBlackList):
+
     class Meta:
         db_table = 'SYS_BLACK_LIST'
 
@@ -278,6 +289,7 @@ class SystemBlackList(RelatedBlackList):
 
 
 class TaxDebtList(RelatedBlackList):
+
     class Meta:
         db_table = 'TAX_DEBTS'
 
@@ -286,6 +298,14 @@ class TaxDebtList(RelatedBlackList):
 
 
 class SGKDebtList(RelatedBlackList):
+
+    taxpayer_number = models.CharField(unique=True, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
+                                                              'Vergi No',
+                                       db_column='TAXPAYER_NUMBER', max_length=15)
+    firm_title = models.CharField(max_length=100, verbose_name='FIRM FULLNAME',
+                                  db_column='FIRM_FULLNAME')
+    debt_amount = models.PositiveIntegerField(db_column='DEBT_AMOUNT')
+
     class Meta:
         db_table = 'SGK_DEBTS'
 
@@ -294,9 +314,9 @@ class SGKDebtList(RelatedBlackList):
 
 
 class KonkordatoList(RelatedBlackList):
+
     class Meta:
         db_table = 'KONKORDATO_LIST'
 
     def __str__(self):
         return f"Konkordato for {self.get_customer_name()}"
-

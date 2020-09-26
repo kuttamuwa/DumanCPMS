@@ -17,6 +17,7 @@ urlpatterns = [
                                                                  'risk_analysis/risk_analysis_retrieve.html'),
          name='checkaccount-search'),
 
+    # path('import/sgk/', views.)
     path('', views.risk_main_page),
     path('get/<int:customer_id>/', views.get_risk_by_customer_id,
          name='get-risk-data'),

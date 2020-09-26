@@ -25,7 +25,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         self.analyzed_data = None
         self.analyze_decision = True  # default value
 
-        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.customer_id)  # empty
+        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.related_customer)  # almost empty
 
         if analyze_right_now:
             self.analyze_all()
@@ -39,6 +39,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
     def detect_son_12ay_iade_yuzdesi(self):
         """
         Son 12 Ay İade %si: İade aylık satışın % 10 unu aşmazsa hesaplama yapılmayacak
+        HINT: Puanlaması başka fonksiyonda
         """
         last_twelve_months_payback_perc = self.risk_model_object.last_twelve_months_payback_perc
         if pd.isna(last_twelve_months_payback_perc):
@@ -60,6 +61,8 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
                     # todo: logging
                     print("Analiz yapilmayacak.")
 
+            return self.analyze_decision
+
     def detect_son_12ay_satis_ort_sapma(self):
         """
         %0-20 azalış	3
@@ -70,6 +73,8 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         pts_dict = {(0, 0.2): 3,
                     (0.2, 0.5): 5,
                     (0.5, 0.75): 10}
+        # todo: Veride son 12 aylik satis ortalamasindan sapma yazmiyor. Burayı nasıl bulacağız ? -> DAVUT ABIYE.
+        # TODO: Biz son 3 aylık sapmayı kullanarak hesapladık, doğru mu?
 
         last_3_months_aberration = self.risk_model_object.last_3_months_aberration
         pts = None
@@ -103,7 +108,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             (15, 20): 5,
             (20, 100): 3
         }
-        kar = self.risk_model_object.kar
+        kar = self.risk_model_object.profit_percent
         pts = None
 
         if not pd.isna(kar):
@@ -118,7 +123,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
                     print("Karın risk puanı hesaplanamamıştır ?")
                     # todo: logging
 
-    def analyze_son_ay_iade(self):
+    def analyze_son_12_ay_iade(self):
         """
         %0-20 	3
         %20-50 	5
@@ -132,7 +137,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             (50, 75): 10,
             (75, 100): 15
         }
-        iade = self.risk_model_object.last_month_payback_perc
+        iade = self.risk_model_object.last_twelve_months_payback_perc
         pts = None
 
         if not pd.isna(iade):
@@ -190,7 +195,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
 
         ort_gecikme_gun_bakiyesi = self.risk_model_object.avg_delay_balance
         if not pd.isna(ort_gecikme_gun_bakiyesi):
-            for t in pts_dict:
+            for t in pts_dict.items():
                 if t[0][0] < ort_gecikme_gun_bakiyesi <= t[0][1]:
                     pts = t[1]
 
@@ -223,9 +228,13 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         devir_gunu = self.risk_model_object.period_day
         if pd.isna(devir_gunu):
             # veride yok, hesaplamak gerek
-            DataSetManager.calc_period_day(self.risk_model_object.period_velocity, )
+            devir_gunu = DataSetManager.calc_period_day(self.risk_model_object.period_velocity)
 
-        pass
+        for t in pts_dict.items():
+            if t[0][0] < devir_gunu <= t[0][1]:
+                pts = t[1]
+
+        self.risk_point_object.devir_gunu_pts = pts
 
     def detect_teminat_limit_riskini_karsilama_seviyesi(self):
         """
@@ -264,13 +273,13 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
 
     def analyze_all(self):
         # todo: logging
-        self.detect_son_12ay_iade_yuzdesi()
+        self.detect_son_12ay_iade_yuzdesi()  # true -> analiz yapilir, false -> yapilmaz. default -> true.
 
-        # eger yukaridaki False dondururse hesaplama yapilmaz?
+        # eger yukaridaki False dondururse hesaplama yapilmaz?<
         if self.analyze_decision:
             self.detect_son_12ay_satis_ort_sapma()
             self.analyze_kar()
-            self.analyze_son_ay_iade()
+            self.analyze_son_12_ay_iade()
             self.analyze_ort_gecikme_gun_sayisi()
             self.analyze_ort_gecikme_gun_bakiyesi()
             self.analyze_devir_gunu()

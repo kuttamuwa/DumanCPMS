@@ -112,7 +112,7 @@ def get_newest_check_accounts(request, count=5):
     """
     accounts = CheckAccount.objects.all()[:count]
     print(accounts)
-    data_set = DataSetModel.objects.all().filter(customer_id__in=(i.customer_id for i in accounts))
+    data_set = DataSetModel.objects.all().filter(customer_id__in=(i.related_customer for i in accounts))
 
     data = {'customer_names': (i.firm_full_name for i in accounts),
             'limit': (i.limit for i in data_set),
