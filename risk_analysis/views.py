@@ -79,6 +79,8 @@ class UploadRiskAnalysisDataView(FormView):
 
     def post(self, request, *args, **kwargs):
         data = request.FILES['riskDataFile']
+        customer_id = int(request.POST['customer'])
+
         if not str(data.name).endswith('.xlsx'):
             return render(request, template_name='risk_analysis/error_pages/general_error.html',
                           context={'error': "Uploaded file must be xlsx file !"})
@@ -90,14 +92,11 @@ class UploadRiskAnalysisDataView(FormView):
 
         df = pd.read_excel(p, sheet_name="MPYS Sn")
 
-        # Control process
-        controldata = ControlRiskDataSet(df)
-
         # Analyzing process
-        analyzedata = AnalyzingRiskDataSet(control_object=controldata)
-        analyzed_df = analyzedata.bulk_to_dataframe()
-
-        analyzed_df.to_sql(DataSetModel.Meta.db_table, if_exists='append', con=connections['default'])
+        for index, row in df.iterrows():
+            risk_model_object = DataSetModel(*row, customer_id=customer_id)
+            analyzedata = AnalyzingRiskDataSet(risk_model_object)
+            analyzedata.save_data()
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')

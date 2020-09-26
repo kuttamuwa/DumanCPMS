@@ -6,9 +6,12 @@ from crispy_forms.tests.forms import forms
 class RiskAnalysisImportDataForm(forms.ModelForm):
     riskDataFile = forms.FileField(
         label='Select your data excel file',
-        help_text='Does your data have all columns that we need?',
+        help_text='Does your data have all columns that we need? \n'
+                  'Please consult on this page: ',
 
     )
+    # todo: şu help_text'in oraya sütunlara bakabileceği bir yer vermek lazım
+
     customer = forms.ModelChoiceField(queryset=CheckAccount.objects.all())
 
     class Meta:
