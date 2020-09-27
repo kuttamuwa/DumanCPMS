@@ -2,16 +2,17 @@ import django_filters
 from django_filters import FilterSet
 
 from checkaccount.models import CheckAccount
-from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel
+from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList
 
 
 class RiskAnalysisFilter(FilterSet):
     firm_full_name = django_filters.CharFilter(lookup_expr='icontains', label='Firm full name')
+
     # taxpayer_number = django_filters.NumberFilter(lookup_expr='icontains', label='Tax payer number')
 
     class Meta:
         model = DataSetModel
-        fields = ('related_customer', )
+        fields = ('related_customer',)
 
     #     # fields = {
     #     #     'firm_type': ['exact'],
@@ -34,3 +35,10 @@ class SGKDataFilter(FilterSet):
     class Meta:
         model = SGKDebtListModel
         fields = ('taxpayer_number', 'firm_title')
+
+
+class TaxDataFilter(FilterSet):
+    class Meta:
+        model = TaxDebtList
+        fields = ('tax_department', 'taxpayer_number', 'dept_title', 'real_operating_income',
+                  'dept_amount')

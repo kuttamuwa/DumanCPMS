@@ -293,14 +293,6 @@ class SystemBlackList(RelatedBlackList):
         return f"System Black List for {self.get_customer_name()}"
 
 
-class TaxDebtList(RelatedBlackList):
-    class Meta:
-        db_table = 'TAX_DEBTS'
-
-    def __str__(self):
-        return f"Tax Debts for  {self.get_customer_name()}"
-
-
 class KonkordatoList(RelatedBlackList):
     class Meta:
         db_table = 'KONKORDATO_LIST'

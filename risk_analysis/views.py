@@ -285,6 +285,47 @@ class RetrieveSGKFormView(FilterView):
     pass
 
 
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class UploadTaxData(FormView):
+    form_class = SGKImportDataForm
+    template_name = 'risk_analysis/create_page/import_tax_dataset_form.html'
+    error_template = 'risk_analysis/error_pages/general_error.html'
+    succeeded_template = 'risk_analysis/succeeded_page_tax.html'
+
+    @staticmethod
+    def __nan_to_none(value):
+        if pd.isna(value):
+            value = None
+
+        return value
+
+    def get_success_url_primitive(self, request):
+        return render(request, template_name=self.succeeded_template)
+
+    def get_success_url(self):
+        # file uploading completed
+        # referring document page
+        return reverse_lazy('docs', kwargs=self.kwargs)
+
+    def get_error_url(self, request, message):
+        return render(request, template_name=self.error_template,
+                      context={'error': message})
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, context={'forms': SGKImportDataForm})
+
+    def post(self, request, *args, **kwargs):
+        data = request.FILES['sgkDataFile']
+        p = default_storage.save(data.name, ContentFile(data.read()))
+
+
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class RetrieveTaxFormView(FilterView):
+    pass
+
+
 class BaseWarnings(ABC):
     template_name = 'risk_analysis/added_dataset_warning_base.html'
     messages = []

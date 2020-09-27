@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
 from checkaccount.models import CheckAccount, AccountDocuments, RelatedBlackList, \
-    SystemBlackList, TaxDebtList, KonkordatoList
+    SystemBlackList, KonkordatoList
 from checkaccount.serializers import CheckAccountSerializer
 from risk_analysis.models import SGKDebtListModel
 

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="alert alert-dismissible alert-success">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Well done!</strong> You imported TAX Debt list
+
+        To see your data:
+        <a href="{{ customer }}/data" class="alert-link">To see your data (NOT STABLE)</a>.
+    </div>
+
+    {% if errors %}
+        <strong> By the way, some errors occured while reading this rows : </strong>
+        {% for err in errors %}
+            <div class="alert alert-dismissible alert-danger">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong> {{ err }} </strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

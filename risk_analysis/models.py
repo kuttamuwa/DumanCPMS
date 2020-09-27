@@ -1,12 +1,10 @@
-from abc import ABC
-
 from django.db import models
+
+from checkaccount.models import CheckAccount, RelatedBlackList
+
 
 # Create your models here.
 # dependent with CheckAccount application
-from django.db.models import QuerySet
-
-from checkaccount.models import CheckAccount, RelatedBlackList
 
 
 class DataSetManager(models.Manager):
@@ -190,3 +188,29 @@ class SGKDebtListModel(models.Model):
 
     def __str__(self):
         return f"SGK Debts for {self.firm_title}"
+
+
+class TaxDebtList(models.Model):
+    id = models.AutoField(primary_key=True, db_column='ID')
+    created = models.DateTimeField(auto_now_add=True)
+    tax_department = models.CharField(max_length=200, verbose_name='TAX DEPARTMENT',
+                                      db_column='TAX_DEPT', unique=False,
+                                      help_text='Vergi Departmanı')
+    taxpayer_number = models.CharField(unique=False, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
+                                                               'Vergi No',
+                                       db_column='TAXPAYER_NUMBER', max_length=15)
+    dept_title = models.CharField(unique=False,
+                                  help_text='Borçlunun Adı Soyadı/Unvanı',
+                                  db_column='DEPT_TITLE', max_length=150)
+    real_operating_income = models.CharField(unique=False,
+                                             help_text='Esas Faaliyet Konusu',
+                                             db_column='REAL_OPERATING_INCOME', max_length=500)
+    dept_amount = models.BigIntegerField(unique=False,
+                                         help_text='Borç Miktarı',
+                                         db_column='DEPT_AMOUNT')
+
+    class Meta:
+        db_table = 'TAX_DEBTS'
+
+    def __str__(self):
+        return f"Tax Debts for  {self.dept_title}"
