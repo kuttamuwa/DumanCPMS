@@ -301,21 +301,6 @@ class TaxDebtList(RelatedBlackList):
         return f"Tax Debts for  {self.get_customer_name()}"
 
 
-class SGKDebtList(RelatedBlackList):
-    taxpayer_number = models.CharField(unique=True, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
-                                                              'Vergi No',
-                                       db_column='TAXPAYER_NUMBER', max_length=15)
-    firm_title = models.CharField(max_length=100, verbose_name='FIRM FULLNAME',
-                                  db_column='FIRM_FULLNAME')
-    debt_amount = models.PositiveIntegerField(db_column='DEBT_AMOUNT')
-
-    class Meta:
-        db_table = 'SGK_DEBTS'
-
-    def __str__(self):
-        return f"SGK Debts for {self.get_customer_name()}"
-
-
 class KonkordatoList(RelatedBlackList):
     class Meta:
         db_table = 'KONKORDATO_LIST'

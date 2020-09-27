@@ -1,7 +1,7 @@
 from django.urls import path
 
 from risk_analysis import views
-from risk_analysis.filters import RiskAnalysisFilter, RiskPointsFilter
+from risk_analysis.filters import RiskAnalysisFilter, RiskPointsFilter, SGKDataFilter
 
 urlpatterns = [
     path('create/', views.creation_type_main_page, name='risk_analysis-create-page'),
@@ -12,10 +12,16 @@ urlpatterns = [
     path('create/importform', views.UploadRiskAnalysisDataView.as_view(),
          name='risk_analysis-upload'),
 
+    path('create/importsgkdata', views.UploadSGKData.as_view(),
+         name='risk_analysis-sgkupload'),
+
     path('retrieve/', views.RetrieveRiskAnalysisFormView.as_view(filterset_class=RiskAnalysisFilter,
                                                                  template_name=
                                                                  'risk_analysis/risk_analysis_retrieve.html'),
          name='checkaccount-search'),
+
+    path('retrieve/sgkdata', views.RetrieveSGKFormView.as_view(filterset_class=SGKDataFilter,
+                                                               template_name='risk_analysis/sgk_data_retrieve.html')),
 
     path('points/', views.RetrieveRiskPointsFormView.as_view(filterset_class=RiskPointsFilter,
                                                              template_name='risk_analysis/risk_points_retrieve.html')),

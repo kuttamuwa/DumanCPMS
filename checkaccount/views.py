@@ -13,9 +13,10 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
-from checkaccount.models import CheckAccount, AccountDocuments, PartnershipDocuments, CustomerBank, RelatedBlackList, \
-    SystemBlackList, TaxDebtList, SGKDebtList, KonkordatoList
+from checkaccount.models import CheckAccount, AccountDocuments, RelatedBlackList, \
+    SystemBlackList, TaxDebtList, KonkordatoList
 from checkaccount.serializers import CheckAccountSerializer
+from risk_analysis.models import SGKDebtListModel
 
 
 def main_page(request):
@@ -290,7 +291,7 @@ class CheckAccountInitialProcesses:
         return self.alert_popup(request, "Tax Debt List", tax_debts)
 
     def find_sgk_debt_list(self, request, customer_id):
-        sgk_debts = SGKDebtList.objects.all().filter(customer_id=customer_id)
+        sgk_debts = SGKDebtListModel.objects.all().filter(customer_id=customer_id)
         return self.alert_popup(request, 'SGK Debt List', sgk_debts)
 
     @FutureWarning

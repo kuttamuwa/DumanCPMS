@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <br>
+    <div class="row">
+        <div class="col">
+            <div class="card card-body">
+                <form method="get">
+                    {% csrf_token %}
+                    {{ filter.form.as_table }}
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    <br>
+
+    {% for sgkdatarow in filter.qs %}
+
+        <div class="row">
+            <div class="col-md">
+                <div class="card card-body">
+                    <table class="table table-sm table-hover">
+                        <tr >
+
+                            <th> Vergi No/ TC Kimlik No </th>
+                            <th> İŞVERENİN UNVANI/ADI SOYADI </th>
+                            <th> Prim Aslı Borç Tutarı </th>
+                            <th> Verinin Yüklenme Tarihi </th>
+                        </tr>
+
+                        <tr>
+                            <td>{{ sgkdatarow.taxpayer_number }}</td>
+                            <td>{{ sgkdatarow.firm_title }}</td>
+                            <td>{{ sgkdatarow.debt_amount }}</td>
+                            <td>{{ sgkdatarow.created }}</td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}

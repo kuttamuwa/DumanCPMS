@@ -1,8 +1,6 @@
+import os
 from abc import ABC
 from collections import Counter
-
-import os
-from DumanCPMS.settings import MEDIA_ROOT
 
 import pandas as pd
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -16,13 +14,11 @@ from django.views import View
 from django.views.generic.edit import FormView
 from django_filters.views import FilterView
 
-from django.db import connections
-
-from checkaccount.forms import UploadSGKDatasetForm
+from DumanCPMS.settings import MEDIA_ROOT
 from checkaccount.models import CheckAccount
-from risk_analysis.algorithms import AnalyzingRiskDataSet, ControlRiskDataSet
-from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm
-from risk_analysis.models import DataSetModel, RiskDataSetPoints
+from risk_analysis.algorithms import AnalyzingRiskDataSet
+from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm
+from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel
 
 
 def risk_main_page(request):
@@ -228,23 +224,65 @@ class CreateRiskAnalysisFormView(View):
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class UploadSGKData(FormView):
-    form_class = UploadSGKDatasetForm
-    template_name = 'checkaccount/import_sgk_dataset_form.html'
+    form_class = SGKImportDataForm
+    template_name = 'risk_analysis/create_page/import_sgk_dataset_form.html'
+    error_template = 'risk_analysis/error_pages/general_error.html'
+    succeeded_template = 'risk_analysis/succeeded_page_sgk.html'
+
+    @staticmethod
+    def __nan_to_none(value):
+        if pd.isna(value):
+            value = None
+
+        return value
+
+    def get_success_url_primitive(self, request):
+        return render(request, template_name=self.succeeded_template)
 
     def get_success_url(self):
         # file uploading completed
         # referring document page
         return reverse_lazy('docs', kwargs=self.kwargs)
 
+    def get_error_url(self, request, message):
+        return render(request, template_name=self.error_template,
+                      context={'error': message})
+
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, context={'forms': RiskAnalysisImportDataForm})
+        return render(request, self.template_name, context={'forms': SGKImportDataForm})
 
     def post(self, request, *args, **kwargs):
         data = request.FILES['sgkDataFile']
-        customer_id = int(request.POST['customer'])
+        p = default_storage.save(data.name, ContentFile(data.read()))
 
-        related_check_account = CheckAccount.objects.get(customer_id=customer_id)
-        # analyzedata.save_data()
+        # saving process
+        p = os.path.join(MEDIA_ROOT, p)
+        df = pd.read_excel(p, skiprows=1)
+
+        error_rows = []
+        try:
+            for index, row in df.iterrows():
+                taxpayer_number = self.__nan_to_none(row.get('Vergi No/ TC Kimlik No'))
+                firm_title = self.__nan_to_none(row.get('İŞVERENİN UNVANI/ADI SOYADI'))
+                debt_amount = self.__nan_to_none(row.get('Prim Aslı Borç Tutarı'))
+
+                sgk_model_object = SGKDebtListModel(
+                    taxpayer_number=taxpayer_number,
+                    firm_title=firm_title,
+                    debt_amount=debt_amount
+                )
+                sgk_model_object.save()
+        except Exception as err:
+            error_rows.append({'row': row, 'error description': err})
+
+        return render(request, template_name=self.succeeded_template,
+                      context={'errors': error_rows})
+
+
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class RetrieveSGKFormView(FilterView):
+    pass
 
 
 class BaseWarnings(ABC):

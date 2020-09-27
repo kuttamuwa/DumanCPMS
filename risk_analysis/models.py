@@ -4,7 +4,9 @@ from django.db import models
 
 # Create your models here.
 # dependent with CheckAccount application
-from checkaccount.models import CheckAccount
+from django.db.models import QuerySet
+
+from checkaccount.models import CheckAccount, RelatedBlackList
 
 
 class DataSetManager(models.Manager):
@@ -171,3 +173,20 @@ class RiskDataSetPoints(models.Model):
 
     def __str__(self):
         return f'POINTS OF {self.internal_customer_id}'
+
+
+class SGKDebtListModel(models.Model):
+    id = models.AutoField(primary_key=True, db_column='ID')
+    created = models.DateTimeField(auto_now_add=True)
+    taxpayer_number = models.CharField(unique=False, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
+                                                               'Vergi No',
+                                       db_column='TAXPAYER_NUMBER', max_length=15)
+    firm_title = models.CharField(max_length=200, verbose_name='FIRM FULLNAME',
+                                  db_column='FIRM_FULLNAME', unique=False)
+    debt_amount = models.PositiveIntegerField(db_column='DEBT_AMOUNT', unique=False)
+
+    class Meta:
+        db_table = 'SGK_DEBTS'
+
+    def __str__(self):
+        return f"SGK Debts for {self.firm_title}"

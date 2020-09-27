@@ -1,5 +1,5 @@
 from checkaccount.models import CheckAccount
-from risk_analysis.models import DataSetModel
+from risk_analysis.models import DataSetModel, SGKDebtListModel
 from crispy_forms.tests.forms import forms
 
 
@@ -12,10 +12,8 @@ class SGKImportDataForm(forms.ModelForm):
     )
     # todo: şu help_text'in oraya sütunlara bakabileceği bir yer vermek lazım
 
-    customer = forms.ModelChoiceField(queryset=CheckAccount.objects.all())
-
     class Meta:
-        model = DataSetModel
+        model = SGKDebtListModel
         fields = ()
 
 
@@ -40,8 +38,3 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
         model = DataSetModel
         fields = ()
 
-
-class RiskAnalysisCreateForm(forms.ModelForm):
-    class Meta:
-        model = DataSetModel
-        fields = '__all__'

@@ -2,7 +2,7 @@ import django_filters
 from django_filters import FilterSet
 
 from checkaccount.models import CheckAccount
-from risk_analysis.models import DataSetModel, RiskDataSetPoints
+from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel
 
 
 class RiskAnalysisFilter(FilterSet):
@@ -28,3 +28,9 @@ class RiskPointsFilter(FilterSet):
     class Meta:
         model = RiskDataSetPoints
         fields = ('customer_id',)
+
+
+class SGKDataFilter(FilterSet):
+    class Meta:
+        model = SGKDebtListModel
+        fields = ('taxpayer_number', 'firm_title')
