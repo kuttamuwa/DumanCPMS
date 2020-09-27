@@ -18,6 +18,7 @@ from django_filters.views import FilterView
 
 from django.db import connections
 
+from checkaccount.forms import UploadSGKDatasetForm
 from checkaccount.models import CheckAccount
 from risk_analysis.algorithms import AnalyzingRiskDataSet, ControlRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm
@@ -69,11 +70,28 @@ def creation_type_main_page(request):
 class UploadRiskAnalysisDataView(FormView):
     form_class = RiskAnalysisImportDataForm
     template_name = 'risk_analysis/create_page/import_form.html'
+    error_template = 'risk_analysis/error_pages/general_error.html'
+    succeeded_template = 'risk_analysis/succeeded_page.html'
+
+    @staticmethod
+    def __nan_to_none(value):
+        if pd.isna(value):
+            value = None
+
+        return value
+
+    def get_success_url_primitive(self, request, customer):
+        return render(request, template_name=self.succeeded_template,
+                      context={'customer': customer})
 
     def get_success_url(self):
         # file uploading completed
         # referring document page
         return reverse_lazy('docs', kwargs=self.kwargs)
+
+    def get_error_url(self, request, message):
+        return render(request, template_name=self.error_template,
+                      context={'error': message})
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name, context={'forms': RiskAnalysisImportDataForm})
@@ -97,48 +115,48 @@ class UploadRiskAnalysisDataView(FormView):
 
         # Analyzing process
         for index, row in df.iterrows():
-            limit = row.get('limit')
-            warrant_state = row.get('warrant_state')  # todo: string converting
-            warrant_amount = row.get('warrant_amount')
+            limit = self.__nan_to_none(row.get('limit'))
+            warrant_state = self.__nan_to_none(row.get('warrant_state'))  # todo: string converting
+            warrant_amount = self.__nan_to_none(row.get('warrant_amount'))
+            internal_customer_id = self.__nan_to_none(row.get('internal_customer_id'))
 
-            if pd.isna(warrant_state) or warrant_state == '' or warrant_state == 'False' or warrant_state == 'Yok' \
-                    or warrant_state is False:
-                if pd.isna(warrant_amount):
-                    warrant_amount = None
+            # if warrant_state is None or warrant_state is False or warrant_state == 'Yok':
+            #     if warrant_amount is None:
+            #         warrant_amount = None
 
-            maturity = row.get('maturity')
-            payment_frequency = row.get('payment_frequency')
-            maturity_exceed_avg = row.get('maturity_exceed_avg')
-            avg_order_amount_last_twelve_months = row.get('avg_order_amount_last_twelve_months')
-
-            avg_order_amount_last_three_months = row.get('avg_order_amount_last_three_months')
-            last_3_months_aberration = row.get('last_3_months_aberration')
-            last_month_payback_perc = row.get('last_month_payback_perc')
-            last_twelve_months_payback_perc = row.get('last_twelve_months_payback_perc')
-            avg_last_three_months_payback_perc = row.get('avg_last_three_months_payback_perc')
-            last_three_months_payback_comparison = row.get('last_three_months_payback_comparison')
-            avg_delay_time = row.get('avg_delay_time')
-            avg_delay_balance = row.get('avg_delay_balance')
-            period_day = row.get('period_day')
-            period_velocity = row.get('period_velocity')
+            maturity = self.__nan_to_none(row.get('maturity'))
+            payment_frequency = self.__nan_to_none(row.get('payment_frequency'))
+            maturity_exceed_avg = self.__nan_to_none(row.get('maturity_exceed_avg'))
+            avg_order_amount_last_twelve_months = self.__nan_to_none(row.get('avg_order_amount_last_twelve_months'))
+            avg_order_amount_last_three_months = self.__nan_to_none(row.get('avg_order_amount_last_three_months'))
+            last_3_months_aberration = self.__nan_to_none(row.get('last_3_months_aberration'))
+            last_month_payback_perc = self.__nan_to_none(row.get('last_month_payback_perc'))
+            last_twelve_months_payback_perc = self.__nan_to_none(row.get('last_twelve_months_payback_perc'))
+            avg_last_three_months_payback_perc = self.__nan_to_none(row.get('avg_last_three_months_payback_perc'))
+            last_three_months_payback_comparison = self.__nan_to_none(row.get('last_three_months_payback_comparison'))
+            avg_delay_time = self.__nan_to_none(row.get('avg_delay_time'))
+            avg_delay_balance = self.__nan_to_none(row.get('avg_delay_balance'))
+            period_day = self.__nan_to_none(row.get('period_day'))
+            period_velocity = self.__nan_to_none(row.get('period_velocity'))
 
             # bakiye - teminat tutarı: balance - warrant amount
-            risk_excluded_warrant_balance = row.get('risk_excluded_warrant_balance')
+            risk_excluded_warrant_balance = self.__nan_to_none(row.get('risk_excluded_warrant_balance'))
 
-            balance = row.get('balance')
-            profit = row.get('profit')  # d. a. ş. y.
+            balance = self.__nan_to_none(row.get('balance'))
+            profit = self.__nan_to_none(row.get('profit'))  # d. a. ş. y.
 
-            profit_percent = row.get('profit_percent')  # kar yuzdesi davut a. v. v, ş.y.
+            profit_percent = self.__nan_to_none(row.get('profit_percent'))  # kar yuzdesi davut a. v. v, ş.y.
 
             # çek dahili toplam risk davut abinin veride var, şemada yok.
-            total_risk_including_cheque = row.get('total_risk_including_cheque')
+            total_risk_including_cheque = self.__nan_to_none(row.get('total_risk_including_cheque'))
 
             # bu veri şemamızda yok, davut abinin gönderdiği örnek veride var.
-            last_12_months_total_endorsement = row.get('last_12_months_total_endorsement')
+            last_12_months_total_endorsement = self.__nan_to_none(row.get('last_12_months_total_endorsement'))
             # period_percent = row.get('period_percent')
 
             risk_model_object = DataSetModel(
                 related_customer=related_check_account,
+                internal_customer_id=internal_customer_id,
                 last_12_months_total_endorsement=last_12_months_total_endorsement,
                 maturity=maturity,
                 limit=limit,
@@ -164,13 +182,27 @@ class UploadRiskAnalysisDataView(FormView):
                 profit_percent=profit_percent
             )
 
-            analyzedata = AnalyzingRiskDataSet(risk_model_object, analyze_right_now=True)
-            analyzedata.save_data()
+            analyzedata = AnalyzingRiskDataSet(risk_model_object, internal_customer_id=internal_customer_id,
+                                               analyze_right_now=True)
+            try:
+                # saving data
+                analyzedata.save_risk_dataset_data()
+                analyzedata.save_risk_points_data()
+                return self.get_success_url_primitive(request, customer=related_check_account)
+
+            except Exception as err:
+                return self.get_error_url(request, err)
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class RetrieveRiskAnalysisFormView(FilterView):
+    pass
+
+
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class RetrieveRiskPointsFormView(FilterView):
     pass
 
 
@@ -191,12 +223,13 @@ class CreateRiskAnalysisFormView(View):
 
         return render(request, self.template_name, {'form': form})
 
+
 # SGK
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class UploadSGKData(FormView):
-    form_class = RiskAnalysisImportDataForm
-    template_name = 'risk_analysis/create_page/import_form.html'
+    form_class = UploadSGKDatasetForm
+    template_name = 'checkaccount/import_sgk_dataset_form.html'
 
     def get_success_url(self):
         # file uploading completed
@@ -207,93 +240,12 @@ class UploadSGKData(FormView):
         return render(request, self.template_name, context={'forms': RiskAnalysisImportDataForm})
 
     def post(self, request, *args, **kwargs):
-        data = request.FILES['riskDataFile']
+        data = request.FILES['sgkDataFile']
         customer_id = int(request.POST['customer'])
 
         related_check_account = CheckAccount.objects.get(customer_id=customer_id)
+        # analyzedata.save_data()
 
-        if not str(data.name).endswith('.xlsx'):
-            return render(request, template_name='risk_analysis/error_pages/general_error.html',
-                          context={'error': "Uploaded file must be xlsx file !"})
-
-        p = default_storage.save(data.name, ContentFile(data.read()))
-
-        # saving process
-        p = os.path.join(MEDIA_ROOT, p)
-
-        df = pd.read_excel(p, sheet_name="MPYS Sn")
-
-        # Analyzing process
-        for index, row in df.iterrows():
-            limit = row.get('limit')
-            warrant_state = row.get('warrant_state')  # todo: string converting
-            warrant_amount = row.get('warrant_amount')
-
-            if pd.isna(warrant_state) or warrant_state == '' or warrant_state == 'False' or warrant_state == 'Yok' \
-                    or warrant_state is False:
-                if pd.isna(warrant_amount):
-                    warrant_amount = None
-
-            maturity = row.get('maturity')
-            payment_frequency = row.get('payment_frequency')
-            maturity_exceed_avg = row.get('maturity_exceed_avg')
-            avg_order_amount_last_twelve_months = row.get('avg_order_amount_last_twelve_months')
-
-            avg_order_amount_last_three_months = row.get('avg_order_amount_last_three_months')
-            last_3_months_aberration = row.get('last_3_months_aberration')
-            last_month_payback_perc = row.get('last_month_payback_perc')
-            last_twelve_months_payback_perc = row.get('last_twelve_months_payback_perc')
-            avg_last_three_months_payback_perc = row.get('avg_last_three_months_payback_perc')
-            last_three_months_payback_comparison = row.get('last_three_months_payback_comparison')
-            avg_delay_time = row.get('avg_delay_time')
-            avg_delay_balance = row.get('avg_delay_balance')
-            period_day = row.get('period_day')
-            period_velocity = row.get('period_velocity')
-
-            # bakiye - teminat tutarı: balance - warrant amount
-            risk_excluded_warrant_balance = row.get('risk_excluded_warrant_balance')
-
-            balance = row.get('balance')
-            profit = row.get('profit')  # d. a. ş. y.
-
-            profit_percent = row.get('profit_percent')  # kar yuzdesi davut a. v. v, ş.y.
-
-            # çek dahili toplam risk davut abinin veride var, şemada yok.
-            total_risk_including_cheque = row.get('total_risk_including_cheque')
-
-            # bu veri şemamızda yok, davut abinin gönderdiği örnek veride var.
-            last_12_months_total_endorsement = row.get('last_12_months_total_endorsement')
-            # period_percent = row.get('period_percent')
-
-            risk_model_object = DataSetModel(
-                related_customer=related_check_account,
-                last_12_months_total_endorsement=last_12_months_total_endorsement,
-                maturity=maturity,
-                limit=limit,
-                total_risk_including_cheque=total_risk_including_cheque,
-                warrant_state=warrant_state,
-                warrant_amount=warrant_amount,
-                avg_order_amount_last_twelve_months=avg_order_amount_last_twelve_months,
-                avg_order_amount_last_three_months=avg_order_amount_last_three_months,
-                last_3_months_aberration=last_3_months_aberration,
-                last_twelve_months_payback_perc=last_twelve_months_payback_perc,
-                avg_last_three_months_payback_perc=avg_last_three_months_payback_perc,
-                last_three_months_payback_comparison=last_three_months_payback_comparison,
-                avg_delay_time=avg_delay_time,
-                risk_excluded_warrant_balance=risk_excluded_warrant_balance,
-                balance=balance,
-                period_velocity=period_velocity,
-                period_day=period_day,
-                payment_frequency=payment_frequency,
-                maturity_exceed_avg=maturity_exceed_avg,
-                avg_delay_balance=avg_delay_balance,
-                last_month_payback_perc=last_month_payback_perc,
-                profit=profit,
-                profit_percent=profit_percent
-            )
-
-            analyzedata = AnalyzingRiskDataSet(risk_model_object, analyze_right_now=True)
-            analyzedata.save_data()
 
 class BaseWarnings(ABC):
     template_name = 'risk_analysis/added_dataset_warning_base.html'

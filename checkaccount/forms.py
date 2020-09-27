@@ -1,7 +1,7 @@
 from crispy_forms.tests.forms import forms
 from django.contrib.auth.models import User
 
-from checkaccount.models import CheckAccount, AccountDocuments
+from checkaccount.models import CheckAccount, AccountDocuments, SGKDebtList
 
 
 class CheckAccountCreateForm(forms.ModelForm):
@@ -14,6 +14,12 @@ class LoginUserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'password')
+
+
+class UploadSGKDatasetForm(forms.ModelForm):
+    class Meta:
+        model = SGKDebtList
+        fields = '__all__'
 
 
 class UploadAccountDocumentForm(forms.ModelForm):

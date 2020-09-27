@@ -20,12 +20,13 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
     # todo: 100'den buyukse veya 0'dan kucukse uyari ver.
     """
 
-    def __init__(self, risk_model_object, analyze_right_now=True):
+    def __init__(self, risk_model_object, internal_customer_id, analyze_right_now=True):
         super().__init__(risk_model_object)
         self.analyzed_data = None
         self.analyze_decision = True  # default value
 
-        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.related_customer)  # almost empty
+        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.related_customer,
+                                                   internal_customer_id=internal_customer_id)  # almost empty
 
         if analyze_right_now:
             self.analyze_all()
@@ -33,8 +34,11 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
     def get_analyzed_data(self):
         return self.analyzed_data
 
-    def save_data(self):
+    def save_risk_dataset_data(self):
         self.risk_model_object.save()
+
+    def save_risk_points_data(self):
+        self.risk_point_object.save()
 
     def detect_son_12ay_iade_yuzdesi(self):
         """
@@ -285,10 +289,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             self.analyze_devir_gunu()
             self.detect_teminat_limit_riskini_karsilama_seviyesi()
 
-            # saving risk data points
-            self.risk_point_object.save()
-
-            return self.analyzed_data()
+            return self.analyzed_data
 
         else:
             # todo: logging

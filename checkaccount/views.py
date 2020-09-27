@@ -62,38 +62,53 @@ def get_customer(request, customer_id, state=0):
     # related account documents checking
     acc_doc_state = False
     try:
-        AccountDocuments.objects.filter(customer_id=customer_id)
+        AccountDocuments.objects.get(customer_id=customer_id)
         acc_doc_state = True
 
     except AccountDocuments.DoesNotExist:
         pass
 
     except AccountDocuments.MultipleObjectsReturned:
-        customer = CheckAccount.objects.get(customer_id=customer_id)
-        err = f'{customer.firm_full_name} has multiple documents ! This error can be solved via' \
-              f' deleting unnecessary document. Each checking account (customer) has to have only one document !'
-        return render(request, 'error_pages/DeletingDocumentErrorPage.html', context={'error': err})
+        # todo: logging
+        print("Bir hesaba bagli birden çok döküman tespit edildi.")
+        acc_doc_state = True
+
+    # except AccountDocuments.MultipleObjectsReturned:
+    #     customer = CheckAccount.objects.get(customer_id=customer_id)
+    #     err = f'{customer.firm_full_name} has multiple documents ! This error can be solved via' \
+    #           f' deleting unnecessary document. Each checking account (customer) has to have only one document !'
+    #     return render(request, 'error_pages/DeletingDocumentErrorPage.html', context={'error': err})
 
     # related partnership documents checking
-    part_doc_state = False
-    try:
-        PartnershipDocuments.objects.get(customer_id=customer_id)
-        part_doc_state = True
-    except PartnershipDocuments.DoesNotExist:
-        pass
-
-    # related Customer Bank Information
-    bank_state = False
-    try:
-        CustomerBank.objects.get(customer_id=customer_id)
-        bank_state = True
-
-    except CustomerBank.DoesNotExist:
-        pass
+    # part_doc_state = False
+    # try:
+    #     PartnershipDocuments.objects.get(customer_id=customer_id)
+    #     part_doc_state = True
+    #
+    # except PartnershipDocuments.DoesNotExist:
+    #     pass
+    #
+    # except PartnershipDocuments.MultipleObjectsReturned:
+    #     print("Bir hesaba bagli birden çok döküman tespit edildi.")
+    #     part_doc_state = True
+    #
+    # # related Customer Bank Information
+    # bank_state = False
+    # try:
+    #     CustomerBank.objects.get(customer_id=customer_id)
+    #     bank_state = True
+    #
+    # except CustomerBank.DoesNotExist:
+    #     pass
+    #
+    # except CustomerBank.MultipleObjectsReturned:
+    #     bank_state = True
 
     if request.method == 'GET':
         context = {'checkaccount': check_account, 'state': state, 'acc_doc_state': acc_doc_state,
-                   'part_doc_state': part_doc_state, 'bank_state': bank_state}
+                   'part_doc_state': True, 'bank_state': True  # todo: bi ara incele. Diger dökümanları da nereden
+                   # alacağımıza bakmamız lazım
+                   }
 
         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
@@ -141,11 +156,12 @@ class CheckAccountFormCreateView(CreateView):
     template_name = 'checkaccount/checkaccount_form.html'
     model = CheckAccount
 
+    # todo: customer_id sütununu doldurmanı falan istiyor, buralar düzeltilmeli.
     fields = '__all__'
 
     def get_success_url(self):
         # todo: true meselesi askıda?
-        return f'/checkaccount/get/{self.object.related_customer}'
+        return f'/checkaccount/get/{self.object.customer_id}'
 
     def form_valid(self, form):
         print("form took")
@@ -218,8 +234,11 @@ class UploadAccountDocumentsView(CreateView):
         return context
 
     def form_valid(self, form):
-        form.instance.related_customer = CheckAccount.objects.get(customer_id=self.kwargs.get('customer_id'))
-        self.object = form.save()
+        account = CheckAccount.objects.get(customer_id=self.kwargs.get('customer_id'))
+        form.instance.related_customer = account
+        form.instance.customer_id = account
+
+        form.save()
         return HttpResponseRedirect(self.get_success_url())
 
 

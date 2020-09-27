@@ -111,6 +111,11 @@ class SysPersonnel(models.Model):
         return self.username
 
 
+class CheckAccountManager(models.Manager):
+    def create(self, *args, **kwargs):
+        return super(CheckAccountManager, self).create(*args, **kwargs)
+
+
 class CheckAccount(models.Model):
     firm_type = models.CharField(max_length=50, choices=CariHesapSpecs.get_firm_type_choices(),
                                  verbose_name='FIRM TYPE', help_text='Business type of the firm',
@@ -195,7 +200,7 @@ class AccountDocuments(models.Model):
     attachment_id = models.AutoField(primary_key=True)
 
     # if customer was deleted?
-    customer_id = models.ForeignKey(CheckAccount, on_delete=models.CASCADE)
+    customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
     attachment_title = models.CharField(unique=False, null=True, blank=True, max_length=50, db_column='TITLE')
     description = models.CharField(unique=False, null=True, blank=True, max_length=250, db_column='DESCRIPTION')
 
@@ -267,6 +272,7 @@ class RelatedBlackList(models.Model):
     id = models.AutoField(primary_key=True, db_column='ID')
     customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
+
     # todo: and many fields
 
     class Meta:
@@ -280,7 +286,6 @@ class RelatedBlackList(models.Model):
 
 
 class SystemBlackList(RelatedBlackList):
-
     class Meta:
         db_table = 'SYS_BLACK_LIST'
 
@@ -289,7 +294,6 @@ class SystemBlackList(RelatedBlackList):
 
 
 class TaxDebtList(RelatedBlackList):
-
     class Meta:
         db_table = 'TAX_DEBTS'
 
@@ -298,7 +302,6 @@ class TaxDebtList(RelatedBlackList):
 
 
 class SGKDebtList(RelatedBlackList):
-
     taxpayer_number = models.CharField(unique=True, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
                                                               'Vergi No',
                                        db_column='TAXPAYER_NUMBER', max_length=15)
@@ -314,7 +317,6 @@ class SGKDebtList(RelatedBlackList):
 
 
 class KonkordatoList(RelatedBlackList):
-
     class Meta:
         db_table = 'KONKORDATO_LIST'
 
