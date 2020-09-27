@@ -27,7 +27,7 @@ urlpatterns = [
                                                                template_name='risk_analysis/sgk_data_retrieve.html')),
 
     path('retrieve/taxdata', views.RetrieveTaxFormView.as_view(filterset_class=TaxDataFilter,
-                                                               template_name='risk_analysis/sgk_data_retrieve.html')),
+                                                               template_name='risk_analysis/tax_data_retrieve.html')),
 
     path('points/', views.RetrieveRiskPointsFormView.as_view(filterset_class=RiskPointsFilter,
                                                              template_name='risk_analysis/risk_points_retrieve.html')),

@@ -205,9 +205,9 @@ class TaxDebtList(models.Model):
     real_operating_income = models.CharField(unique=False,
                                              help_text='Esas Faaliyet Konusu',
                                              db_column='REAL_OPERATING_INCOME', max_length=500)
-    dept_amount = models.BigIntegerField(unique=False,
-                                         help_text='Borç Miktarı',
-                                         db_column='DEPT_AMOUNT')
+    dept_amount = models.FloatField(unique=False,
+                                    help_text='Borç Miktarı',
+                                    db_column='DEPT_AMOUNT')
 
     class Meta:
         db_table = 'TAX_DEBTS'

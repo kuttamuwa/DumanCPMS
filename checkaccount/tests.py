@@ -126,7 +126,7 @@ class SectorTest(TestCase):
 
 
 class CheckAccountTest(TestCase, ImportFromExcelfile):
-    excel_path = r"C:\Users\LENOVO\PycharmProjects\DumanCPMS\excels"
+    excel_path = r"C:\Users\LENOVO\PycharmProjects\DumanCPMS\excels\CheckAccountsTest.xls"
 
     @staticmethod
     def test_create_one_account():

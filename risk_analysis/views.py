@@ -17,8 +17,8 @@ from django_filters.views import FilterView
 from DumanCPMS.settings import MEDIA_ROOT
 from checkaccount.models import CheckAccount
 from risk_analysis.algorithms import AnalyzingRiskDataSet
-from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm
-from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel
+from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, TAXImportDataForm
+from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList
 
 
 def risk_main_page(request):
@@ -288,7 +288,7 @@ class RetrieveSGKFormView(FilterView):
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class UploadTaxData(FormView):
-    form_class = SGKImportDataForm
+    form_class = TAXImportDataForm
     template_name = 'risk_analysis/create_page/import_tax_dataset_form.html'
     error_template = 'risk_analysis/error_pages/general_error.html'
     succeeded_template = 'risk_analysis/succeeded_page_tax.html'
@@ -313,11 +313,42 @@ class UploadTaxData(FormView):
                       context={'error': message})
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, context={'forms': SGKImportDataForm})
+        return render(request, self.template_name, context={'forms': TAXImportDataForm})
 
     def post(self, request, *args, **kwargs):
-        data = request.FILES['sgkDataFile']
+        #  todo: şunu taxDataFile yap bi ara
+        data = request.FILES['taxDataFile']
         p = default_storage.save(data.name, ContentFile(data.read()))
+
+        p = os.path.join(MEDIA_ROOT, p)
+        df = pd.read_excel(p)
+
+        error_rows = []
+
+        for index, row in df.iterrows():
+            tax_department = self.__nan_to_none(row.get('Vergi Dairesi'))
+            taxpayer_number = self.__nan_to_none(row.get('Vergi Kimlik Numarası'))
+            dept_title = self.__nan_to_none(row.get('Borçlunun Adı Soyadı/Unvanı'))
+            real_operating_income = self.__nan_to_none(row.get('Esas Faaliyet Konusu'))
+            dept_amount = self.__nan_to_none(row.get('Borç Miktarı'))
+
+            # todo: buralar standartlastirilmali -> davut abi.
+            dept_amount = float(dept_amount.replace('.', '').replace(',', '.'))
+
+            tax_model_object = TaxDebtList(
+                tax_department=tax_department,
+                taxpayer_number=taxpayer_number,
+                dept_title=dept_title,
+                real_operating_income=real_operating_income,
+                dept_amount=dept_amount
+            )
+            try:
+                tax_model_object.save()
+            except Exception as err:
+                error_rows.append({'row': row, 'error description': err})
+
+        return render(request, template_name=self.succeeded_template,
+                      context={'errors': error_rows})
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
