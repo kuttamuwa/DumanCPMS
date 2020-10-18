@@ -11,18 +11,23 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, CreateView
 from django_filters.views import FilterView
 
 from DumanCPMS.settings import MEDIA_ROOT
 from checkaccount.models import CheckAccount
 from risk_analysis.algorithms import AnalyzingRiskDataSet
-from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, TAXImportDataForm
-from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList
+from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, \
+    TAXImportDataForm, DomainCreateForm, SubtypeCreateForm
+from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList, DomainPts
 
 
 def risk_main_page(request):
     return render(request, 'risk_analysis/risk_main_page.html')
+
+
+def generic_thanks(request):
+    return render(request, 'risk_analysis/generic_thanks.html')
 
 
 def not_in_riskanalysis_group(user):
@@ -316,7 +321,6 @@ class UploadTaxData(FormView):
         return render(request, self.template_name, context={'forms': TAXImportDataForm})
 
     def post(self, request, *args, **kwargs):
-        #  todo: şunu taxDataFile yap bi ara
         data = request.FILES['taxDataFile']
         p = default_storage.save(data.name, ContentFile(data.read()))
 
@@ -355,6 +359,35 @@ class UploadTaxData(FormView):
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class RetrieveTaxFormView(FilterView):
     pass
+
+
+class CreateDomainView(FormView):
+    template_name = 'risk_analysis/environs/create_domain.html'
+    form_class = DomainCreateForm
+    success_url = '/thanks/'
+
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        return super().form_valid(form)
+
+
+# @method_decorator(login_required(login_url='/login'), name='dispatch')
+# @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class RetrieveDomainFormView(FilterView):
+    pass
+
+
+class CreateSubtypeView(FormView):
+    template_name = 'risk_analysis/environs/create_subtype.html'
+    form_class = SubtypeCreateForm
+    success_url = '/thanks/'
+
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        form.send_email()
+        return super().form_valid(form)
 
 
 class BaseWarnings(ABC):

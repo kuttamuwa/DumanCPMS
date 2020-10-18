@@ -16,7 +16,7 @@ from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
 from checkaccount.models import CheckAccount, AccountDocuments, RelatedBlackList, \
     SystemBlackList, KonkordatoList
 from checkaccount.serializers import CheckAccountSerializer
-from risk_analysis.models import SGKDebtListModel
+from risk_analysis.models import SGKDebtListModel, TaxDebtList
 
 
 def main_page(request):

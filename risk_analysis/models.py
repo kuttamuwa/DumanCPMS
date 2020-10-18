@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from checkaccount.models import CheckAccount, RelatedBlackList
@@ -85,65 +86,103 @@ class DataSetManager(models.Manager):
         return super(DataSetManager, self).create(*args, **kwargs)
 
 
-class DataSetModel(models.Model):
+class BaseModel(models.Model):
+    objects = models.Manager
+
+    data_id = models.AutoField(primary_key=True)
+
+    created_date = models.DateTimeField(auto_now_add=True, db_column='CREATED_DATE',
+                                        name='Created Date')
+
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                   on_delete=models.SET_NULL, name='Created by')
+    # edited_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+
+
+class DataSetModel(BaseModel):
     objects = DataSetManager
 
-    related_customer = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
+    related_customer = models.ForeignKey(CheckAccount, on_delete=models.PROTECT, verbose_name='İlişkili Müşteri')
     internal_customer_id = models.IntegerField(db_column='INTERNAL_CUSTOMER_ID', help_text='İç Müşteri Numarası',
-                                               null=False)
-    data_id = models.AutoField(primary_key=True)
-    limit = models.PositiveIntegerField(db_column='LIMIT', null=False)  # 500 0000 vs
+                                               null=False, verbose_name='İç Müşteri No')
+
+    limit = models.PositiveIntegerField(db_column='LIMIT', null=False, verbose_name='Limit')  # 500 0000 vs
     warrant_state = models.BooleanField(db_column='WARRANT_STATE', help_text='teminat durumu',
-                                        null=True, default=False)  # var yok
+                                        null=True, default=False, verbose_name='Teminat Durumu')  # var yok
     warrant_amount = models.PositiveIntegerField(db_column='WARRANT_AMOUNT', help_text='teminat tutarı',
-                                                 null=True)  # 500 000 vs
-    maturity = models.IntegerField(db_column='MATURITY', help_text='vade günü', null=True)  # gun
+                                                 null=True, verbose_name='Teminat Tutarı')  # 500 000 vs
+    maturity = models.IntegerField(db_column='MATURITY', help_text='vade günü', null=True, verbose_name='Vade Günü')  # gun
     payment_frequency = models.PositiveSmallIntegerField(db_column='PAYMENT_FREQ',
-                                                         help_text='odeme sikligi', null=True)  # 10, 5 gun
+                                                         help_text='odeme sikligi', null=True,
+                                                         verbose_name='Ödeme Sıklığı')  # 10, 5 gun
     maturity_exceed_avg = models.IntegerField(db_column='MATURITY_EXCEED_AVG',
                                               help_text='ortalama gecikme gun bakiyesi',
+                                              verbose_name='Ortalama Gecikme Gün Bakiyesi',
                                               null=True)  # gun
     avg_order_amount_last_twelve_months = models.FloatField(db_column='AVG_ORDER_AMOUNT_12',
                                                             help_text='Son 12 ay ortalama sipariş tutarı',
-                                                            null=True)
+                                                            null=True, verbose_name='Son 12 Ay Ortalama Sipariş Tutarı')
     avg_order_amount_last_three_months = models.FloatField(db_column='AVG_ORDER_AMOUNT_3',
                                                            help_text='Son 3 ay ortalama sipariş tutarı',
-                                                           null=True)
+                                                           null=True, verbose_name='Son 3 Ay Ortalama Sipariş Tutarı')
     last_3_months_aberration = models.PositiveSmallIntegerField(db_column='ABERRATION',
                                                                 help_text="Son 3 ay ile son "
                                                                           "11 aylık satış ortalamasından sapma",
-                                                                null=True)
+                                                                null=True, verbose_name='Son 3 ay ile son 11 aylık '
+                                                                                        'Satış ortalamasından sapma')
+    # todo: üstteki hesaplanır:
+    # todo: son 3 ay ile son 11 aylik satış ortalamasından sapma -> ((son 3 ay - son 12 ay) / son 12 ay) * 100
+
     last_month_payback_perc = models.PositiveSmallIntegerField(db_column='PAYBACK_PERC_LAST',
                                                                help_text='Son ay iade yuzdesi',
-                                                               null=True)
+                                                               null=True, verbose_name='Son ay iade yüzdesi')
     last_twelve_months_payback_perc = models.FloatField(db_column='PAYBACK_PERC_12',
                                                         help_text='Son 12 ay iade yüzdesi',
-                                                        null=True)
-    avg_last_three_months_payback_perc = models.PositiveSmallIntegerField(db_column='AVG_PAYBACK_PERC_3',
-                                                                          help_text='Son 3 ay iade yuzdesi', null=True)
+                                                        null=True, verbose_name='Son 12 ay iade yüzdesi')
     last_three_months_payback_comparison = models.SmallIntegerField(db_column='LAST_THREE_PAYBACK_COMP',
                                                                     help_text='Son 3 ay ile son 11 '
                                                                               'aylık iade %si karşılaştırması',
-                                                                    null=True)
-    avg_delay_time = models.SmallIntegerField(db_column='AVG_DELAY_TIME', help_text='Ort gecikme gun sayisi', null=True)
+                                                                    null=True, verbose_name='Son 3 ay ile son 11 '
+                                                                                            'aylık iade yüzdesi '
+                                                                                            'karşılaştırması')
+
+    avg_last_three_months_payback_perc = models.PositiveSmallIntegerField(db_column='AVG_PAYBACK_PERC_3',
+                                                                          help_text='Son 3 ay iade yuzdesi', null=True,
+                                                                          verbose_name='Son 3 ay iade yüzdesi')
+
+    # todo: last_three_months_payback_comparison = ((son 3 ay - son 12 ay) / son 12 ay) * 100
+
+    avg_delay_time = models.SmallIntegerField(db_column='AVG_DELAY_TIME', help_text='Ort gecikme gun sayisi', null=True,
+                                              verbose_name='Ortalama gecikme gün sayısı')
     avg_delay_balance = models.PositiveIntegerField(db_column='AVG_DELAY_BALANCE',
-                                                    help_text='Ortalama gecikme gun bakiyesi', null=True)
+                                                    help_text='Ortalama gecikme gun bakiyesi', null=True,
+                                                    verbose_name='Ortalama gecikme gün bakiyesi')
     # calculated -> 30 / devir hizi
-    period_day = models.PositiveIntegerField(db_column='PERIOD_DAY', help_text='Devir gunu', null=True)
+    period_day = models.PositiveIntegerField(db_column='PERIOD_DAY', help_text='Devir gunu', null=True,
+                                             verbose_name='Devir günü')
     # calculated -> Musterinin aylik siparis hacmi / Musterinin aylik ortalama bakiyesi
-    period_velocity = models.FloatField(db_column='PERIOD_VEL', help_text='Devir hizi', null=True)
+    period_velocity = models.FloatField(db_column='PERIOD_VEL', help_text='Devir hizi', null=True,
+                                        verbose_name='Devir hızı')
     risk_excluded_warrant_balance = models.IntegerField(
         db_column='RISK_DIF_WARRANT_BALANCE',
-        help_text='Teminat harici bakiye - risk', null=True)  # + - buyuk sayi calculated
-    balance = models.PositiveIntegerField(db_column='BALANCE', help_text='Bakiye', null=True)
-    profit = models.PositiveIntegerField(db_column='PROFIT', help_text='Kar', null=True)
-    profit_percent = models.FloatField(db_column='PERC_PROFIT', help_text='Kar yuzdesi', null=True)
+        help_text='Teminat harici bakiye - risk', null=True, verbose_name='Teminat harici bakiye - risk')
+    # + - buyuk sayi calculated
+
+    # bakiye verisi yerine çek dahil toplam risk gelecek.
+    balance = models.PositiveIntegerField(db_column='BALANCE', help_text='Bakiye', null=True, verbose_name='Bakiye')
+    profit = models.PositiveIntegerField(db_column='PROFIT', help_text='Kar', null=True, verbose_name='Kar')
+    profit_percent = models.FloatField(db_column='PERC_PROFIT', help_text='Kar yuzdesi', null=True,
+                                       verbose_name='Kar yüzdesi')
     total_risk_including_cheque = models.IntegerField(db_column='TOTAL_RISK_CHEQUE', help_text='Çek dahil toplam risk',
-                                                      null=True)
+                                                      null=True, verbose_name='Çek dahil toplam risk')
     last_12_months_total_endorsement = models.PositiveIntegerField(db_column='LAST_12_TOTAL_ENDORSEMENT',
                                                                    help_text='Son 12 aylık toplam ciro',
-                                                                   null=True)
-    created = models.DateTimeField(auto_now_add=True)
+                                                                   null=True, verbose_name='Son 12 aylık toplam ciro')
+
+    @classmethod
+    def get_domain_list(cls):
+        return [(i.name, i.verbose_name) for i in cls._meta.fields if i not in BaseModel._meta.fields
+                and i.verbose_name not in ('basemodel ptr', )]
 
     def __str__(self):
         return CheckAccount.objects.get(customer_id=self.related_customer)
@@ -152,8 +191,7 @@ class DataSetModel(models.Model):
         db_table = 'RISK_DATA'
 
 
-class RiskDataSetPoints(models.Model):
-    id = models.AutoField(primary_key=True)
+class RiskDataSetPoints(BaseModel):
     customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
     internal_customer_id = models.IntegerField(db_column='IC_MUSTERI_ID', null=False)
     son_12ay_ortalama_sapma_pts = models.PositiveSmallIntegerField(db_column='SON_SENE_ORT_SAPMA_PTS', null=True)
@@ -173,9 +211,7 @@ class RiskDataSetPoints(models.Model):
         return f'POINTS OF {self.internal_customer_id}'
 
 
-class SGKDebtListModel(models.Model):
-    id = models.AutoField(primary_key=True, db_column='ID')
-    created = models.DateTimeField(auto_now_add=True)
+class SGKDebtListModel(BaseModel):
     taxpayer_number = models.CharField(unique=False, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
                                                                'Vergi No',
                                        db_column='TAXPAYER_NUMBER', max_length=15)
@@ -190,9 +226,7 @@ class SGKDebtListModel(models.Model):
         return f"SGK Debts for {self.firm_title}"
 
 
-class TaxDebtList(models.Model):
-    id = models.AutoField(primary_key=True, db_column='ID')
-    created = models.DateTimeField(auto_now_add=True)
+class TaxDebtList(BaseModel):
     tax_department = models.CharField(max_length=200, verbose_name='TAX DEPARTMENT',
                                       db_column='TAX_DEPT', unique=False,
                                       help_text='Vergi Departmanı')
@@ -214,3 +248,41 @@ class TaxDebtList(models.Model):
 
     def __str__(self):
         return f"Tax Debts for  {self.dept_title}"
+
+
+# Puantage #
+class DomainManager(models.Manager):
+    pass
+
+
+class SubtypeManager(models.Manager):
+    pass
+
+
+class DomainPts(BaseModel):
+    objects = DomainManager
+
+    domain_names = models.CharField(db_column='DOMAIN', choices=DataSetModel.get_domain_list(), max_length=100)
+    point = models.FloatField(max_length=100.0, default=0.0, db_column='POINT',
+                              help_text='Set your domain point of your variable'  # , validators=[validate_summary]
+                              )
+
+    def __str__(self):
+        return 'Domain Points'
+
+
+class SubtypePoints(BaseModel):
+    objects = SubtypeManager
+
+    domain_name = models.ForeignKey(DomainPts, on_delete=models.PROTECT, related_name='domains')
+
+    pts = models.FloatField(max_length=100, db_column='PTS', help_text='Point of specified intervals '
+                                                                       'of your subtype related Domain')
+    min_interval = models.FloatField(db_column='MIN_INTERVAL', help_text='Minimum interval')
+
+    max_interval = models.FloatField(db_column='MAX_INTERVAL', help_text='Maximum interval')
+
+    def __str__(self):
+        return f"Points of {self.domain_name} : \n" \
+               f"Minimum interval: {self.min_interval} \n" \
+               f"Maximum interval: {self.max_interval}"

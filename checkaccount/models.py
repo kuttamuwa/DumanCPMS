@@ -127,23 +127,26 @@ class CheckAccount(models.Model):
                                        db_column='TAXPAYER_NUMBER', max_length=15)
 
     # validators cannot be used
-    birthplace = models.ForeignKey(Cities, on_delete=models.CASCADE, related_name='birthplace', null=True, blank=True)
+    birthplace = models.ForeignKey(Cities, on_delete=models.CASCADE, related_name='birthplace', null=True, blank=True,
+                                   verbose_name='Doğum Yeri')
     tax_department = models.CharField(max_length=100, verbose_name='TAX DEPARTMENT', db_column='TAX_DEPARTMENT')
     firm_address = models.CharField(max_length=200, verbose_name='FIRM ADDRESS', db_column='FIRM_ADDRESS')
 
     firm_key_contact_personnel = models.CharField(max_length=70,
                                                   verbose_name=CariHesapSpecs.get_key_contact_personnel(),
                                                   db_column='FIRM_KEY_PERSON')
-    sector = models.ForeignKey(Sectors, on_delete=models.SET_NULL, null=True)
+    sector = models.ForeignKey(Sectors, on_delete=models.SET_NULL, null=True, verbose_name='Sektör')
 
-    city = models.ForeignKey(Cities, on_delete=models.SET_NULL, null=True)  # if city | district goes?
-    district = models.ForeignKey(Districts, on_delete=models.SET_NULL, null=True)
+    city = models.ForeignKey(Cities, on_delete=models.SET_NULL, null=True, verbose_name='Şehir')  # if city | district goes?
+    district = models.ForeignKey(Districts, on_delete=models.SET_NULL, null=True, verbose_name='İlçe')
 
-    phone_number = models.CharField(max_length=15, unique=True, db_column='PHONE_NUMBER')
-    fax = models.CharField(max_length=15, unique=True, db_column='FAX_NUMBER')
-    web_url = models.URLField(db_column='WEB_URL')
-    email_addr = models.EmailField(unique=True, db_column='EMAIL_ADDR')
-    representative_person = models.ForeignKey(SysPersonnel, on_delete=models.PROTECT)  # there is still job to do?
+    phone_number = models.CharField(max_length=15, unique=True, db_column='PHONE_NUMBER',
+                                    verbose_name='Telefon numarası')
+    fax = models.CharField(max_length=15, unique=True, db_column='FAX_NUMBER', verbose_name='Fax Numarası')
+    web_url = models.URLField(db_column='WEB_URL', verbose_name='Web adresi')
+    email_addr = models.EmailField(unique=True, db_column='EMAIL_ADDR', verbose_name='Email adresi')
+    representative_person = models.ForeignKey(SysPersonnel, on_delete=models.PROTECT,
+                                              verbose_name='Temsilci')  # there is still job to do?
 
     # object id
     customer_id = models.AutoField(primary_key=True)

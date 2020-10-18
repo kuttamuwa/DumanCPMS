@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <br>
+    <div class="row">
+        <div class="col">
+            <div class="card card-body">
+                <form method="get">
+                    {% csrf_token %}
+                    {{ filter.form.as_table }}
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    <br>
+
+    {% for pts in filter.qs %}
+
+        <div class="row">
+            <div class="col-md">
+                <div class="card card-body">
+                    <table class="table table-sm table-hover">
+                        <tr >
+
+                            <th> Müşteri Sıra No</th>
+                            <th>Son 12 ay ortalama sapma puanı</th>
+                            <th>Kâr Puanı</th>
+                            <th>İade Puanı</th>
+                            <th>Ortalama gecikme puanı department</th>
+                            <th>Ortalama gecikme gün bakiyesi puanı</th>
+                            <th>Devir günü puanı</th>
+                            <th>Teminatın limit riskini karşılama puanı</th>
+                        </tr>
+
+                        <tr>
+                            <td>{{ pts.internal_customer_id }}</td>
+                            <td>{{ pts.son_12ay_ortalama_sapma_pts }}</td>
+                            <td>{{ pts.kar_pts }}</td>
+                            <td>{{ pts.iade_pts }}</td>
+                            <td>{{ pts.ort_gecikme_pts }}</td>
+                            <td>{{ pts.ort_gecikme_gun_bakiyesi_pts }}</td>
+                            <td>{{ pts.devir_gunu_pts }}</td>
+                            <td>{{ pts.teminatin_limit_riskini_karsilamasi_pts }}</td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}

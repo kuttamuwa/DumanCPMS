@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div>
+        <form method="post" enctype="multipart/form-data" action="">
+            {% csrf_token %}
+            {{ forms|crispy}}
+            <button type="submit"  class="btn btn-success">Import Risk Analysis Data </button>
+        </form>
+    </div>
+{% endblock %}

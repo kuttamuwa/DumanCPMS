@@ -1,5 +1,5 @@
 from checkaccount.models import CheckAccount
-from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList
+from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList, DomainPts, SubtypePoints
 from crispy_forms.tests.forms import forms
 
 
@@ -50,3 +50,20 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
     class Meta:
         model = DataSetModel
         fields = ()
+
+
+class DomainCreateForm(forms.ModelForm):
+    domain = forms.ChoiceField(choices=DataSetModel.get_domain_list())
+    pts = forms.FloatField(max_value=100.0)
+
+    class Meta:
+        model = DomainPts
+        fields = ()
+
+
+class SubtypeCreateForm(forms.ModelForm):
+    pass
+
+    class Meta:
+        model = SubtypePoints
+        fields = '__all__'

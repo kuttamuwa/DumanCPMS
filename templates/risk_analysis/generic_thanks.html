@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="alert alert-dismissible alert-success">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Well done!</strong>
+
+    </div>
+
+    {% if errors %}
+        <strong> By the way, some errors occured meanwhile : </strong>
+        {% for err in errors %}
+            <div class="alert alert-dismissible alert-danger">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong> {{ err }} </strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

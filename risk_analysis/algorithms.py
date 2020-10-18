@@ -2,6 +2,11 @@ from risk_analysis.models import DataSetModel, RiskDataSetPoints, DataSetManager
 import numpy as np
 import pandas as pd
 
+"""
+# todo : Puanlamaların yönetileceği bir admin paneli hazırlanacak.
+
+"""
+
 
 class ControlRiskDataSet:
     def __init__(self, risk_model_object):
@@ -72,20 +77,32 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         %0-20 azalış	3
         %20-50 azalış	5
         %50-75 azalış	10
-
         """
-        pts_dict = {(0, 0.2): 3,
-                    (0.2, 0.5): 5,
-                    (0.5, 0.75): 10}
+        pts_dict = {(0, -20): 3,
+                    (-20, -50): 5,
+                    (-50, -75): 10,
+                    (-75, -100): 15}
+
         # todo: Veride son 12 aylik satis ortalamasindan sapma yazmiyor. Burayı nasıl bulacağız ? -> DAVUT ABIYE.
         # TODO: Biz son 3 aylık sapmayı kullanarak hesapladık, doğru mu?
 
-        last_3_months_aberration = self.risk_model_object.last_3_months_aberration
+        # last_3_months_aberration = self.risk_model_object.last_3_months_aberration
+
+        avg_order_last_3_months = self.risk_model_object.avg_order_amount_last_three_months
+        avg_order_last_12_months = self.risk_model_object.avg_order_amount_last_twelve_months
+
+        last_3_months_aberration = ((
+                                                avg_order_last_3_months - avg_order_last_12_months) / avg_order_last_12_months) * 100
         pts = None
         if not pd.isna(last_3_months_aberration):
-            for t in pts_dict.items():
-                if t[0][0] < last_3_months_aberration < t[0][1]:
-                    pts = t[1]
+            last_3_months_aberration = float(last_3_months_aberration)
+            if last_3_months_aberration >= 0:
+                pts = 0
+
+            else:
+                for t in pts_dict.items():
+                    if t[0][0] < last_3_months_aberration < t[0][1]:
+                        pts = t[1]
 
             if pts is not None:
                 self.risk_point_object.son_12ay_ortalama_sapma_pts = pts
@@ -112,7 +129,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             (15, 20): 5,
             (20, 100): 3
         }
-        kar = self.risk_model_object.profit_percent
+        kar = round(self.risk_model_object.profit_percent * 100)
         pts = None
 
         if not pd.isna(kar):
@@ -164,8 +181,9 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
 
         """
         pts_dict = {
-            (10, 20): 5,
-            (20, 30): 10,
+            (0, 10): 5,
+            (10, 20): 10,
+            (20, 30): 15,
             (30, 999999): 15
         }
         pts = None
@@ -193,7 +211,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         pts_dict = {
             (0, 50000): 5,
             (50000, 10000): 8,
-            (10000, np.inf): 10
+            (100000, np.inf): 10
         }
         pts = None
 
@@ -223,9 +241,9 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
 
         """
         pts_dict = {
-            (0, 15): 5,
-            (15, 30): 10,
-            (30, np.inf): 15
+            (0, 90): 5,
+            (90, 150): 10,
+            (150, np.inf): 15
         }
         pts = None
 
@@ -238,7 +256,8 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             if t[0][0] < devir_gunu <= t[0][1]:
                 pts = t[1]
 
-        self.risk_point_object.devir_gunu_pts = pts
+        if pts is not None:
+            self.risk_point_object.devir_gunu_pts = pts
 
     def detect_teminat_limit_riskini_karsilama_seviyesi(self):
         """
@@ -256,24 +275,35 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         }
         pts = None
 
-        # todo: ??? Ya burası davut abinin excel'i ile tutmuyor. Teminat limit riskini karsilama seviyesi
-        # todo : Acaba teminat bakiyesi - risk mi demek?
+        if self.risk_model_object.warrant_state is False:
+            print("Teminat durumu olmadığı için limit risk karşılama seviyesi puanı yapılmamıştır.")
 
-        teminat_limit_risk_kars_seviyesi = self.risk_model_object.risk_excluded_warrant_balance
-        if teminat_limit_risk_kars_seviyesi is None:
-            print("Teminat limit riskini karsilama seviyesi ")
+        else:
+            teminat_limit_risk_kars_seviyesi = (
+                                                           self.risk_model_object.warrant_amount / self.risk_model_object.limit) * 100
 
-        for t in pts_dict.items():
-            if t[0][0] < teminat_limit_risk_kars_seviyesi <= t[0][1]:
-                pts = t[1]
+            if teminat_limit_risk_kars_seviyesi is None:
+                print("Teminat limit riskini karsilama seviyesi ")
 
-            if pts is None:
-                print("Teminat limit riskini karşılama seviyesi için puanlama yapılamamıştır")
+            for t in pts_dict.items():
+                if t[0][0] < teminat_limit_risk_kars_seviyesi <= t[0][1]:
+                    pts = t[1]
 
-            self.risk_point_object.teminatin_limit_riskini_karsilamasi_pts = pts
+                if pts is None:
+                    print("Teminat limit riskini karşılama seviyesi için puanlama yapılamamıştır")
+
+                self.risk_point_object.teminatin_limit_riskini_karsilamasi_pts = pts
 
     def bulk_to_dataframe(self):
         return self.analyzed_data
+
+    def total_customer_point(self):
+        toplam = self.risk_point_object.ort_gecikme_gun_bakiyesi_pts + self.risk_point_object.ort_gecikme_pts + \
+                 self.risk_point_object.teminatin_limit_riskini_karsilamasi_pts + \
+                 self.risk_point_object.son_12ay_ortalama_sapma_pts + self.risk_point_object.devir_gunu_pts + \
+                 self.risk_point_object.iade_pts + self.risk_point_object.kar_pts
+
+        return toplam
 
     def analyze_all(self):
         # todo: logging
@@ -288,6 +318,11 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             self.analyze_ort_gecikme_gun_bakiyesi()
             self.analyze_devir_gunu()
             self.detect_teminat_limit_riskini_karsilama_seviyesi()
+
+            try:
+                toplam_pts = self.total_customer_point()
+            except Exception:
+                pass
 
             return self.analyzed_data
 

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from risk_analysis import views
-from risk_analysis.filters import RiskAnalysisFilter, RiskPointsFilter, SGKDataFilter, TaxDataFilter
+from risk_analysis.filters import RiskAnalysisFilter, RiskPointsFilter, SGKDataFilter, TaxDataFilter, DomainPointsFilter
 
 urlpatterns = [
     path('create/', views.creation_type_main_page, name='risk_analysis-create-page'),
@@ -32,8 +32,13 @@ urlpatterns = [
     path('points/', views.RetrieveRiskPointsFormView.as_view(filterset_class=RiskPointsFilter,
                                                              template_name='risk_analysis/risk_points_retrieve.html')),
 
+    path('managepts/', views.RetrieveDomainFormView.as_view(filterset_class=DomainPointsFilter,
+                                                            template_name='risk_analysis/environs/create_domain.html')),
+
     path('', views.risk_main_page),
     path('get/<int:customer_id>/', views.get_risk_by_customer_id,
          name='get-risk-data'),
+
+    path('thanks/', views.generic_thanks),
 
 ]

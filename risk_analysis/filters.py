@@ -2,7 +2,7 @@ import django_filters
 from django_filters import FilterSet
 
 from checkaccount.models import CheckAccount
-from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList
+from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList, DomainPts
 
 
 class RiskAnalysisFilter(FilterSet):
@@ -21,6 +21,15 @@ class RiskAnalysisFilter(FilterSet):
     #     fields = (
     #         'firm_type', 'firm_full_name', 'taxpayer_number', 'firm_key_contact_personnel', 'representative_person',
     #         'customer_id')
+
+
+class DomainPointsFilter(FilterSet):
+    domain = django_filters.ChoiceFilter(choices=DataSetModel.get_domain_list())
+    # pts = django_filters.(max_value=100.0)
+
+    class Meta:
+        model = DomainPts
+        fields = ()
 
 
 class RiskPointsFilter(FilterSet):
