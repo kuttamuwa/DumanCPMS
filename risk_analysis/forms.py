@@ -1,6 +1,9 @@
+from django.forms import inlineformset_factory
+
 from checkaccount.models import CheckAccount
-from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList, DomainPts, SubtypePoints
+from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList, Subtypes, Domains
 from crispy_forms.tests.forms import forms
+from django import forms as djforms
 
 
 class SGKImportDataForm(forms.ModelForm):
@@ -52,18 +55,24 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
         fields = ()
 
 
-class DomainCreateForm(forms.ModelForm):
-    domain = forms.ChoiceField(choices=DataSetModel.get_domain_list())
-    pts = forms.FloatField(max_value=100.0)
+# DomainCreateFormInlineSet = inlineformset_factory(Domains, DomainPts, form=DomainCreateForm, extra=1,
+#                                                   can_delete=True, fk_name='domain_name')
 
+class DomainCreateForm(djforms.ModelForm):
     class Meta:
-        model = DomainPts
-        fields = ()
+        model = Domains
+        fields = '__all__'
+
+    def is_valid(self):
+        # do something
+        super(DomainCreateForm, self).is_valid()
 
 
 class SubtypeCreateForm(forms.ModelForm):
-    pass
-
     class Meta:
-        model = SubtypePoints
+        model = Subtypes
         fields = '__all__'
+
+    def is_valid(self):
+        # do something
+        super(SubtypeCreateForm, self).is_valid()

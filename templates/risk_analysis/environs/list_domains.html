@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <p> <strong> Please be careful about domain names. These are will be used while importing your data
+     or create new objects in Risk Analysis. </strong></p>
+    <div class="row">
+        <div class="col-md">
+            <div class="card card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th>Domain Name</th>
+                    </tr>
+
+                    <tr>
+                        <td>{{ dataset.name }}</td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # dashboard - dash
-    # 'django_plotly_dash.apps.DjangoPlotlyDashConfig',
 
     # project apps
     'checkaccount',
@@ -51,6 +50,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'rest_framework',
     'crispy_forms',
+
     'django_filters',
 ]
 
@@ -74,7 +74,7 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
-    'http://localhost:8081',
+    'http://localhost:8000',
 )
 INTERNAL_IPS = [
     '127.0.0.1'
@@ -106,7 +106,7 @@ WSGI_APPLICATION = 'DumanCPMS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcpms_dev',
+        'NAME': 'dcpms_de',
         'USER': 'postgres',
         'PASSWORD': 'figo1190',
         'HOST': 'localhost',

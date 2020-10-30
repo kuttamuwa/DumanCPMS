@@ -67,7 +67,7 @@ class DistrictTest(ImportFromShapefile):
         for i in df.iterrows():
             related_c_name = i[1][self.city_name_field]
             d_name = i[1][self.district_name_field]
-            print(f"related city name : {related_c_name}   -   district name : {d_name}")
+            # print(f"related city name : {related_c_name}   -   district name : {d_name}")
             Districts.objects.get_or_create(related_city_name=Cities.objects.get(city_name=related_c_name),
                                             district_name=d_name)
 
@@ -193,13 +193,13 @@ class CheckAccountTest(TestCase, ImportFromExcelfile):
 
             representative_person = SysPersonnel.objects.get_or_create(username=representative_person)
 
-            CheckAccount.objects.create(firm_type=firm_type, firm_full_name=firm_full_name,
-                                        taxpayer_number=taxpayer_number,
-                                        birthplace=birthplace, tax_department=tax_department,
-                                        firm_address=firm_address,
-                                        firm_key_contact_personnel=firm_key_contact_personnel,
-                                        sector=sector, city=city, district=district, phone_number=phone_number,
-                                        fax=fax, web_url=web_url, email_addr=email_addr,
-                                        representative_person=representative_person)
+            CheckAccount.objects.get_or_create(firm_type=firm_type, firm_full_name=firm_full_name,
+                                               taxpayer_number=taxpayer_number,
+                                               birthplace=birthplace, tax_department=tax_department,
+                                               firm_address=firm_address,
+                                               firm_key_contact_personnel=firm_key_contact_personnel,
+                                               sector=sector, city=city, district=district, phone_number=phone_number,
+                                               fax=fax, web_url=web_url, email_addr=email_addr,
+                                               representative_person=representative_person)
 
 # attachment tests

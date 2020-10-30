@@ -42,7 +42,7 @@ urlpatterns = [
     path('logout/', cviews.LogoutUserView.as_view()),
 
     # dashboard
-    path('dashboard/', include('dashboard.urls')),
+    # path('dashboard/', include('dashboard.urls')),
 
 ]
 

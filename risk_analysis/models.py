@@ -96,7 +96,11 @@ class BaseModel(models.Model):
 
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
                                    on_delete=models.SET_NULL, name='Created by')
+
     # edited_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        db_table = 'BASEMODEL'
 
 
 class DataSetModel(BaseModel):
@@ -111,7 +115,8 @@ class DataSetModel(BaseModel):
                                         null=True, default=False, verbose_name='Teminat Durumu')  # var yok
     warrant_amount = models.PositiveIntegerField(db_column='WARRANT_AMOUNT', help_text='teminat tutarı',
                                                  null=True, verbose_name='Teminat Tutarı')  # 500 000 vs
-    maturity = models.IntegerField(db_column='MATURITY', help_text='vade günü', null=True, verbose_name='Vade Günü')  # gun
+    maturity = models.IntegerField(db_column='MATURITY', help_text='vade günü', null=True,
+                                   verbose_name='Vade Günü')  # gun
     payment_frequency = models.PositiveSmallIntegerField(db_column='PAYMENT_FREQ',
                                                          help_text='odeme sikligi', null=True,
                                                          verbose_name='Ödeme Sıklığı')  # 10, 5 gun
@@ -182,7 +187,7 @@ class DataSetModel(BaseModel):
     @classmethod
     def get_domain_list(cls):
         return [(i.name, i.verbose_name) for i in cls._meta.fields if i not in BaseModel._meta.fields
-                and i.verbose_name not in ('basemodel ptr', )]
+                and i.verbose_name not in ('basemodel ptr',)]
 
     def __str__(self):
         return CheckAccount.objects.get(customer_id=self.related_customer)
@@ -251,38 +256,58 @@ class TaxDebtList(BaseModel):
 
 
 # Puantage #
-class DomainManager(models.Manager):
-    pass
-
-
-class SubtypeManager(models.Manager):
-    pass
-
-
-class DomainPts(BaseModel):
-    objects = DomainManager
-
-    domain_names = models.CharField(db_column='DOMAIN', choices=DataSetModel.get_domain_list(), max_length=100)
-    point = models.FloatField(max_length=100.0, default=0.0, db_column='POINT',
+class Domains(BaseModel):
+    name = models.CharField(db_column='DOMAIN', max_length=100)
+    point = models.FloatField(max_length=100, default=0.0, db_column='POINT',
                               help_text='Set your domain point of your variable'  # , validators=[validate_summary]
                               )
 
+    @staticmethod
+    def get_total_points():
+        return sum(i.point for i in Domains.objects.all())
+
+    def save(self, *args, **kwargs):
+        if self.point + self.get_total_points() <= 100:
+            super(Domains, self).save(*args, **kwargs)
+
+        else:
+            raise ValueError("Total of points exceeds 100")
+
     def __str__(self):
-        return 'Domain Points'
+        return f'Domain: {self.name} \n' \
+               f'General Point : {self.point}'
+
+    class Meta:
+        db_table = 'DOMAINS'
 
 
-class SubtypePoints(BaseModel):
-    objects = SubtypeManager
-
-    domain_name = models.ForeignKey(DomainPts, on_delete=models.PROTECT, related_name='domains')
+class Subtypes(BaseModel):
+    domain_name = models.ForeignKey(Domains, on_delete=models.PROTECT, max_length=100)
 
     pts = models.FloatField(max_length=100, db_column='PTS', help_text='Point of specified intervals '
                                                                        'of your subtype related Domain')
-    min_interval = models.FloatField(db_column='MIN_INTERVAL', help_text='Minimum interval')
+    min_interval = models.FloatField(max_length=100, db_column='MIN_INTERVAL', help_text='Minimum interval')
 
-    max_interval = models.FloatField(db_column='MAX_INTERVAL', help_text='Maximum interval')
+    max_interval = models.FloatField(max_length=100, db_column='MAX_INTERVAL', help_text='Maximum interval')
+
+    def save(self, *args, **kwargs):
+        # total point control
+        if not self.pts + self.get_total_points(self.domain_name) <= 100:
+            raise ValueError(f"Point exceeds 100 for this domain : {self.domain_name}")
+
+        # interval control
+        # todo: bunu sonra cozecegim.
+
+        super(Subtypes, self).save()
+
+    @staticmethod
+    def get_total_points(domain):
+        return sum(i.pts for i in Subtypes.objects.filter(domain_name=domain))
 
     def __str__(self):
         return f"Points of {self.domain_name} : \n" \
                f"Minimum interval: {self.min_interval} \n" \
                f"Maximum interval: {self.max_interval}"
+
+    class Meta:
+        db_table = 'SUBTYPES'
