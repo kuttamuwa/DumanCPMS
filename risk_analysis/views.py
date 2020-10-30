@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import transaction
+from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
@@ -374,7 +375,13 @@ class ManageDomainWithSubtypesFormView(View):
     template_name = 'risk_analysis/environs/create_domain.html'
 
     def get(self, request, *args, **kwargs):
-        context = {'domains': Domains().objects().all(), 'subtypes': Subtypes().objects().all()}
+        domain_form = DomainCreateForm
+        subtype_form = SubtypeCreateForm
+
+        context = {'domainformset': formset_factory(domain_form),
+                   'subtypeformset': formset_factory(subtype_form),
+                   'domains': Domains.objects.all(),
+                   'subtypes': Subtypes.objects.all()}
         return render(request, self.template_name, context=context)
 
     def post(self, request, *args, **kwargs):

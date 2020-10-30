@@ -2,33 +2,36 @@
 
 {% block content %}
 
+    <div class="jumbotron" id="test">
+        <p> Add Domain </p>
+        {{ domainformset }}
+
+        <a class="btn btn-primary btn-lg" href="#" role="button">Submit</a>
+    </div>
+
     <div class="jumbotron" id="domains">
         <h1 class="display-3">Domains</h1>
+        {% for d in domains %}
+            <p> {{ d.name }} </p>
+            <div class="w3-light-grey">
+                <div class="w3-container w3-green w3-center" style="width:40%" aria-valuemin="3" aria-valuemax="100">{{ d.point }}</div>
+            </div><br>
+        {% endfor %}
 
-        <ul class="list-group">
-            {% for d in domains %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ d.name }}
-                    <span class="badge badge-primary badge-pill">{{ d.point }}</span>
-                </li>
-            {% endfor %}
-        </ul>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+        <a class="btn btn-primary btn-lg" href="#" role="button">Submit</a>
     </div>
 
     <div class="jumbotron" id="subtypes">
         <h1 class="display-3">Subtypes</h1>
 
-        <ul class="list-group">
-            {% for s in subtypes %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ s.min_interval }}  -- {{ s.max_interval }}
-                    <span class="badge badge-primary badge-pill">{{ s.pts }}</span>
-                </li>
-            {% endfor %}
-        </ul>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+        {% for s in subtypes %}
+            <p> {{ s.domain_name }} </p>
+            <div class="w3-light-grey">
+                <div class="w3-container w3-green w3-center" style="width:40%">{{ s.point }}</div>
+            </div><br>
+        {% endfor %}
+
+        <a class="btn btn-primary btn-lg" href="#" role="button">Submit</a>
     </div>
 
 {% endblock %}
