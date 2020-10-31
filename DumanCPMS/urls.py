@@ -44,6 +44,8 @@ urlpatterns = [
     # dashboard
     # path('dashboard/', include('dashboard.urls')),
 
+    # example - modal
+    path('modalex/', include('modalex.urls'))
 ]
 
 if settings.DEBUG:

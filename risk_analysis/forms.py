@@ -85,6 +85,11 @@ class DomainsModalForm(BSModalModelForm):
         fields = '__all__'
 
 
+class DomainsFilterModalForm(BSModalForm):
+    class Meta:
+        fields = '__all__'
+
+
 class SubtypeCreateForm(forms.ModelForm):
     class Meta:
         model = Subtypes

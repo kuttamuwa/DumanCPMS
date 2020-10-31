@@ -46,13 +46,16 @@ INSTALLED_APPS = [
     'risk_analysis',
     'dashboard',
     'finance_checkup',
+    'modalex',
 
     'debug_toolbar',
     'rest_framework',
     'crispy_forms',
 
     'django_filters',
-    'bootstrap_modal_forms'
+    'bootstrap_modal_forms',
+    'datatableview',
+    'widget_tweaks',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

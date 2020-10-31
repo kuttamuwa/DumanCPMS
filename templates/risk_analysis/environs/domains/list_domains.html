@@ -1,0 +1,35 @@
+<table id="books-table" class="table">
+    <thead>
+    <tr>
+        <th class="text-center" scope="col">Name</th>
+        <th class="text-center" scope="col">Point</th>
+        <th class="text-center" scope="col">Read / Update / Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for d in domains %}
+        <tr>
+            <th class="text-center" scope="row">{{ forloop.counter }}</th>
+            <td class="text-center">{{ d.name }}</td>
+            <td class="text-center">{{ d.point }}</td>
+            <td class="text-center">
+                <!-- Read domain buttons -->
+                <button type="button" class="bs-modal read-book btn btn-sm btn-primary"
+                        data-form-url="{% url 'read_domain' d.data_id %}">
+                    <span class="fa fa-eye"></span>
+                </button>
+                <!-- Update domain buttons -->
+                <button type="button" class="update-book btn btn-sm btn-primary"
+                        data-form-url="{% url 'update_domain' d.data_id %}">
+                    <span class="fa fa-pencil"></span>
+                </button>
+                <!-- Delete domain buttons -->
+                <button type="button" class="bs-modal delete-book btn btn-sm btn-danger"
+                        data-form-url="{% url 'delete_domain' d.data_id %}">
+                    <span class="fa fa-trash"></span>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

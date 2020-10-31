@@ -3,13 +3,16 @@ from abc import ABC
 from collections import Counter
 
 import pandas as pd
-from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView, BSModalReadView, BSModalDeleteView
+from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView, BSModalReadView, BSModalDeleteView, \
+    BSModalFormView
+from datatableview.views import DatatableView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View, generic
@@ -21,7 +24,7 @@ from DumanCPMS.settings import MEDIA_ROOT
 from checkaccount.models import CheckAccount
 from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, \
-    TAXImportDataForm, DomainCreateForm, SubtypeCreateForm, DomainsModalForm
+    TAXImportDataForm, DomainCreateForm, SubtypeCreateForm, DomainsModalForm, DomainsFilterModalForm
 from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList, Domains, Subtypes
 
 
@@ -364,76 +367,107 @@ class RetrieveTaxFormView(FilterView):
     pass
 
 
-class DomainsList(ListView):
-    model = Domains
-    template_name = 'risk_analysis/environs/list_domains.html'
+# class DomainsList(ListView):
+#     model = Domains
+#     template_name = 'risk_analysis/environs/list_domains.html'
+#
+#
+# @method_decorator(login_required(login_url='/login'), name='dispatch')
+# @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+# class DomainsCreate(CreateView):
+#     model = Domains
+#     fields = '__all__'
+#
+#     # template_name = 'risk_analysis/environs/create_domain_backup.html'
+#
+#     def get(self, request, *args, **kwargs):
+#         context = {'form': DomainCreateForm}
+#         return render(request, template_name=self.template_name,
+#                       context=context)
+#
+#     def post(self, request, *args, **kwargs):
+#         if request.is_ajax:
+#             form = DomainCreateForm(request.POST)
+#             if form.is_valid() is not False:
+#                 form.created_by = request.user
+#                 form.save()
+#
+#                 # serialize domains
+#                 data = {'domains': serializers.serialize('json', Domains.objects.all())}
+#
+#                 return JsonResponse(data, status=200)
+#
+#             else:
+#                 return JsonResponse({'error': form.errors}, status=400)
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
-class DomainsCreate(CreateView):
-    model = Domains
-    fields = '__all__'
-
-    # template_name = 'risk_analysis/environs/create_domain_backup.html'
-
-    def get(self, request, *args, **kwargs):
-        context = {'form': DomainCreateForm}
-        return render(request, template_name=self.template_name,
-                      context=context)
-
-    def post(self, request, *args, **kwargs):
-        if request.is_ajax:
-            form = DomainCreateForm(request.POST)
-            if form.is_valid() is not False:
-                form.created_by = request.user
-                form.save()
-
-                # serialize domains
-                data = {'domains': serializers.serialize('json', Domains.objects.all())}
-
-                return JsonResponse(data, status=200)
-
-            else:
-                return JsonResponse({'error': form.errors}, status=400)
-
-
-@method_decorator(login_required(login_url='/login'), name='dispatch')
-@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
-class DomainsCreateTest(BSModalCreateView):
-    model = Domains
+class DomainsCreateModal(BSModalCreateView):
+    template_name = 'risk_analysis/environs/domains/create_domain_test.html'
     form_class = DomainsModalForm
-    template_name = 'risk_analysis/environs/create_domain_test.html'
     success_message = 'You created Domain'
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
-class DomainsUpdate(BSModalUpdateView):
+class DomainsUpdateModal(BSModalUpdateView):
     model = Domains
+    template_name = 'risk_analysis/environs/domains/update_domain.html'
     form_class = DomainsModalForm
     fields = '__all__'
 
 
-class DomainsReadView(BSModalReadView):
+class DomainsReadModal(BSModalReadView):
     model = Domains
+    template_name = 'risk_analysis/environs/domains/read_domain.html'
 
 
-class DomainsDeleteView(BSModalDeleteView):
+class DomainsDeleteModal(BSModalDeleteView):
     model = Domains
+    template_name = 'risk_analysis/environs/domains/delete_domain.html'
     success_message = 'Success: Book was deleted.'
 
 
-class DomainsIndex(generic.ListView):
+class DomainsFilterModal(BSModalFormView):
+    template_name = 'modalex/examples/filter_book.html'
+    form_class = DomainsFilterModalForm
+
+    def form_valid(self, form):
+        if 'clear' in self.request.POST:
+            self.filter = ''
+        else:
+            self.filter = '?type=' + form.cleaned_data['type']
+
+        response = super().form_valid(form)
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy('index') + self.filter
+
+
+class DomainsIndexModal(generic.ListView):
     model = Domains
     context_object_name = 'Domain'
-    template_name = 'risk_analysis/environs/domain_index.html'
+    template_name = 'risk_analysis/environs/domains/domain_index.html'
 
     def get_queryset(self):
         qs = super().get_queryset()
         if 'type' in self.request.GET:
             qs = qs.filter(book_type=int(self.request.GET['type']))
         return qs
+
+
+def domains_all(request):
+    data = dict()
+    if request.method == 'GET':
+        books = Domains.objects.all()
+        data['table'] = render_to_string(
+            'risk_analysis/environs/domains/list_domains.html',
+            {'books': books},
+            request=request
+        )
+        return JsonResponse(data)
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
