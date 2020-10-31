@@ -1,0 +1,27 @@
+{% load widget_tweaks %}
+
+<div class="modal-header">
+    <h3 class="modal-title">Domain details</h3>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="modal-body">
+
+    <h1 class="display-3">Domains</h1>
+    {% for d in domains %}
+        <p> {{ d.name }} </p>
+        <div class="w3-light-grey">
+            <div class="w3-container w3-green w3-center" style="width:40%" aria-valuemin="3"
+                 aria-valuemax="100" id={{ d.domain_id }}>{{ d.point }}</div>
+        </div><br>
+    {% endfor %}
+
+    <a class="btn btn-primary btn-lg" role="button" onsubmit="">Submit</a>
+
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>
