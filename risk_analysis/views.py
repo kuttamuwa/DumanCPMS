@@ -3,16 +3,16 @@ from abc import ABC
 from collections import Counter
 
 import pandas as pd
+from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView, BSModalReadView, BSModalDeleteView
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.db import transaction
-from django.forms import formset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views import View
+from django.views import View, generic
 from django.views.generic import ListView
 from django.views.generic.edit import FormView, CreateView
 from django_filters.views import FilterView
@@ -21,7 +21,7 @@ from DumanCPMS.settings import MEDIA_ROOT
 from checkaccount.models import CheckAccount
 from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, \
-    TAXImportDataForm, DomainCreateForm, SubtypeCreateForm
+    TAXImportDataForm, DomainCreateForm, SubtypeCreateForm, DomainsModalForm
 from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList, Domains, Subtypes
 
 
@@ -371,15 +371,79 @@ class DomainsList(ListView):
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class DomainsCreate(CreateView):
+    model = Domains
+    fields = '__all__'
+
+    # template_name = 'risk_analysis/environs/create_domain_backup.html'
+
+    def get(self, request, *args, **kwargs):
+        context = {'form': DomainCreateForm}
+        return render(request, template_name=self.template_name,
+                      context=context)
+
+    def post(self, request, *args, **kwargs):
+        if request.is_ajax:
+            form = DomainCreateForm(request.POST)
+            if form.is_valid() is not False:
+                form.created_by = request.user
+                form.save()
+
+                # serialize domains
+                data = {'domains': serializers.serialize('json', Domains.objects.all())}
+
+                return JsonResponse(data, status=200)
+
+            else:
+                return JsonResponse({'error': form.errors}, status=400)
+
+
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class DomainsCreateTest(BSModalCreateView):
+    model = Domains
+    form_class = DomainsModalForm
+    template_name = 'risk_analysis/environs/create_domain_test.html'
+    success_message = 'You created Domain'
+
+
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class DomainsUpdate(BSModalUpdateView):
+    model = Domains
+    form_class = DomainsModalForm
+    fields = '__all__'
+
+
+class DomainsReadView(BSModalReadView):
+    model = Domains
+
+
+class DomainsDeleteView(BSModalDeleteView):
+    model = Domains
+    success_message = 'Success: Book was deleted.'
+
+
+class DomainsIndex(generic.ListView):
+    model = Domains
+    context_object_name = 'Domain'
+    template_name = 'risk_analysis/environs/domain_index.html'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if 'type' in self.request.GET:
+            qs = qs.filter(book_type=int(self.request.GET['type']))
+        return qs
+
+
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class ManageDomainWithSubtypesFormView(View):
     template_name = 'risk_analysis/environs/create_domain.html'
 
     def get(self, request, *args, **kwargs):
-        domain_form = DomainCreateForm
-        subtype_form = SubtypeCreateForm
-
-        context = {'domainformset': formset_factory(domain_form),
-                   'subtypeformset': formset_factory(subtype_form),
+        context = {'domainformset': DomainCreateForm,
+                   'subtypeformset': SubtypeCreateForm,
                    'domains': Domains.objects.all(),
                    'subtypes': Subtypes.objects.all()}
         return render(request, self.template_name, context=context)

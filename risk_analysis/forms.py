@@ -1,3 +1,4 @@
+from bootstrap_modal_forms.forms import BSModalForm, BSModalModelForm
 from django.forms import inlineformset_factory
 
 from checkaccount.models import CheckAccount
@@ -59,6 +60,16 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
 #                                                   can_delete=True, fk_name='domain_name')
 
 class DomainCreateForm(djforms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DomainCreateForm, self).__init__(*args, **kwargs)
+        # add a "form-control" class to each form input
+        # for enabling bootstrap
+
+        for name in self.fields.keys():
+            self.fields[name].widget.attrs.update({
+                'class': 'form-control',
+            })
+
     class Meta:
         model = Domains
         fields = '__all__'
@@ -66,6 +77,12 @@ class DomainCreateForm(djforms.ModelForm):
     def is_valid(self):
         # do something
         super(DomainCreateForm, self).is_valid()
+
+
+class DomainsModalForm(BSModalModelForm):
+    class Meta:
+        model = Domains
+        fields = '__all__'
 
 
 class SubtypeCreateForm(forms.ModelForm):
