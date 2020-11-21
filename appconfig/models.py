@@ -30,7 +30,7 @@ class Domains(BaseModel):
 
 
 class Subtypes(BaseModel):
-    domain_name = models.ForeignKey(Domains, on_delete=models.PROTECT, max_length=100)
+    domain = models.ForeignKey(Domains, on_delete=models.PROTECT, max_length=100)
 
     pts = models.FloatField(max_length=100, db_column='PTS', help_text='Point of specified intervals '
                                                                        'of your subtype related Domain')
@@ -40,8 +40,8 @@ class Subtypes(BaseModel):
 
     def save(self, *args, **kwargs):
         # total point control
-        if not self.pts + self.get_total_points(self.domain_name) <= 100:
-            raise ValueError(f"Point exceeds 100 for this domain : {self.domain_name}")
+        if not self.pts + self.get_total_points(self.domain) <= 100:
+            raise ValueError(f"Point exceeds 100 for this domain : {self.domain}")
 
         # interval control
         # todo: bunu sonra cozecegim.
@@ -53,7 +53,7 @@ class Subtypes(BaseModel):
         return sum(i.pts for i in Subtypes.objects.filter(domain_name=domain))
 
     def __str__(self):
-        return f"Points of {self.domain_name} : \n" \
+        return f"Points of {self.domain} : \n" \
                f"Minimum interval: {self.min_interval} \n" \
                f"Maximum interval: {self.max_interval}"
 

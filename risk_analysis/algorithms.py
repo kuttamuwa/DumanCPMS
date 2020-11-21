@@ -1,3 +1,4 @@
+from appconfig.models import Domains, Subtypes
 from risk_analysis.models import DataSetModel, RiskDataSetPoints, DataSetManager
 import numpy as np
 import pandas as pd
@@ -11,6 +12,8 @@ import pandas as pd
 class ControlRiskDataSet:
     def __init__(self, risk_model_object):
         self.risk_model_object = risk_model_object
+        self.domains = Domains.objects.all()
+        self.subtypes = Subtypes.objects.all()
 
     def control_columns(self):
         pass
@@ -92,7 +95,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         avg_order_last_12_months = self.risk_model_object.avg_order_amount_last_twelve_months
 
         last_3_months_aberration = ((
-                                                avg_order_last_3_months - avg_order_last_12_months) / avg_order_last_12_months) * 100
+                                            avg_order_last_3_months - avg_order_last_12_months) / avg_order_last_12_months) * 100
         pts = None
         if not pd.isna(last_3_months_aberration):
             last_3_months_aberration = float(last_3_months_aberration)
@@ -279,8 +282,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             print("Teminat durumu olmadığı için limit risk karşılama seviyesi puanı yapılmamıştır.")
 
         else:
-            teminat_limit_risk_kars_seviyesi = (
-                                                           self.risk_model_object.warrant_amount / self.risk_model_object.limit) * 100
+            teminat_limit_risk_kars_seviyesi = (self.risk_model_object.warrant_amount / self.risk_model_object.limit) * 100
 
             if teminat_limit_risk_kars_seviyesi is None:
                 print("Teminat limit riskini karsilama seviyesi ")

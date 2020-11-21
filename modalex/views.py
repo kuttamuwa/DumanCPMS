@@ -48,7 +48,7 @@ class BookFilterView(BSModalFormView):
         return response
 
     def get_success_url(self):
-        return reverse_lazy('domain-index') + self.filter
+        return reverse_lazy('index') + self.filter
 
 
 class BookCreateView(BSModalCreateView):

@@ -17,7 +17,7 @@ urlpatterns = [
     path('domains/update/<int:pk>', views.DomainUpdateView.as_view(), name='update-domain'),
     path('domains/read/<int:pk>', views.DomainReadView.as_view(), name='read-domain'),
     path('domains/delete/<int:pk>', views.DomainDeleteView.as_view(), name='delete-domain'),
-    path('domains/all', views.domains_list, name='domains'),
+    path('domains/all', views.domains_list, name='domains-all'),
 
     # subtypes crud
     path('subtypes/', views.SubtypeIndex.as_view(), name='subtype-index'),

@@ -1,4 +1,4 @@
-<table id="books-table" class="table">
+<table id="domains-table" class="table">
   <thead>
   <tr>
     <th class="text-center" scope="col">#</th>
@@ -14,16 +14,16 @@
       <td class="text-center">{{ d.name }}</td>
       <td class="text-center">{{ d.point }}</td>
       <td class="text-center">
-        <!-- Read book buttons -->
-        <button type="button" class="bs-modal read-book btn btn-sm btn-primary" data-form-url="{% url 'read-domain' d.pk %}">
+        <!-- Read domain buttons -->
+        <button type="button" class="bs-modal read-domain btn btn-sm btn-primary" data-form-url="{% url 'read-domain' d.pk %}">
           <span class="fa fa-eye"></span>
         </button>
-        <!-- Update book buttons -->
-        <button type="button" class="update-book btn btn-sm btn-primary" data-form-url="{% url 'update-domain' d.pk %}">
+        <!-- Update domain buttons -->
+        <button type="button" class="update-domain btn btn-sm btn-primary" data-form-url="{% url 'update-domain' d.pk %}">
           <span class="fa fa-pencil"></span>
         </button>
-        <!-- Delete book buttons -->
-        <button type="button" class="bs-modal delete-book btn btn-sm btn-danger" data-form-url="{% url 'delete-domain' d.pk %}">
+        <!-- Delete domain buttons -->
+        <button type="button" class="bs-modal delete-domain btn btn-sm btn-danger" data-form-url="{% url 'delete-domain' d.pk %}">
           <span class="fa fa-trash"></span>
         </button>
       </td>

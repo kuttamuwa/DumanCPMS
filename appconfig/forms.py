@@ -1,10 +1,17 @@
-from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.models import User
-
 from bootstrap_modal_forms.forms import BSModalModelForm, BSModalForm
-from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
+from django import forms
+
 from .models import Domains, Subtypes
+
+
+def subtypes_point_sum_exceeds_100(value, domain):
+    if sum([Subtypes.objects.get(domain=domain).pts].append(value)) > 100:
+        raise ValueError(f"Summary of subtype points cannot be exceed 100 for {domain} domain")
+
+
+def domains_point_sum_exceeds_100(value):
+    if sum([d.point for d in Domains.objects.all()] + [value]) > 100:
+        raise ValueError("Summary of domain points cannot be exceed 100")
 
 
 class DomainFilterForm(BSModalForm):
@@ -16,7 +23,8 @@ class DomainFilterForm(BSModalForm):
 
 class DomainModalForm(BSModalModelForm):
     name = forms.CharField(max_length=100)
-    point = forms.FloatField(max_value=100.0, min_value=0.0)  # todo: validators
+    point = forms.FloatField(max_value=100.0, min_value=0.0,
+                             validators=[domains_point_sum_exceeds_100])  # todo: validators
 
     class Meta:
         exclude = ['created_by']
@@ -24,16 +32,21 @@ class DomainModalForm(BSModalModelForm):
 
 
 class SubtypeModalForm(BSModalModelForm):
-    domain_name = forms.ChoiceField(choices=Domains.objects.all(), help_text='Subtype is sub choicable value'
-                                                                             ' under domains')
+    domain = forms.ModelChoiceField(queryset=Domains.objects.all(),
+                                    help_text='Subtype is sub choicable value '
+                                              'under domains')
     subpoint = forms.FloatField(min_value=0.0, max_value=100.0, help_text='Point between intervals')
     min_interval = forms.FloatField(max_value=100, min_value=0.0, help_text='Minimum interval')
 
     max_interval = forms.FloatField(max_value=100, min_value=0.0, help_text='Maximum interval')
 
+    def save(self, commit=True):
+        # subtypes_point_sum_exceeds_100(self.subpoint, self.domain)
+        super(SubtypeModalForm, self).save()
+
     class Meta:
         model = Subtypes
-        fields = '__all__'
+        fields = ['domain', 'subpoint', 'min_interval', 'max_interval']
 
 
 class SubtypeFilterForm(BSModalForm):

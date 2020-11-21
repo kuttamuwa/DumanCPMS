@@ -1,5 +1,6 @@
 from bootstrap_modal_forms.generic import BSModalFormView, BSModalCreateView, BSModalUpdateView, BSModalReadView, \
     BSModalDeleteView
+from django.db.models import ProtectedError
 from django.http import JsonResponse
 from django.shortcuts import render
 
@@ -14,7 +15,9 @@ from appconfig.models import Domains, Subtypes
 
 # indexes, main pages
 def all_indexes(request):
-    return render(request, 'appconfig/index.html')
+    return render(request, 'appconfig/index.html',
+                  context={'domains': Domains.objects.all(),
+                           'subtypes': Subtypes.objects.all()})
 
 
 class SubtypeIndex(generic.ListView):
@@ -63,7 +66,7 @@ class DomainCreateView(BSModalCreateView):
     template_name = 'appconfig/domaindirs/create_domain.html'
     form_class = DomainModalForm
     success_message = 'Success: Domain was created.'
-    success_url = reverse_lazy('domain-index')
+    success_url = reverse_lazy('app-index')
 
     def form_valid(self, form):
         return super(DomainCreateView, self).form_valid(form)
@@ -74,7 +77,7 @@ class DomainUpdateView(BSModalUpdateView):
     template_name = 'appconfig/domaindirs/update_domain.html'
     form_class = DomainModalForm
     success_message = 'Success: Domain was updated.'
-    success_url = reverse_lazy('domain-index')
+    success_url = reverse_lazy('app-index')
 
     def form_valid(self, form):
         return super(DomainUpdateView, self).form_valid(form)
@@ -89,7 +92,10 @@ class DomainDeleteView(BSModalDeleteView):
     model = Domains
     template_name = 'appconfig/domaindirs/delete_domain.html'
     success_message = 'Success: Domain was deleted.'
-    success_url = reverse_lazy('domain-index')
+    success_url = reverse_lazy('app-index')
+
+    def post(self, request, *args, **kwargs):
+        return super(DomainDeleteView, self).post(request, *args, **kwargs)
 
 
 def domains_list(request):
@@ -119,14 +125,17 @@ class SubtypeFilterView(BSModalFormView):
         return response
 
     def get_success_url(self):
-        return reverse_lazy('index') + self.filter
+        return reverse_lazy('app-index') + self.filter
 
 
 class SubtypeCreateView(BSModalCreateView):
     template_name = 'appconfig/subtypedirs/create_subtype.html'
     form_class = SubtypeModalForm
     success_message = 'Success: Subtype was created.'
-    success_url = reverse_lazy('subtype-index')
+    success_url = reverse_lazy('app-index')
+
+    # def get(self, request, *args, **kwargs):
+    #     return super(SubtypeCreateView, self).get(request, *args, **kwargs)
 
     def form_valid(self, form):
         return super(SubtypeCreateView, self).form_valid(form)
@@ -137,7 +146,7 @@ class SubtypeUpdateView(BSModalUpdateView):
     template_name = 'appconfig/subtypedirs/update_subtype.html'
     form_class = SubtypeModalForm
     success_message = 'Success: Subtype was updated.'
-    success_url = reverse_lazy('subtype-index')
+    success_url = reverse_lazy('app-index')
 
     def form_valid(self, form):
         return super(SubtypeUpdateView, self).form_valid(form)
@@ -152,7 +161,7 @@ class SubtypeDeleteView(BSModalDeleteView):
     model = Subtypes
     template_name = 'appconfig/subtypedirs/delete_subtype.html'
     success_message = 'Success: Subtype was deleted.'
-    success_url = reverse_lazy('subtype-index')
+    success_url = reverse_lazy('app-index')
 
 
 def subtypes_list(request):
