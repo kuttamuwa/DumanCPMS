@@ -48,14 +48,14 @@ class BookFilterView(BSModalFormView):
         return response
 
     def get_success_url(self):
-        return reverse_lazy('index') + self.filter
+        return reverse_lazy('domain-index') + self.filter
 
 
 class BookCreateView(BSModalCreateView):
     template_name = 'modalex/examples/create_book.html'
     form_class = BookModelForm
     success_message = 'Success: Book was created.'
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('domain-index')
 
 
 class BookUpdateView(BSModalUpdateView):
@@ -63,7 +63,7 @@ class BookUpdateView(BSModalUpdateView):
     template_name = 'modalex/examples/update_book.html'
     form_class = BookModelForm
     success_message = 'Success: Book was updated.'
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('domain-index')
 
 
 class BookReadView(BSModalReadView):
@@ -89,7 +89,7 @@ class CustomLoginView(BSModalLoginView):
     authentication_form = CustomAuthenticationForm
     template_name = 'modalex/examples/login.html'
     success_message = 'Success: You were successfully logged in.'
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('domain-index')
 
 
 def books(request):
