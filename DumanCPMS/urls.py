@@ -41,6 +41,9 @@ urlpatterns = [
     path('login/', cviews.LoginUserView.as_view()),
     path('logout/', cviews.LogoutUserView.as_view()),
 
+    # appconfig
+    path('appconfig/', include('appconfig.urls')),
+
     # dashboard
     # path('dashboard/', include('dashboard.urls')),
 

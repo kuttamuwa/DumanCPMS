@@ -1,8 +1,6 @@
 from django.contrib import admin
 
 # Register your models here.
-from risk_analysis.models import Domains, Subtypes, BaseModel
+from risk_analysis.models import BaseModel
 
-admin.site.register(Domains)
-admin.site.register(Subtypes)
 admin.site.register(BaseModel)

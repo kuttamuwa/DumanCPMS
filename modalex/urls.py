@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-
+from DumanCPMS.urls import cviews
 
 urlpatterns = [
     path('', views.Index.as_view(), name='index'),
@@ -12,5 +12,6 @@ urlpatterns = [
     path('delete/<int:pk>', views.BookDeleteView.as_view(), name='delete_book'),
     path('books/', views.books, name='books'),
     path('signup/', views.SignUpView.as_view(), name='signup'),
-    path('login/', views.CustomLoginView.as_view(), name='login'),
+    path('login/', cviews.LoginUserView.as_view(), name='login'),
+    path('logout/', cviews.LogoutUserView.as_view(), name='logout'),
 ]

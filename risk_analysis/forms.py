@@ -2,7 +2,7 @@ from bootstrap_modal_forms.forms import BSModalForm, BSModalModelForm
 from django.forms import inlineformset_factory
 
 from checkaccount.models import CheckAccount
-from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList, Subtypes, Domains
+from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList
 from crispy_forms.tests.forms import forms
 from django import forms as djforms
 
@@ -59,42 +59,42 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
 # DomainCreateFormInlineSet = inlineformset_factory(Domains, DomainPts, form=DomainCreateForm, extra=1,
 #                                                   can_delete=True, fk_name='domain_name')
 
-class DomainCreateForm(djforms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DomainCreateForm, self).__init__(*args, **kwargs)
-        # add a "form-control" class to each form input
-        # for enabling bootstrap
-
-        for name in self.fields.keys():
-            self.fields[name].widget.attrs.update({
-                'class': 'form-control',
-            })
-
-    class Meta:
-        model = Domains
-        fields = '__all__'
-
-    def is_valid(self):
-        # do something
-        super(DomainCreateForm, self).is_valid()
-
-
-class DomainsModalForm(BSModalModelForm):
-    class Meta:
-        model = Domains
-        fields = '__all__'
+# class DomainCreateForm(djforms.ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         super(DomainCreateForm, self).__init__(*args, **kwargs)
+#         # add a "form-control" class to each form input
+#         # for enabling bootstrap
+#
+#         for name in self.fields.keys():
+#             self.fields[name].widget.attrs.update({
+#                 'class': 'form-control',
+#             })
+#
+#     class Meta:
+#         model = Domains
+#         fields = '__all__'
+#
+#     def is_valid(self):
+#         # do something
+#         super(DomainCreateForm, self).is_valid()
 
 
-class DomainsFilterModalForm(BSModalForm):
-    class Meta:
-        fields = '__all__'
+# class DomainsModalForm(BSModalModelForm):
+#     class Meta:
+#         model = Domains
+#         fields = '__all__'
+#
+#
+# class DomainsFilterModalForm(BSModalForm):
+#     class Meta:
+#         fields = '__all__'
 
 
-class SubtypeCreateForm(forms.ModelForm):
-    class Meta:
-        model = Subtypes
-        fields = '__all__'
-
-    def is_valid(self):
-        # do something
-        super(SubtypeCreateForm, self).is_valid()
+# class SubtypeCreateForm(forms.ModelForm):
+#     class Meta:
+#         model = Subtypes
+#         fields = '__all__'
+#
+#     def is_valid(self):
+#         # do something
+#         super(SubtypeCreateForm, self).is_valid()

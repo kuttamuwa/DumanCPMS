@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'dashboard',
     'finance_checkup',
     'modalex',
+    'appconfig',
 
     'debug_toolbar',
     'rest_framework',
