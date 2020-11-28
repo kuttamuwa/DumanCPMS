@@ -1,17 +1,18 @@
 from bootstrap_modal_forms.forms import BSModalModelForm, BSModalForm
 from django import forms
 
+from .errors import SubtypePoints, DomainPoints
 from .models import Domains, Subtypes
 
 
 def subtypes_point_sum_exceeds_100(value, domain):
     if sum([Subtypes.objects.get(domain=domain).pts].append(value)) > 100:
-        raise ValueError(f"Summary of subtype points cannot be exceed 100 for {domain} domain")
+        raise SubtypePoints(domain)
 
 
 def domains_point_sum_exceeds_100(value):
     if sum([d.point for d in Domains.objects.all()] + [value]) > 100:
-        raise ValueError("Summary of domain points cannot be exceed 100")
+        raise DomainPoints
 
 
 class DomainFilterForm(BSModalForm):

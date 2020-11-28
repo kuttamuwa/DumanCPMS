@@ -28,13 +28,12 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
     # todo: 100'den buyukse veya 0'dan kucukse uyari ver.
     """
 
-    def __init__(self, risk_model_object, internal_customer_id, analyze_right_now=True):
+    def __init__(self, risk_model_object, analyze_right_now=True):
         super().__init__(risk_model_object)
         self.analyzed_data = None
         self.analyze_decision = True  # default value
 
-        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.related_customer,
-                                                   internal_customer_id=internal_customer_id)  # almost empty
+        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.related_customer)  # almost empty
 
         if analyze_right_now:
             self.analyze_all()

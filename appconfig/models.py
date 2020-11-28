@@ -1,4 +1,6 @@
 from django.db import models
+
+from appconfig.errors import DomainPoints
 from risk_analysis.models import BaseModel
 
 
@@ -19,7 +21,7 @@ class Domains(BaseModel):
             super(Domains, self).save(*args, **kwargs)
 
         else:
-            raise ValueError("Total of points exceeds 100")
+            raise DomainPoints
 
     def __str__(self):
         return f'Domain: {self.name} \n' \
@@ -41,7 +43,7 @@ class Subtypes(BaseModel):
     def save(self, *args, **kwargs):
         # total point control
         if not self.pts + self.get_total_points(self.domain) <= 100:
-            raise ValueError(f"Point exceeds 100 for this domain : {self.domain}")
+            raise DomainPoints
 
         # interval control
         # todo: bunu sonra cozecegim.

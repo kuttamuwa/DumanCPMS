@@ -2,10 +2,11 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import render
 from django.urls import reverse
+from checkaccount import settings
+from .errors import SoleTraderMustHaveTaxPayerNumber, LegalEntityMustHaveBirthPlace
 
 from .geo_models import GeoModel
-from .model_sys_specs import CariHesapSpecs, AccountDocumentsSpec, PartnershipDocumentsSpecs, \
-    LegalEntityMustHaveBirthPlace, SoleTraderMustHaveTaxPayerNumber
+from .model_sys_specs import CariHesapSpecs, AccountDocumentsSpec, PartnershipDocumentsSpecs
 
 """
 UYARILAR:
@@ -119,34 +120,35 @@ class CheckAccountManager(models.Manager):
 class CheckAccount(models.Model):
     firm_type = models.CharField(max_length=50, choices=CariHesapSpecs.get_firm_type_choices(),
                                  verbose_name='FIRM TYPE', help_text='Business type of the firm',
-                                 db_column='FIRM_TYPE')
+                                 db_column='FIRM_TYPE', null=True)
     firm_full_name = models.CharField(max_length=70, verbose_name='FIRM FULLNAME',
-                                      db_column='FIRM_FULLNAME')
+                                      db_column='FIRM_FULLNAME', null=True)
     taxpayer_number = models.CharField(unique=True, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
                                                               'Vergi No',
-                                       db_column='TAXPAYER_NUMBER', max_length=15)
+                                       db_column='TAXPAYER_NUMBER', max_length=15, null=True)
 
     # validators cannot be used
     birthplace = models.ForeignKey(Cities, on_delete=models.CASCADE, related_name='birthplace', null=True, blank=True,
                                    verbose_name='Doğum Yeri')
-    tax_department = models.CharField(max_length=100, verbose_name='TAX DEPARTMENT', db_column='TAX_DEPARTMENT')
-    firm_address = models.CharField(max_length=200, verbose_name='FIRM ADDRESS', db_column='FIRM_ADDRESS')
+    tax_department = models.CharField(max_length=100, verbose_name='TAX DEPARTMENT', db_column='TAX_DEPARTMENT',
+                                      null=True)
+    firm_address = models.CharField(max_length=200, verbose_name='FIRM ADDRESS', db_column='FIRM_ADDRESS', null=True)
 
     firm_key_contact_personnel = models.CharField(max_length=70,
                                                   verbose_name=CariHesapSpecs.get_key_contact_personnel(),
-                                                  db_column='FIRM_KEY_PERSON')
+                                                  db_column='FIRM_KEY_PERSON', null=True)
     sector = models.ForeignKey(Sectors, on_delete=models.SET_NULL, null=True, verbose_name='Sektör')
 
     city = models.ForeignKey(Cities, on_delete=models.SET_NULL, null=True, verbose_name='Şehir')  # if city | district goes?
     district = models.ForeignKey(Districts, on_delete=models.SET_NULL, null=True, verbose_name='İlçe')
 
     phone_number = models.CharField(max_length=15, unique=True, db_column='PHONE_NUMBER',
-                                    verbose_name='Telefon numarası')
-    fax = models.CharField(max_length=15, unique=True, db_column='FAX_NUMBER', verbose_name='Fax Numarası')
-    web_url = models.URLField(db_column='WEB_URL', verbose_name='Web adresi')
-    email_addr = models.EmailField(unique=True, db_column='EMAIL_ADDR', verbose_name='Email adresi')
+                                    verbose_name='Telefon numarası', null=True)
+    fax = models.CharField(max_length=15, unique=True, db_column='FAX_NUMBER', verbose_name='Fax Numarası', null=True)
+    web_url = models.URLField(db_column='WEB_URL', verbose_name='Web adresi', null=True)
+    email_addr = models.EmailField(unique=True, db_column='EMAIL_ADDR', verbose_name='Email adresi', null=True)
     representative_person = models.ForeignKey(SysPersonnel, on_delete=models.PROTECT,
-                                              verbose_name='Temsilci')  # there is still job to do?
+                                              verbose_name='Temsilci', null=True)
 
     # object id
     customer_id = models.AutoField(primary_key=True)
@@ -172,12 +174,12 @@ class CheckAccount(models.Model):
 
         if CariHesapSpecs.check_legal_entity(self.firm_type):
             # sahis firmasi
-            if self.birthplace is None:
+            if self.birthplace is None and settings.ERROR_SETTINGS[LegalEntityMustHaveBirthPlace]:
                 raise LegalEntityMustHaveBirthPlace()
 
         else:
             # tuzel kisilik
-            if self.taxpayer_number is None:
+            if self.taxpayer_number is None and settings.ERROR_SETTINGS[SoleTraderMustHaveTaxPayerNumber]:
                 raise SoleTraderMustHaveTaxPayerNumber()
 
         super(CheckAccount, self).save(*args, **kwargs)

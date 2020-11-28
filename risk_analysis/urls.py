@@ -30,9 +30,8 @@ urlpatterns = [
                                                                  'risk_analysis/risk_analysis_retrieve.html'),
          name='risk_analysis-search'),
 
-
-    path('points/', views.RetrieveRiskPointsFormView.as_view(filterset_class=RiskPointsFilter,
-                                                             template_name='risk_analysis/risk_points_retrieve.html')),
+    path('analyze', views.RiskAnalysisListView.as_view(), name='risk-analyze'),
+    path('analyze/<int:customer_id>', views.RiskAnalysisListView.as_view(), name='risk-analyze-customer'),
 
     # main urls
     path('', views.risk_main_page),

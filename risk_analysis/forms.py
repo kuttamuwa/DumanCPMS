@@ -47,9 +47,6 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
                   'Please consult on this page: ',
 
     )
-    # todo: şu help_text'in oraya sütunlara bakabileceği bir yer vermek lazım
-
-    customer = forms.ModelChoiceField(queryset=CheckAccount.objects.all())
 
     class Meta:
         model = DataSetModel

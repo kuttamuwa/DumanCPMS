@@ -25,7 +25,7 @@ from checkaccount.models import CheckAccount
 from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, \
     TAXImportDataForm
-from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList
+from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList
 
 
 def risk_main_page(request):
@@ -105,9 +105,6 @@ class UploadRiskAnalysisDataView(FormView):
 
     def post(self, request, *args, **kwargs):
         data = request.FILES['riskDataFile']
-        customer_id = int(request.POST['customer'])
-
-        related_check_account = CheckAccount.objects.get(customer_id=customer_id)
 
         if not str(data.name).endswith('.xlsx'):
             return render(request, template_name='risk_analysis/error_pages/general_error.html',
@@ -125,7 +122,7 @@ class UploadRiskAnalysisDataView(FormView):
             limit = self.__nan_to_none(row.get('limit'))
             warrant_state = self.__nan_to_none(row.get('warrant_state'))  # todo: string converting
             warrant_amount = self.__nan_to_none(row.get('warrant_amount'))
-            internal_customer_id = self.__nan_to_none(row.get('internal_customer_id'))
+            customer_name = self.__nan_to_none(row.get('customer_name'))
 
             # if warrant_state is None or warrant_state is False or warrant_state == 'Yok':
             #     if warrant_amount is None:
@@ -161,9 +158,14 @@ class UploadRiskAnalysisDataView(FormView):
             last_12_months_total_endorsement = self.__nan_to_none(row.get('last_12_months_total_endorsement'))
             # period_percent = row.get('period_percent')
 
+            try:
+                related_check_account = CheckAccount.objects.get(firm_full_name=customer_name)
+
+            except CheckAccount.DoesNotExist:
+                related_check_account = CheckAccount(firm_full_name=customer_name).save()
+
             risk_model_object = DataSetModel(
                 related_customer=related_check_account,
-                internal_customer_id=internal_customer_id,
                 last_12_months_total_endorsement=last_12_months_total_endorsement,
                 maturity=maturity,
                 limit=limit,
@@ -188,13 +190,11 @@ class UploadRiskAnalysisDataView(FormView):
                 profit=profit,
                 profit_percent=profit_percent
             )
-
-            analyzedata = AnalyzingRiskDataSet(risk_model_object, internal_customer_id=internal_customer_id,
-                                               analyze_right_now=True)
+            risk_model_object.save()
             try:
                 # saving data
-                analyzedata.save_risk_dataset_data()
-                analyzedata.save_risk_points_data()
+                # analyzedata.save_risk_dataset_data()
+                # analyzedata.save_risk_points_data()
                 return self.get_success_url_primitive(request, customer=related_check_account)
 
             except Exception as err:
@@ -204,12 +204,6 @@ class UploadRiskAnalysisDataView(FormView):
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class RetrieveRiskAnalysisFormView(FilterView):
-    pass
-
-
-@method_decorator(login_required(login_url='/login'), name='dispatch')
-@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
-class RetrieveRiskPointsFormView(FilterView):
     pass
 
 
@@ -451,22 +445,24 @@ class DataSetWarnings(BaseWarnings):
         pass
 
 
-class BaseNotifications(object):
-    customer_health_status = ('HEALTHY', 'STABLE', 'NEED TO BE MANAGED', 'SENSITIVE', 'RISKY')
-    current_status = None
-    customer_id = None
+class RiskAnalysisListView(generic.ListView):
+    template_name = 'risk_analysis/risk_analysis_retrieve.html'
 
-    @classmethod
-    def calculate_health_status(cls, customer_id):
-        # todo :? Muhtemelen puanlama algoritması ağırlıklı toplanıp dondurulecek
+    def get(self, request, *args, **kwargs):
+        customer_id = kwargs.get('customer_id')
+        if customer_id is None:
+            return render(request, 'risk_analysis/analysis/select_customer_page.html',
+                          context={'riskdatasets': DataSetModel.objects.all()})
 
-        try:
-            risk_data = RiskDataSetPoints.objects.get(customer_id=customer_id)
-        except RiskDataSetPoints.DoesNotExist:
-            # todo: logging
-            print("{} id ile iliskili musteri puanlaması bulunamadı !")
+        else:
+            customer_id = kwargs.get('customer_id')
+            check_account = CheckAccount.objects.get(customer_id=customer_id)
 
-        pass
+            risk_data = DataSetModel.objects.get(related_customer=check_account)
+            analyze_risk_ds = AnalyzingRiskDataSet(risk_data)
+            analyze_risk_ds.analyze_all()
+
+            return render(request, self.template_name)
 
 
 class BasicDashboardData:

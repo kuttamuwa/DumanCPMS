@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for ch in riskdatasets %}
+
+        <div class="row">
+            <div class="col-md">
+                <div class="card card-body">
+                    <table class="table table-sm table-hover">
+                        <tr onclick="window.location='/risk_analysis/analyze/{{ ch.internal_customer_id }}'; ">
+                            <th>Related Customer</th>
+                        </tr>
+
+                        <tr>
+                            <td>{{ ch.related_customer }}</td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}

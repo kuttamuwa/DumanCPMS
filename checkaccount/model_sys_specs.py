@@ -2,6 +2,8 @@
 
 __supported_languages__ = ('TR', 'EN-EN', 'EN-US')
 
+from checkaccount.errors import NoLangSpecified
+
 
 class SystemProperties:
     lang = 'TR'  # default value
@@ -16,7 +18,6 @@ class SystemProperties:
 
 class CariHesapSpecs(SystemProperties):
     # sahis isletmesinde birthplace doldurulur.
-    # todo: t ve s -> Tuzel kisilik, Sahis isletmesi
     FIRM_TYPE_CHOICES = {'TR': (('t', 'TUZEL_KISILIK'), ('s', 'SAHIS_ISLETMESI')),
                          'EN-EN': (('l', 'LEGAL_ENTITIY'), ('s', 'SOLE_TRADER')),
                          'EN-US': (('l', 'LEGAL_ENTITIY'), ('s', 'SOLE_TRADER'))}
@@ -121,17 +122,3 @@ class PartnershipDocumentsSpecs(SystemProperties):
         return cls.board_structure['verbose_name'][cls.lang]
 
 
-class NoLangSpecified(ValueError):
-    pass
-
-
-class SysException(Exception):
-    pass
-
-
-class LegalEntityMustHaveBirthPlace(SysException):
-    pass
-
-
-class SoleTraderMustHaveTaxPayerNumber(SysException):
-    pass

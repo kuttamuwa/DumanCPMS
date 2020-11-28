@@ -6,6 +6,7 @@ from checkaccount.models import CheckAccount, RelatedBlackList
 
 # Create your models here.
 # dependent with CheckAccount application
+from risk_analysis.errors import MaturitySpeedError, BalanceError
 
 
 class DataSetManager(models.Manager):
@@ -18,9 +19,7 @@ class DataSetManager(models.Manager):
             balance = kwargs.get('balance')
 
             if last_twelve_month_avg_order_amount is None or balance is None:
-                raise ValueError("Vade hızı boş verilmiş. Hızın bulunması için gerekli diğer veriler olan son "
-                                 "12 aylık ortalama sipariş tutarı ve bakiye bilgileri de eksik. \n"
-                                 "Algoritmanın sağlıklı çalışabilmesi için ilgili verileri lütfen doldurun !")
+                raise MaturitySpeedError
 
             period_velocity = DataSetManager.calc_period_velocity(last_twelve_month_avg_order_amount, balance)
 
@@ -29,24 +28,20 @@ class DataSetManager(models.Manager):
     @staticmethod
     def calc_period_velocity(last_twelve_month_avg_order_amount, balance):
         if balance is None:
-            raise ValueError("Bakiye verisi doldurulmalı ! \n"
-                             "Ozellikle devir gunu verilmediyse !")
+            raise BalanceError
 
         if last_twelve_month_avg_order_amount is None:
-            raise ValueError("Bakiye verisi doldurulmalı ! \n"
-                             "Ozellikle devir gunu verilmediyse !")
+            raise BalanceError
 
         return last_twelve_month_avg_order_amount // balance
 
     @staticmethod
     def calc_risk_excluded_warrant_balance(balance, warrant):
         if balance is None:
-            raise ValueError("Bakiye verisi doldurulmalıdır ! \n"
-                             "Ozellikle Bakiye harici risk verisi verilmediyse")
+            raise BalanceError
 
         if warrant is None:
-            raise ValueError("Teminat verisi doldurulmalıdır ! \n"
-                             "Ozellikle Bakiye harici risk verisi verilmediyse")
+            raise BalanceError
 
         return balance - warrant
 
@@ -104,9 +99,10 @@ class BaseModel(models.Model):
 
 
 class DataSetModel(BaseModel):
-    objects = DataSetManager
+    # objects = DataSetManager
 
-    related_customer = models.ForeignKey(CheckAccount, on_delete=models.PROTECT, verbose_name='İlişkili Müşteri')
+    related_customer = models.ForeignKey(CheckAccount, on_delete=models.PROTECT, verbose_name='İlişkili Müşteri',
+                                         null=True)
     internal_customer_id = models.IntegerField(db_column='INTERNAL_CUSTOMER_ID', help_text='İç Müşteri Numarası',
                                                null=False, verbose_name='İç Müşteri No')
 
