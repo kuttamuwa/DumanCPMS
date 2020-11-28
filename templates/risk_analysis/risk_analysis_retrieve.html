@@ -8,7 +8,7 @@
             <div class="card card-body">
                 <form method="get">
                     {% csrf_token %}
-                    {{ filter.form.as_table }}
+                    {{ filter.as_table }}
                     <button class="btn btn-primary" type="submit">Search</button>
                 </form>
             </div>
@@ -17,7 +17,7 @@
     </div>
     <br>
 
-    {% for data in filter.qs %}
+    {% for data in riskdatasets %}
 
         <div class="row">
             <div class="col-md">

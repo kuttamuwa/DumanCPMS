@@ -6,7 +6,7 @@ from checkaccount.models import CheckAccount, RelatedBlackList
 
 # Create your models here.
 # dependent with CheckAccount application
-from risk_analysis.errors import MaturitySpeedError, BalanceError
+from risk_analysis.errors import BalanceError
 
 
 class DataSetManager(models.Manager):
@@ -103,8 +103,6 @@ class DataSetModel(BaseModel):
 
     related_customer = models.ForeignKey(CheckAccount, on_delete=models.PROTECT, verbose_name='İlişkili Müşteri',
                                          null=True)
-    internal_customer_id = models.IntegerField(db_column='INTERNAL_CUSTOMER_ID', help_text='İç Müşteri Numarası',
-                                               null=False, verbose_name='İç Müşteri No')
 
     limit = models.PositiveIntegerField(db_column='LIMIT', null=False, verbose_name='Limit')  # 500 0000 vs
     warrant_state = models.BooleanField(db_column='WARRANT_STATE', help_text='teminat durumu',
@@ -186,7 +184,7 @@ class DataSetModel(BaseModel):
                 and i.verbose_name not in ('basemodel ptr',)]
 
     def __str__(self):
-        return CheckAccount.objects.get(customer_id=self.related_customer)
+        return f"Related Customer : {self.related_customer.firm_full_name}"
 
     class Meta:
         db_table = 'RISK_DATA'

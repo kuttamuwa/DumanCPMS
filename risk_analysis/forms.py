@@ -1,10 +1,8 @@
-from bootstrap_modal_forms.forms import BSModalForm, BSModalModelForm
-from django.forms import inlineformset_factory
+from bootstrap_modal_forms.forms import BSModalForm
+from crispy_forms.tests.forms import forms
 
 from checkaccount.models import CheckAccount
 from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList
-from crispy_forms.tests.forms import forms
-from django import forms as djforms
 
 
 class SGKImportDataForm(forms.ModelForm):
@@ -52,3 +50,10 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
         model = DataSetModel
         fields = ()
 
+
+class RiskAnalysisRetrieveForm(BSModalForm):
+    related_customer = forms.ModelChoiceField(queryset=CheckAccount.objects.all(),
+                                              required=False)
+
+    class Meta:
+        fields = ['related_customer']

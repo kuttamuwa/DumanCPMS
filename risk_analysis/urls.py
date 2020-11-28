@@ -25,10 +25,7 @@ urlpatterns = [
                                                                template_name='risk_analysis/tax_data_retrieve.html')),
 
     # retrieving created risk analysis dataset
-    path('retrieve/', views.RetrieveRiskAnalysisFormView.as_view(filterset_class=RiskAnalysisFilter,
-                                                                 template_name=
-                                                                 'risk_analysis/risk_analysis_retrieve.html'),
-         name='risk_analysis-search'),
+    path('retrieve/', views.RetrieveRiskAnalysisFormView.as_view(), name='risk_analysis-search'),
 
     path('analyze', views.RiskAnalysisListView.as_view(), name='risk-analyze'),
     path('analyze/<int:customer_id>', views.RiskAnalysisListView.as_view(), name='risk-analyze-customer'),

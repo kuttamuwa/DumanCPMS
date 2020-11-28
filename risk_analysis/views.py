@@ -3,28 +3,23 @@ from abc import ABC
 from collections import Counter
 
 import pandas as pd
-from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView, BSModalReadView, BSModalDeleteView, \
-    BSModalFormView
-from datatableview.views import DatatableView
+from bootstrap_modal_forms.generic import BSModalFormView
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View, generic
-from django.views.generic import ListView
-from django.views.generic.edit import FormView, CreateView
+from django.views.generic.edit import FormView
 from django_filters.views import FilterView
 
 from DumanCPMS.settings import MEDIA_ROOT
 from checkaccount.models import CheckAccount
 from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, \
-    TAXImportDataForm
+    TAXImportDataForm, RiskAnalysisRetrieveForm
 from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList
 
 
@@ -203,8 +198,33 @@ class UploadRiskAnalysisDataView(FormView):
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
-class RetrieveRiskAnalysisFormView(FilterView):
-    pass
+class RetrieveRiskAnalysisFormView(BSModalFormView):
+    template_name = 'risk_analysis/risk_analysis_retrieve.html'
+    form_class = RiskAnalysisRetrieveForm
+
+    def get(self, request, *args, **kwargs):
+        related_customer_id = request.GET.get('related_customer')
+        if related_customer_id is None or related_customer_id == "":
+            riskdatasets = DataSetModel.objects.all()
+            return render(request, self.template_name, context={'filter': self.form_class,
+                                                                'riskdatasets': riskdatasets})
+        else:
+            riskds = DataSetModel.objects.filter(
+                related_customer=CheckAccount.objects.get(customer_id=related_customer_id))
+            return render(request, self.template_name, context={'filter': self.form_class,
+                                                                'riskdatasets': riskds})
+
+    def form_valid(self, form):
+        if 'clear' in self.request.POST:
+            self.filter = ''
+        else:
+            self.filter = '?related_customer=' + form.cleaned_data['related_customer']
+
+        response = super().form_valid(form)
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy('index') + self.filter
 
 
 class CreateRiskAnalysisFormView(View):

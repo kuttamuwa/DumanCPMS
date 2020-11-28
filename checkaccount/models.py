@@ -120,7 +120,7 @@ class CheckAccountManager(models.Manager):
 class CheckAccount(models.Model):
     firm_type = models.CharField(max_length=50, choices=CariHesapSpecs.get_firm_type_choices(),
                                  verbose_name='FIRM TYPE', help_text='Business type of the firm',
-                                 db_column='FIRM_TYPE', null=True)
+                                 db_column='FIRM_TYPE', null=True, default='t')
     firm_full_name = models.CharField(max_length=70, verbose_name='FIRM FULLNAME',
                                       db_column='FIRM_FULLNAME', null=True)
     taxpayer_number = models.CharField(unique=True, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
@@ -174,13 +174,13 @@ class CheckAccount(models.Model):
 
         if CariHesapSpecs.check_legal_entity(self.firm_type):
             # sahis firmasi
-            if self.birthplace is None and settings.ERROR_SETTINGS[LegalEntityMustHaveBirthPlace]:
-                raise LegalEntityMustHaveBirthPlace()
+            if self.birthplace is None:
+                LegalEntityMustHaveBirthPlace()
 
         else:
             # tuzel kisilik
-            if self.taxpayer_number is None and settings.ERROR_SETTINGS[SoleTraderMustHaveTaxPayerNumber]:
-                raise SoleTraderMustHaveTaxPayerNumber()
+            if self.taxpayer_number is None:
+                SoleTraderMustHaveTaxPayerNumber()
 
         super(CheckAccount, self).save(*args, **kwargs)
 

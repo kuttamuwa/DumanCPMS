@@ -24,9 +24,6 @@ class CariHesapSpecs(SystemProperties):
     IDENTITY_NUMBER_DIGIT = {'TR': 11,
                              'EN-US': 9,
                              'EN-EN': 11}
-    #
-    # SECTORS = {'TR': (('CBS', 'Cografi Bilgi Sistemleri'), ('IOT', 'AKILLI EV')),
-    #            'EN': (('GIS', 'Geographic Information System'), ('IOT', 'SMART_HOME'))}
 
     TABLE_NAME = {'TR': 'CARI_HESAP',
                   'EN': 'CHECK_ACCOUNT'}
