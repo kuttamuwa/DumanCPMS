@@ -3,6 +3,7 @@ from django.forms import inlineformset_factory
 
 from checkaccount.models import CheckAccount
 from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList
+from risk_analysis.analyze_models import RiskDSAnalyze
 from crispy_forms.tests.forms import forms
 from django import forms as djforms
 
@@ -47,11 +48,20 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
                   'Please consult on this page: ',
 
     )
-    # todo: şu help_text'in oraya sütunlara bakabileceği bir yer vermek lazım
-
     customer = forms.ModelChoiceField(queryset=CheckAccount.objects.all())
+    analyze_now = forms.BooleanField(required=False, label='Analyze now', initial=True)
+
+    def save(self, commit=True):
+        super(RiskAnalysisImportDataForm, self).save()
 
     class Meta:
         model = DataSetModel
-        fields = ()
+        fields = ['riskDataFile', 'customer']
 
+
+class RiskDSAnalyzeForm(BSModalForm):
+    risk_ds_analyze = forms.ModelChoiceField(queryset=RiskDSAnalyze.objects.all(),
+                                             help_text='Analyzed of risk dataset objects')
+
+    class Meta:
+        fields = ['risk_ds_analyze']

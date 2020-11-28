@@ -3,21 +3,17 @@ from abc import ABC
 from collections import Counter
 
 import pandas as pd
-from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView, BSModalReadView, BSModalDeleteView, \
-    BSModalFormView
-from datatableview.views import DatatableView
+from bootstrap_modal_forms import generic
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views import View, generic
-from django.views.generic import ListView
-from django.views.generic.edit import FormView, CreateView
+from django.views import View
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import FormView
 from django_filters.views import FilterView
 
 from DumanCPMS.settings import MEDIA_ROOT
@@ -26,6 +22,7 @@ from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, \
     TAXImportDataForm
 from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList
+from risk_analysis.analyze_models import RiskDSAnalyze
 
 
 def risk_main_page(request):
@@ -101,13 +98,15 @@ class UploadRiskAnalysisDataView(FormView):
                       context={'error': message})
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, context={'forms': RiskAnalysisImportDataForm})
+        return render(request, self.template_name, context={'forms': self.form_class})
 
     def post(self, request, *args, **kwargs):
         data = request.FILES['riskDataFile']
         customer_id = int(request.POST['customer'])
-
         related_check_account = CheckAccount.objects.get(customer_id=customer_id)
+
+        declared_form = RiskAnalysisImportDataForm(request.POST)
+        analyze_now_check = declared_form['analyze_now'].data
 
         if not str(data.name).endswith('.xlsx'):
             return render(request, template_name='risk_analysis/error_pages/general_error.html',
@@ -190,7 +189,7 @@ class UploadRiskAnalysisDataView(FormView):
             )
 
             analyzedata = AnalyzingRiskDataSet(risk_model_object, internal_customer_id=internal_customer_id,
-                                               analyze_right_now=True)
+                                               analyze_right_now=analyze_now_check)
             try:
                 # saving data
                 analyzedata.save_risk_dataset_data()
@@ -229,6 +228,20 @@ class CreateRiskAnalysisFormView(View):
             return HttpResponseRedirect('/success/')
 
         return render(request, self.template_name, {'form': form})
+
+
+# Analyzed of Risk Dataset
+class RetrieveRiskDSAnalyze(ListView):
+    model = RiskDSAnalyze
+    context_object_name = 'RiskDSAnalyze'
+    template_name = 'risk_analysis/analyzed_page/analyzed_retrieve.html'
+
+    def get(self, request, *args, **kwargs):
+        RiskDSAnalyze.import_all_riskdataset_into_analyze()
+        customer_names = [CheckAccount.objects.get(customer_id=r.risk_ds.customer_id_id)
+                          for r in RiskDSAnalyze.objects.all()]
+        kwargs['customer_names'] = customer_names
+        return super(RetrieveRiskDSAnalyze, self).get(request, *args, **kwargs)
 
 
 # SGK
@@ -296,6 +309,7 @@ class RetrieveSGKFormView(FilterView):
     pass
 
 
+# TAX
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class UploadTaxData(FormView):

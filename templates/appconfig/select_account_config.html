@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+    <div class="form-group">
+        <select class="custom-select" id="optid">
+            <option selected="">Select Check Account for Application Config</option>
+            {% for v in accounts %}
+                <option onclick="">{{ v.customer_id }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="button" class="bs-modal read-domain btn btn-sm btn-primary"
+                data-form-url="{% url 'app-index' v.id %}">
+          <span class="fa fa-eye"></span>
+        </button>
+    </div>
+{% endblock %}

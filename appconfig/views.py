@@ -6,18 +6,53 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic
 
 from appconfig.forms import DomainFilterForm, DomainModalForm, SubtypeFilterForm, SubtypeModalForm
 from appconfig.models import Domains, Subtypes
+from checkaccount.models import CheckAccount
 
 
-# indexes, main pages
-def all_indexes(request):
-    return render(request, 'appconfig/index.html',
-                  context={'domains': Domains.objects.all(),
-                           'subtypes': Subtypes.objects.all()})
+def index_main_page(request):
+    context = {'accounts': CheckAccount.objects.all()}
+    return render(request, 'appconfig/select_account_config.html', context=context)
+
+
+class Index(generic.ListView):
+    template_name = 'appconfig/index.html'
+    model = [Domains, Subtypes]
+
+    # context_object_name = ['domains', 'subtypes']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if 'type' in self.request.GET:
+            qs = qs.filter(book_type=int(self.request.GET['type']))
+        return qs
+
+    def get(self, request, *args, **kwargs):
+        check_account_id = request.path.split('/')[-1]
+        try:
+            account = CheckAccount.objects.get(customer_id=check_account_id)
+        except CheckAccount.DoesNotExist:
+            return render(request, 'appconfig/index.html',
+                          context={'error': 'This account id does not exists !'})
+
+        context = {'account': account, 'domains': Domains.objects.all(),
+                   'subtypes': Subtypes.objects.all()}
+        get_req = request.GET
+
+        if get_req:
+            domain_name = get_req.get('domain_name')
+            sub_domain = get_req.get('sub_domain')
+
+            if domain_name is not None:
+                context['domains'] = Domains.objects.filter(name=domain_name)
+
+            if sub_domain is not None:
+                context['subtypes'] = Subtypes.objects.filter(domain_id=sub_domain)
+        return render(request, 'appconfig/index.html', context=context)
 
 
 class SubtypeIndex(generic.ListView):
@@ -28,7 +63,7 @@ class SubtypeIndex(generic.ListView):
     def get_queryset(self):
         qs = super().get_queryset()
         if 'type' in self.request.GET:
-            qs = qs.filter(domain_name=str(self.request.GET['domain_name']))
+            qs = qs.filter(domain=self.request.GET['domain'])
         return qs
 
 
@@ -40,7 +75,7 @@ class DomainIndex(generic.ListView):
     def get_queryset(self):
         qs = super().get_queryset()
         if 'domain_name' in self.request.GET:
-            qs = qs.filter(domain_name=str(self.request.GET['domain_name']))
+            qs = qs.filter(name=str(self.request.GET['domain_name']))
         return qs
 
 
@@ -53,23 +88,27 @@ class DomainFilterView(BSModalFormView):
         if 'clear' in self.request.POST:
             self.filter = ''
         else:
-            self.filter = '?type=' + form.cleaned_data['type']
+            self.filter = '?domain_name=' + form.cleaned_data['name']
 
         response = super().form_valid(form)
         return response
 
     def get_success_url(self):
-        return reverse_lazy('index') + self.filter
+        return reverse_lazy('app-index') + self.filter
 
 
 class DomainCreateView(BSModalCreateView):
     template_name = 'appconfig/domaindirs/create_domain.html'
     form_class = DomainModalForm
     success_message = 'Success: Domain was created.'
-    success_url = reverse_lazy('app-index')
+
+    # success_url = reverse_lazy('app-index')
 
     def form_valid(self, form):
         return super(DomainCreateView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('app-index')
 
 
 class DomainUpdateView(BSModalUpdateView):
@@ -119,7 +158,7 @@ class SubtypeFilterView(BSModalFormView):
         if 'clear' in self.request.POST:
             self.filter = ''
         else:
-            self.filter = '?type=' + form.cleaned_data['type']
+            self.filter = '?sub_domain=' + str(form.cleaned_data['domain'].pk)
 
         response = super().form_valid(form)
         return response
@@ -134,11 +173,14 @@ class SubtypeCreateView(BSModalCreateView):
     success_message = 'Success: Subtype was created.'
     success_url = reverse_lazy('app-index')
 
-    # def get(self, request, *args, **kwargs):
-    #     return super(SubtypeCreateView, self).get(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return super(SubtypeCreateView, self).get(request, *args, **kwargs)
 
     def form_valid(self, form):
         return super(SubtypeCreateView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('app-index')
 
 
 class SubtypeUpdateView(BSModalUpdateView):

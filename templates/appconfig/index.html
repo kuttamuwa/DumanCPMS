@@ -1,8 +1,19 @@
 {% extends 'appconfig/base.html' %}
 
 {% block content %}
-    {% include 'appconfig/domaindirs/domain_index.html' %}
+    <p> {{ account }} </p>
 
-    {% include 'appconfig/subtypedirs/subtype_index.html' %}
+    {% if error %}
+        <div class="alert alert-dismissible alert-danger">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Hata !</strong> {{ error }}
+        </div>
+
+    {% else %}
+
+        {% include 'appconfig/domaindirs/domain_index.html' %}
+
+        {% include 'appconfig/subtypedirs/subtype_index.html' %}
+    {% endif %}
 
 {% endblock content %}

@@ -34,6 +34,9 @@ urlpatterns = [
     path('points/', views.RetrieveRiskPointsFormView.as_view(filterset_class=RiskPointsFilter,
                                                              template_name='risk_analysis/risk_points_retrieve.html')),
 
+    # general point of risk dataset
+    path('analyzed/', views.RetrieveRiskDSAnalyze.as_view(), name='analyzed-index'),
+
     # main urls
     path('', views.risk_main_page),
     path('get/<int:customer_id>/', views.get_risk_by_customer_id,

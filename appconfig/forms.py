@@ -18,6 +18,7 @@ class DomainFilterForm(BSModalForm):
     name = forms.CharField(max_length=100)
 
     class Meta:
+        model = Domains
         fields = ['name']
 
 
@@ -35,22 +36,20 @@ class SubtypeModalForm(BSModalModelForm):
     domain = forms.ModelChoiceField(queryset=Domains.objects.all(),
                                     help_text='Subtype is sub choicable value '
                                               'under domains')
-    subpoint = forms.FloatField(min_value=0.0, max_value=100.0, help_text='Point between intervals')
-    min_interval = forms.FloatField(max_value=100, min_value=0.0, help_text='Minimum interval')
+    pts = forms.FloatField(min_value=0.0, max_value=100.0, help_text='Point between intervals')
+    min_interval = forms.FloatField(help_text='Minimum interval')
 
-    max_interval = forms.FloatField(max_value=100, min_value=0.0, help_text='Maximum interval')
-
-    def save(self, commit=True):
-        # subtypes_point_sum_exceeds_100(self.subpoint, self.domain)
-        super(SubtypeModalForm, self).save()
+    max_interval = forms.FloatField(help_text='Maximum interval')
 
     class Meta:
         model = Subtypes
-        fields = ['domain', 'subpoint', 'min_interval', 'max_interval']
+        fields = ['domain', 'pts', 'min_interval', 'max_interval']
 
 
 class SubtypeFilterForm(BSModalForm):
-    name = forms.CharField(max_length=100)
+    domain = forms.ModelChoiceField(queryset=Domains.objects.all(),
+                                    help_text='Subtype is sub choicable value '
+                                              'under domains')
 
     class Meta:
-        fields = ['name']
+        fields = ['domain']

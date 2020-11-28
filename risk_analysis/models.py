@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-
 from checkaccount.models import CheckAccount, RelatedBlackList
 
 
@@ -146,7 +145,7 @@ class DataSetModel(BaseModel):
                                                         null=True, verbose_name='Son 12 ay iade yüzdesi')
     last_three_months_payback_comparison = models.SmallIntegerField(db_column='LAST_THREE_PAYBACK_COMP',
                                                                     help_text='Son 3 ay ile son 11 '
-                                                                              'aylık iade %si karşılaştırması',
+                                                                              'aylık iade yüzdesi karşılaştırması',
                                                                     null=True, verbose_name='Son 3 ay ile son 11 '
                                                                                             'aylık iade yüzdesi '
                                                                                             'karşılaştırması')
@@ -157,8 +156,8 @@ class DataSetModel(BaseModel):
 
     # todo: last_three_months_payback_comparison = ((son 3 ay - son 12 ay) / son 12 ay) * 100
 
-    avg_delay_time = models.SmallIntegerField(db_column='AVG_DELAY_TIME', help_text='Ort gecikme gun sayisi', null=True,
-                                              verbose_name='Ortalama gecikme gün sayısı')
+    avg_delay_time = models.SmallIntegerField(db_column='AVG_DELAY_TIME', help_text='Ortalama gecikme gun sayisi',
+                                              null=True, verbose_name='Ortalama gecikme gün sayısı')
     avg_delay_balance = models.PositiveIntegerField(db_column='AVG_DELAY_BALANCE',
                                                     help_text='Ortalama gecikme gun bakiyesi', null=True,
                                                     verbose_name='Ortalama gecikme gün bakiyesi')
@@ -253,3 +252,6 @@ class TaxDebtList(BaseModel):
 
     def __str__(self):
         return f"Tax Debts for  {self.dept_title}"
+
+
+

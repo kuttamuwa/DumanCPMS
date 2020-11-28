@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Analysis of Risk Datasets</h2>
+    <table class="table mb-0">
+        <thead>
+        <tr>
+            <th>Risk Dataset</th>
+            <th>General Point</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ana in RiskDSAnalyze %}
+            <tr>
+                <td>{{ ana.risk_ds }}</td>
+                <td>{{ ana.general_point }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

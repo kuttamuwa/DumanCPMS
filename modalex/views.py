@@ -55,7 +55,7 @@ class BookCreateView(BSModalCreateView):
     template_name = 'modalex/examples/create_book.html'
     form_class = BookModelForm
     success_message = 'Success: Book was created.'
-    success_url = reverse_lazy('domain-index')
+    success_url = reverse_lazy('index')
 
 
 class BookUpdateView(BSModalUpdateView):
