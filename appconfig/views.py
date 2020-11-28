@@ -35,11 +35,11 @@ class Index(generic.ListView):
         get_req = request.GET
 
         if get_req:
-            domain_name = get_req.get('name')
+            domain_name = get_req.get('domain_name')
             sub_domain = get_req.get('sub_domain')
 
             if domain_name is not None:
-                context['domains'] = Domains.objects.filter(name=domain_name)
+                context['domains'] = Domains.objects.filter(pk=domain_name)
 
             if sub_domain is not None:
                 context['subtypes'] = Subtypes.objects.filter(domain_id=sub_domain)
@@ -79,7 +79,7 @@ class DomainFilterView(BSModalFormView):
         if 'clear' in self.request.POST:
             self.filter = ''
         else:
-            self.filter = '?name=' + form.cleaned_data['name']
+            self.filter = '?domain_name=' + str(form.cleaned_data['domain_name'].pk)
 
         response = super().form_valid(form)
         return response
@@ -145,7 +145,7 @@ class SubtypeFilterView(BSModalFormView):
         if 'clear' in self.request.POST:
             self.filter = ''
         else:
-            self.filter = '?name=' + form.cleaned_data['name']
+            self.filter = '?sub_domain=' + str(form.cleaned_data['sub_domain'].pk)
 
         response = super().form_valid(form)
         return response

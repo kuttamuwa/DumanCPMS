@@ -15,7 +15,8 @@ def domains_point_sum_exceeds_100(value):
 
 
 class DomainFilterForm(BSModalForm):
-    name = forms.CharField(max_length=100)
+    domain_name = forms.ModelChoiceField(queryset=Domains.objects.all(), label='Domain Name',
+                                         required=False)
 
     class Meta:
         fields = ['name']
@@ -50,7 +51,7 @@ class SubtypeModalForm(BSModalModelForm):
 
 
 class SubtypeFilterForm(BSModalForm):
-    name = forms.CharField(max_length=100)
+    sub_domain = forms.ModelChoiceField(queryset=Domains.objects.all(), label='Domain', required=False)
 
     class Meta:
         fields = ['name']
