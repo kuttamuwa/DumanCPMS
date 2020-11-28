@@ -13,7 +13,7 @@
     {% for s in subtypes %}
         <tr>
             <th class="text-center" scope="row">{{ forloop.counter }}</th>
-            <td class="text-center">{{ s.domain_name }}</td>
+            <td class="text-center">{{ s.domain.name }}</td>
             <td class="text-center">{{ s.pts }}</td>
             <td class="text-center">{{ s.min_interval }}</td>
             <td class="text-center">{{ s.max_interval }}</td>

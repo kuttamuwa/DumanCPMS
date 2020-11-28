@@ -14,10 +14,36 @@ from appconfig.models import Domains, Subtypes
 
 
 # indexes, main pages
-def all_indexes(request):
-    return render(request, 'appconfig/index.html',
-                  context={'domains': Domains.objects.all(),
-                           'subtypes': Subtypes.objects.all()})
+from checkaccount.models import CheckAccount
+
+
+class Index(generic.ListView):
+    template_name = 'appconfig/index.html'
+    model = [Domains, Subtypes]
+
+    # context_object_name = ['domains', 'subtypes']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if 'type' in self.request.GET:
+            qs = qs.filter(book_type=int(self.request.GET['type']))
+        return qs
+
+    def get(self, request, *args, **kwargs):
+        context = {'domains': Domains.objects.all(),
+                   'subtypes': Subtypes.objects.all()}
+        get_req = request.GET
+
+        if get_req:
+            domain_name = get_req.get('name')
+            sub_domain = get_req.get('sub_domain')
+
+            if domain_name is not None:
+                context['domains'] = Domains.objects.filter(name=domain_name)
+
+            if sub_domain is not None:
+                context['subtypes'] = Subtypes.objects.filter(domain_id=sub_domain)
+        return render(request, 'appconfig/index.html', context=context)
 
 
 class SubtypeIndex(generic.ListView):
@@ -53,13 +79,13 @@ class DomainFilterView(BSModalFormView):
         if 'clear' in self.request.POST:
             self.filter = ''
         else:
-            self.filter = '?type=' + form.cleaned_data['type']
+            self.filter = '?name=' + form.cleaned_data['name']
 
         response = super().form_valid(form)
         return response
 
     def get_success_url(self):
-        return reverse_lazy('index') + self.filter
+        return reverse_lazy('app-index') + self.filter
 
 
 class DomainCreateView(BSModalCreateView):
@@ -119,7 +145,7 @@ class SubtypeFilterView(BSModalFormView):
         if 'clear' in self.request.POST:
             self.filter = ''
         else:
-            self.filter = '?type=' + form.cleaned_data['type']
+            self.filter = '?name=' + form.cleaned_data['name']
 
         response = super().form_valid(form)
         return response

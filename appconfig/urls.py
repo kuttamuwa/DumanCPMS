@@ -8,7 +8,7 @@ from DumanCPMS.urls import cviews
 
 
 urlpatterns = [
-    path('', views.all_indexes, name='app-index'),
+    path('', views.Index.as_view(), name='app-index'),
 
     # domains crud
     path('domains/', views.DomainIndex.as_view(), name='domain-index'),
