@@ -297,10 +297,10 @@ class DeleteAccountDocumentsView(DeleteView):
     # success_url = 'checkaccount/docs/delete/succeed/'
 
     def post(self, request, *args, **kwargs):
-        super(DeleteAccountDocumentsView, self).post(request, *args, **kwargs)
+        return super(DeleteAccountDocumentsView, self).post(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        super(DeleteAccountDocumentsView, self).get(request, *args, **kwargs)
+        return super(DeleteAccountDocumentsView, self).get(request, *args, **kwargs)
 
 
 class CheckAccountInitialProcesses:
