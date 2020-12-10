@@ -9,11 +9,11 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://127.0.0.1:5432/dcpms_dev</jdbc-url>
     </data-source>
-    <data-source source="LOCAL" name="dcpms_dev@localhost" uuid="2d24262e-4067-4812-b6ec-8bbb5245fdbf">
+    <data-source source="LOCAL" name="dcpms_de@localhost" uuid="2d24262e-4067-4812-b6ec-8bbb5245fdbf">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/dcpms_dev</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/dcpms_de</jdbc-url>
     </data-source>
   </component>
 </project>

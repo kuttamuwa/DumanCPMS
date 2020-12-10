@@ -139,7 +139,8 @@ class CheckAccount(models.Model):
                                                   db_column='FIRM_KEY_PERSON', null=True)
     sector = models.ForeignKey(Sectors, on_delete=models.SET_NULL, null=True, verbose_name='Sektör')
 
-    city = models.ForeignKey(Cities, on_delete=models.SET_NULL, null=True, verbose_name='Şehir')  # if city | district goes?
+    city = models.ForeignKey(Cities, on_delete=models.SET_NULL, null=True,
+                             verbose_name='Şehir')  # if city | district goes?
     district = models.ForeignKey(Districts, on_delete=models.SET_NULL, null=True, verbose_name='İlçe')
 
     phone_number = models.CharField(max_length=15, unique=True, db_column='PHONE_NUMBER',
@@ -191,21 +192,21 @@ class AccountDocuments(models.Model):
     activity_certificate_pdf = models.FileField(
         upload_to='activity_certificates/pdfs/',
         verbose_name=AccountDocumentsSpec.get_activity_certificate_verbose_name(),
-        db_column='ACTIVITY_CERTIFICATE_PATH')
+        db_column='ACTIVITY_CERTIFICATE_PATH', null=True)
 
     tax_return_pdf = models.FileField(
         upload_to='tax_return/pdfs/', verbose_name=AccountDocumentsSpec.get_tax_return_verbose_name(),
-        db_column='TAX_RETURN_PATH')
+        db_column='TAX_RETURN_PATH', null=True)
 
     authorized_signatures_list_pdf = models.FileField(
         upload_to='authorized_signatures_list/pdfs/',
         verbose_name=AccountDocumentsSpec.get_authorized_signatures_list_verbose_name(),
-        db_column='AUTHORIZED_SIG_LIST')
+        db_column='AUTHORIZED_SIG_LIST', null=True)
 
     attachment_id = models.AutoField(primary_key=True)
 
     # if customer was deleted?
-    customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
+    customer_id = models.OneToOneField(CheckAccount, on_delete=models.PROTECT)
     attachment_title = models.CharField(unique=False, null=True, blank=True, max_length=50, db_column='TITLE')
     description = models.CharField(unique=False, null=True, blank=True, max_length=250, db_column='DESCRIPTION')
 

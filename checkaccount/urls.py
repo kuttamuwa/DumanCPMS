@@ -28,7 +28,7 @@ urlpatterns = [
 
     path('get/<int:customer_id>/docs', views.GetAccountDocumentsList.as_view(), name='docs'),
 
-    path('get/<int:customer_id>/docs/delete', views.DeleteAccountDocumentsView.as_view(), name='delete_docs'),
+    path('get/<int:pk>/docs/delete', views.DeleteAccountDocumentsView.as_view(), name='delete_docs'),
 
     path('get/<pk>/delete', views.CheckAccountFormDeleteView.as_view(), name='delete_customer'),
 

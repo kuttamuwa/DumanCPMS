@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 # Create your views here.
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
@@ -73,37 +73,6 @@ def get_customer(request, customer_id, state=0):
         # todo: logging
         print("Bir hesaba bagli birden çok döküman tespit edildi.")
         acc_doc_state = True
-
-    # except AccountDocuments.MultipleObjectsReturned:
-    #     customer = CheckAccount.objects.get(customer_id=customer_id)
-    #     err = f'{customer.firm_full_name} has multiple documents ! This error can be solved via' \
-    #           f' deleting unnecessary document. Each checking account (customer) has to have only one document !'
-    #     return render(request, 'error_pages/DeletingDocumentErrorPage.html', context={'error': err})
-
-    # related partnership documents checking
-    # part_doc_state = False
-    # try:
-    #     PartnershipDocuments.objects.get(customer_id=customer_id)
-    #     part_doc_state = True
-    #
-    # except PartnershipDocuments.DoesNotExist:
-    #     pass
-    #
-    # except PartnershipDocuments.MultipleObjectsReturned:
-    #     print("Bir hesaba bagli birden çok döküman tespit edildi.")
-    #     part_doc_state = True
-    #
-    # # related Customer Bank Information
-    # bank_state = False
-    # try:
-    #     CustomerBank.objects.get(customer_id=customer_id)
-    #     bank_state = True
-    #
-    # except CustomerBank.DoesNotExist:
-    #     pass
-    #
-    # except CustomerBank.MultipleObjectsReturned:
-    #     bank_state = True
 
     if request.method == 'GET':
         context = {'checkaccount': check_account, 'state': state, 'acc_doc_state': acc_doc_state,
@@ -216,22 +185,96 @@ class GetAccountDocumentsList(ListView):
 class UploadAccountDocumentsView(CreateView):
     model = AccountDocuments
     form_class = UploadAccountDocumentForm
-    # success_url = reverse_lazy('docs', kwargs={'customer_id': })
+    success_url = reverse_lazy('docs')
     template_name = 'checkaccount/upload_account_document.html'
+
+    def post(self, request, *args, **kwargs):
+        return super(UploadAccountDocumentsView, self).post(request, *args, **kwargs)
+
+    def file_all_check(self):
+        checkaccount_id = self.kwargs.get('customer_id')
+        doc_control = self.document_control(checkaccount_id)
+        if all(doc_control):
+            return True
+        else:
+            return False
+
+    def get(self, request, *args, **kwargs):
+        if self.file_all_check():
+            # If all file uploaded?
+            return redirect(reverse('docs', kwargs=self.kwargs))
+        super(UploadAccountDocumentsView, self).get(request, *args, **kwargs)
+
+    def get_form(self, form_class=None):
+        f = super(UploadAccountDocumentsView, self).get_form(form_class=form_class)
+
+        if self.request.method == 'POST':
+            if f.is_valid():
+                check_account = CheckAccount.objects.get(customer_id=int(self.request.path.split("/")[-2]))
+                f.instance.customer_id = check_account
+                try:
+                    f.instance = AccountDocuments.objects.get(customer_id=check_account)
+                except AccountDocuments.DoesNotExist:
+                    # never been created
+                    pass
+
+        if self.request.method == 'GET':
+            f = self.form_state_manipulation(f, self.kwargs['customer_id'])
+
+        return f
+
+    def form_state_manipulation(self, form, customer_id):
+        doc_control = self.document_control(customer_id)
+        trpname = AccountDocuments.tax_return_pdf.field.attname
+        aslpname = AccountDocuments.authorized_signatures_list_pdf.field.attname
+        acpname = AccountDocuments.activity_certificate_pdf.field.attname
+
+        if doc_control[trpname] is not None:
+            form.fields.get(trpname).disabled = True
+
+        if doc_control[aslpname] is not None:
+            form.fields.get(aslpname).disabled = True
+
+        if doc_control[acpname] is not None:
+            form.fields.get(acpname).disabled = True
+
+        return form
 
     def get_success_url(self):
         # file uploading completed
         # referring document page
         return reverse_lazy('docs', kwargs=self.kwargs)
 
+    def document_control(self, check_account_pk):
+        trpname = AccountDocuments.tax_return_pdf.field.attname
+        aslpname = AccountDocuments.authorized_signatures_list_pdf.field.attname
+        acpname = AccountDocuments.activity_certificate_pdf.field.attname
+
+        result_dict = {acpname: None, aslpname: None, trpname: None}
+
+        try:
+            acc = AccountDocuments.objects.get(customer_id=check_account_pk)
+
+            if acc.activity_certificate_pdf.name:
+                result_dict[acpname] = True
+            if acc.authorized_signatures_list_pdf.name:
+                result_dict[aslpname] = True
+            if acc.tax_return_pdf.name:
+                result_dict[trpname] = True
+
+        except AccountDocuments.DoesNotExist:
+            print(f"{check_account_pk} has no Account Documents")
+
+        finally:
+            return result_dict
+
     def get_context_data(self, **kwargs):
         customer_id = self.kwargs.get('customer_id')
-        context = super().get_context_data(**kwargs)
+        context = super(UploadAccountDocumentsView, self).get_context_data(**kwargs)
 
         if customer_id is not None:
             check_account = CheckAccount.objects.get(customer_id=customer_id)
             context['check_account'] = check_account
-
         return context
 
     def form_valid(self, form):
@@ -239,8 +282,7 @@ class UploadAccountDocumentsView(CreateView):
         form.instance.related_customer = account
         form.instance.customer_id = account
 
-        form.save()
-        return HttpResponseRedirect(self.get_success_url())
+        return super(UploadAccountDocumentsView, self).form_valid(form=form)
 
 
 def delete_succeed_doc(request):
@@ -250,19 +292,15 @@ def delete_succeed_doc(request):
 class DeleteAccountDocumentsView(DeleteView):
     model = AccountDocuments
     template_name = 'checkaccount/delete_check_account.html'
-    pk_url_kwarg = 'customer_id'
-    success_url = 'checkaccount/docs/delete/succeed/'
 
-    def get_context_data(self, **kwargs):
-        customer_id = self.kwargs.get('customer_id')
-        docs = AccountDocuments.objects.filter(customer_id=customer_id)
+    # pk_url_kwarg = 'attachment_id'
+    # success_url = 'checkaccount/docs/delete/succeed/'
 
-        context = super().get_context_data(**kwargs)
+    def post(self, request, *args, **kwargs):
+        super(DeleteAccountDocumentsView, self).post(request, *args, **kwargs)
 
-        if docs is not None:
-            context['docs'] = docs
-
-        return context
+    def get(self, request, *args, **kwargs):
+        super(DeleteAccountDocumentsView, self).get(request, *args, **kwargs)
 
 
 class CheckAccountInitialProcesses:
