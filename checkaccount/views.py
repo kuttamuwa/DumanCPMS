@@ -181,6 +181,9 @@ class GetAccountDocumentsList(ListView):
     template_name = 'checkaccount/uploaded_account_documents.html'
     context_object_name = 'AccountDocuments'
 
+    def get(self, request, *args, **kwargs):
+        return super(GetAccountDocumentsList, self).get(request, *args, **kwargs)
+
 
 class UploadAccountDocumentsView(CreateView):
     model = AccountDocuments
@@ -300,6 +303,9 @@ class DeleteAccountDocumentsView(DeleteView):
         return super(DeleteAccountDocumentsView, self).post(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        acc = AccountDocuments.objects.get(pk=kwargs.get(self.pk_url_kwarg))
+        acc.delete_by_type(int(request.path.split("/")[4]))
+
         return super(DeleteAccountDocumentsView, self).get(request, *args, **kwargs)
 
 

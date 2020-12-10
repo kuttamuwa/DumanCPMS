@@ -9,7 +9,6 @@
             <th>Tax Return</th>
             <th>Authorized Signatures List</th>
             <th>Download</th>
-            {#            <th>Delete</th>#}
         </tr>
         </thead>
         <tbody>
@@ -20,7 +19,7 @@
                     <a href="{{ doc.activity_certificate_pdf.url }}" download class="btn btn-primary btn-sm">
                         Download PDF
                     </a>
-                    <a href="{% url 'delete_docs' pk=doc.pk %}"
+                    <a href="{% url 'delete_docs' pk=doc.pk type=1%}"
                        class="btn btn-primary btn-sm">
                         Delete PDF
                     </a>
@@ -30,7 +29,7 @@
                     <a href="{{ doc.tax_return_pdf.url }}" download class="btn btn-primary btn-sm">
                         Download PDF
                     </a>
-                    <a href="{% url 'delete_docs' pk=doc.pk %}" download
+                    <a href="{% url 'delete_docs' pk=doc.pk type=2 %}" download
                        class="btn btn-primary btn-sm">
                         Delete PDF
                     </a>
@@ -40,7 +39,7 @@
                     <a href="{{ doc.authorized_signatures_list_pdf.url }}" download class="btn btn-primary btn-sm">
                         Download PDF
                     </a>
-                    <a href="{% url 'delete_docs' pk=doc.pk %}" download
+                    <a href="{% url 'delete_docs' pk=doc.pk type=3%}" download
                        class="btn btn-primary btn-sm">
                         Delete PDF
                     </a>

@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from checkaccount import settings
 from .errors import SoleTraderMustHaveTaxPayerNumber, LegalEntityMustHaveBirthPlace
+from .fields import DumanFileField
 
 from .geo_models import GeoModel
 from .model_sys_specs import CariHesapSpecs, AccountDocumentsSpec, PartnershipDocumentsSpecs
@@ -189,19 +190,19 @@ class CheckAccount(models.Model):
 class AccountDocuments(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
-    activity_certificate_pdf = models.FileField(
+    activity_certificate_pdf = DumanFileField(
         upload_to='activity_certificates/pdfs/',
         verbose_name=AccountDocumentsSpec.get_activity_certificate_verbose_name(),
-        db_column='ACTIVITY_CERTIFICATE_PATH', null=True)
+        db_column='ACTIVITY_CERTIFICATE_PATH', null=True, blank=True)
 
-    tax_return_pdf = models.FileField(
+    tax_return_pdf = DumanFileField(
         upload_to='tax_return/pdfs/', verbose_name=AccountDocumentsSpec.get_tax_return_verbose_name(),
-        db_column='TAX_RETURN_PATH', null=True)
+        db_column='TAX_RETURN_PATH', null=True, blank=True)
 
-    authorized_signatures_list_pdf = models.FileField(
+    authorized_signatures_list_pdf = DumanFileField(
         upload_to='authorized_signatures_list/pdfs/',
         verbose_name=AccountDocumentsSpec.get_authorized_signatures_list_verbose_name(),
-        db_column='AUTHORIZED_SIG_LIST', null=True)
+        db_column='AUTHORIZED_SIG_LIST', null=True, blank=True)
 
     attachment_id = models.AutoField(primary_key=True)
 
@@ -219,12 +220,27 @@ class AccountDocuments(models.Model):
     def __str__(self):
         return f"{self.description}//{self.customer_id}"
 
-    def delete(self, *args, **kwargs):
-        self.activity_certificate_pdf.delete()
-        self.tax_return_pdf.delete()
-        self.authorized_signatures_list_pdf.delete()
+    def delete_by_type(self, _type):
+        if _type == 1:
+            # activity_certificate_pdf
+            self.delete_activity_certificate()
 
-        super().delete(*args, **kwargs)
+        elif _type == 2:
+            # tax_return_pdf
+            self.delete_tax_return_pdf()
+
+        elif _type == 3:
+            # authorized_signatures_list_pdf
+            self.delete_authorized_signatures_list_pdf()
+
+    def delete_activity_certificate(self):
+        self.activity_certificate_pdf.delete()
+
+    def delete_tax_return_pdf(self):
+        self.tax_return_pdf.delete()
+
+    def delete_authorized_signatures_list_pdf(self):
+        self.authorized_signatures_list_pdf.delete()
 
 
 class PartnershipDocuments(models.Model):
