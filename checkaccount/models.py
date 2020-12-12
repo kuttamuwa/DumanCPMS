@@ -203,7 +203,7 @@ class AccountDocuments(models.Model):
     attachment_id = models.AutoField(primary_key=True)
 
     # if customer was deleted?
-    customer_id = models.OneToOneField(CheckAccount, on_delete=models.PROTECT)
+    customer_id = models.OneToOneField(CheckAccount, on_delete=models.CASCADE)
     attachment_title = models.CharField(unique=False, null=True, blank=True, max_length=50, db_column='TITLE')
     description = models.CharField(unique=False, null=True, blank=True, max_length=250, db_column='DESCRIPTION')
 

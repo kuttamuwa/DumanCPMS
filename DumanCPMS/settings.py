@@ -111,7 +111,7 @@ WSGI_APPLICATION = 'DumanCPMS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcpms_de',
+        'NAME': 'dcpms_dev',
         'USER': 'postgres',
         'PASSWORD': 'figo1190',
         'HOST': 'localhost',

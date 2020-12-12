@@ -6,7 +6,7 @@ from checkaccount.models import CheckAccount, RelatedBlackList
 
 # Create your models here.
 # dependent with CheckAccount application
-from risk_analysis.errors import BalanceError
+from risk_analysis.errors import BalanceError, MaturitySpeedError
 
 
 class DataSetManager(models.Manager):
@@ -101,7 +101,7 @@ class BaseModel(models.Model):
 class DataSetModel(BaseModel):
     # objects = DataSetManager
 
-    related_customer = models.ForeignKey(CheckAccount, on_delete=models.PROTECT, verbose_name='İlişkili Müşteri',
+    related_customer = models.ForeignKey(CheckAccount, on_delete=models.CASCADE, verbose_name='İlişkili Müşteri',
                                          null=True)
 
     limit = models.PositiveIntegerField(db_column='LIMIT', null=False, verbose_name='Limit')  # 500 0000 vs
@@ -191,7 +191,7 @@ class DataSetModel(BaseModel):
 
 
 class RiskDataSetPoints(BaseModel):
-    customer_id = models.ForeignKey(CheckAccount, on_delete=models.PROTECT)
+    customer_id = models.ForeignKey(CheckAccount, on_delete=models.CASCADE)
     internal_customer_id = models.IntegerField(db_column='IC_MUSTERI_ID', null=False)
     son_12ay_ortalama_sapma_pts = models.PositiveSmallIntegerField(db_column='SON_SENE_ORT_SAPMA_PTS', null=True)
     kar_pts = models.PositiveSmallIntegerField(db_column='KAR_PTS', null=True)

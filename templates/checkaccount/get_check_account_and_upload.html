@@ -55,17 +55,31 @@
             </div>
         </div>
 
-        {#        Account Document situations#}
-            <div class="card border-secondary mb-3" style="max-width: 20rem;">
-                <div class="card-header">About Account Documents</div>
-                <div class="card-body">
-                    <h4 class="card-title">Do you want to check out your documents?
-                    Like activity certificate tax return and authorized signatures list</h4>
-                    <p class="card-text"><a href="/checkaccount/get/{{ checkaccount.customer_id }}/upload"> To see
-                        your files </a></p>
+        <div class="container" style="">
+            <div class="row">
+                <div class="card border-secondary mb-3" style="">
+                    <div class="card-header">About Account Documents</div>
+                    <div class="card-body">
+                        <h4 class="card-title">Do you want to check out your documents?
+                            Like activity certificate tax return and authorized signatures list</h4>
+                        <p class="card-text"><a href="/checkaccount/get/{{ checkaccount.customer_id }}/upload"> To see
+                            your files </a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="card bg-danger mb-3" style="">
+                    <div class="card-header">Deleting Check Account</div>
+                    <div class="card-body">
+                        <h4 class="card-title">Do you want to DELETE ACCOUNT?</h4>
+                        <p class="card-text"><a href="{% url 'delete_customer' pk=checkaccount.customer_id %}">
+                            To Delete your account </a></p>
+                    </div>
                 </div>
             </div>
 
-
+        </div>
     </div>
+
 {% endblock %}

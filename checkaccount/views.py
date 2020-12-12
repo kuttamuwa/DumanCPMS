@@ -76,8 +76,7 @@ def get_customer(request, customer_id, state=0):
 
     if request.method == 'GET':
         context = {'checkaccount': check_account, 'state': state, 'acc_doc_state': acc_doc_state,
-                   'part_doc_state': True, 'bank_state': True  # todo: bi ara incele. Diger dökümanları da nereden
-                   # alacağımıza bakmamız lazım
+                   'part_doc_state': True, 'bank_state': True
                    }
 
         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
