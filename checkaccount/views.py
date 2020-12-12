@@ -134,8 +134,13 @@ class CheckAccountFormCreateView(CreateView):
 
     def get_form(self, form_class=None):
         form = super(CheckAccountFormCreateView, self).get_form(form_class)
-        # test account
+        # form.instance.created_by = self.request.user
+
+        # FOR TESTING
         ca = tests.CheckAccountTest.test_create_one_account()
+        ca.created_by = self.request.user
+
+        form = CheckAccountCreateForm(instance=ca)
 
         return form
 

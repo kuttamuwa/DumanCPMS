@@ -8,7 +8,11 @@ from checkaccount.models import CheckAccount, AccountDocuments
 class CheckAccountCreateForm(forms.ModelForm):
     class Meta:
         model = CheckAccount
-        fields = '__all__'
+        exclude = ('Created by', )
+
+    def __init__(self, *args, **kwargs):
+        # self.base_fields['Created by'].disabled = True
+        super(CheckAccountCreateForm, self).__init__(*args, **kwargs)
 
 
 class LoginUserForm(forms.ModelForm):

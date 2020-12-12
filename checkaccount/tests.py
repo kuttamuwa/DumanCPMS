@@ -107,17 +107,28 @@ class CheckAccountTest(TestCase, ImportCityDistricts):
         # district also imports cities
         ImportCityDistricts().runforme()
 
+        s = Sectors.objects.get_or_create(name='GIS')
+        s = s[0]
+        sp = SysPersonnel.objects.get_or_create(username='sonurbilen')
+        sp = sp[0]
+
+        c = Cities.objects.get(name='CORUM')
+        d = Districts.objects.get(name='ISKILIP', city=c)
+
         c = CheckAccount.objects.get_or_create(firm_type='SAHIS_ISLETMESI', firm_full_name='UMUT TEST AS',
                                                taxpayer_number=18319776776,
                                                tax_department='UMRANIYE VERGI DAIRESI',
                                                firm_address='sample address',
                                                firm_key_contact_personnel='someone',
-                                               sector=Sectors.objects.get(name='GIS'),
+                                               city=c,
+                                               district=d,
+                                               sector=s,
                                                phone_number='05063791026',
                                                fax='02122451517', web_url='https://dumanarge.com',
                                                email_addr='info@dumanarge.com',
-                                               representative_person=SysPersonnel.objects.get_or_create(
-                                                   username='sonurbilen'))
+                                               representative_person=sp)
+
+        c = c[0]
         return c
 
     def test_create_accounts_from_excel(self):

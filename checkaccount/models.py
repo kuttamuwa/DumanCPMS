@@ -54,11 +54,11 @@ class Sectors(BaseModel):
 
 
 class SysPersonnel(BaseModel):
-    firstname = models.CharField(max_length=50, db_column='FIRSTNAME')
-    surname = models.CharField(max_length=50, db_column='SURNAME')
-    username = models.CharField(max_length=50, db_column='USERNAME')
+    firstname = models.CharField(max_length=50, db_column='FIRSTNAME', null=True)
+    surname = models.CharField(max_length=50, db_column='SURNAME', null=True)
+    username = models.CharField(max_length=50, db_column='USERNAME', null=True)
     department = models.ForeignKey(SysDepartments, on_delete=models.CASCADE, null=True)  # if department goes?
-    position = models.CharField(max_length=50, db_column='POSITION')
+    position = models.CharField(max_length=50, db_column='POSITION', null=True)
 
     class Meta:
         db_table = 'SYS_PERSONNEL'
@@ -78,8 +78,8 @@ class CheckAccount(BaseModel):
                                  db_column='FIRM_TYPE', null=True, default='t')
     firm_full_name = models.CharField(max_length=70, verbose_name='FIRM FULLNAME',
                                       db_column='FIRM_FULLNAME', null=True)
-    taxpayer_number = models.CharField(unique=True, help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise'
-                                                              'Vergi No',
+    taxpayer_number = models.CharField(unique=False,
+                                       help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise Vergi No',
                                        db_column='TAXPAYER_NUMBER', max_length=15, null=True)
 
     # validators cannot be used
@@ -98,11 +98,11 @@ class CheckAccount(BaseModel):
                              verbose_name='Şehir')  # if city | district goes?
     district = models.ForeignKey(Districts, on_delete=models.SET_NULL, null=True, verbose_name='İlçe')
 
-    phone_number = models.CharField(max_length=15, unique=True, db_column='PHONE_NUMBER',
+    phone_number = models.CharField(max_length=15, unique=False, db_column='PHONE_NUMBER',
                                     verbose_name='Telefon numarası', null=True)
-    fax = models.CharField(max_length=15, unique=True, db_column='FAX_NUMBER', verbose_name='Fax Numarası', null=True)
+    fax = models.CharField(max_length=15, unique=False, db_column='FAX_NUMBER', verbose_name='Fax Numarası', null=True)
     web_url = models.URLField(db_column='WEB_URL', verbose_name='Web adresi', null=True)
-    email_addr = models.EmailField(unique=True, db_column='EMAIL_ADDR', verbose_name='Email adresi', null=True)
+    email_addr = models.EmailField(unique=False, db_column='EMAIL_ADDR', verbose_name='Email adresi', null=True)
     representative_person = models.ForeignKey(SysPersonnel, on_delete=models.PROTECT,
                                               verbose_name='Temsilci', null=True)
 
