@@ -86,6 +86,8 @@ def get_customer(request, pk, state=0):
         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
 
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
 class CheckAccountView(DetailView):
     template_name = 'checkaccount/get_check_account_and_upload.html'
     model = CheckAccount
@@ -97,6 +99,8 @@ class CheckAccountView(DetailView):
         return super(CheckAccountView, self).get_queryset()
 
 
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
 class CheckAccountFormView(View):
     form_class = CheckAccountCreateForm
     initial = {'key': 'value'}
@@ -138,18 +142,16 @@ class CheckAccountFormCreateView(CreateView):
         return form
 
 
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
 class CheckAccountFormDeleteView(DeleteView):
     model = CheckAccount
     template_name = 'checkaccount/delete_checkaccount_succeeded.html'
     success_url = '/'
 
-    def get_queryset(self):
-        qs = super(CheckAccountFormDeleteView, self).get_queryset()
-        # todo : not a good way but it works
-        c_id = int(self.request.path.split("/")[3])
-        return qs.filter(customer_id=c_id)
 
-
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
 class CheckAccountFormUpdateView(UpdateView):
     # model = CheckAccountCreateForm
     fields = checkaccount_shown_fields

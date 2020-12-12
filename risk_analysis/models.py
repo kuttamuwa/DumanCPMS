@@ -99,7 +99,7 @@ class BaseModel(models.Model):
 class DataSetModel(BaseModel):
     # objects = DataSetManager
 
-    related_customer = models.ForeignKey(CheckAccount, on_delete=models.CASCADE, verbose_name='İlişkili Müşteri',
+    related_customer = models.ForeignKey(CheckAccount, on_delete=models.SET_NULL, verbose_name='İlişkili Müşteri',
                                          null=True)
 
     limit = models.PositiveIntegerField(db_column='LIMIT', null=False, verbose_name='Limit')  # 500 0000 vs
