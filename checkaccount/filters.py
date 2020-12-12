@@ -11,11 +11,3 @@ class CheckAccountFilter(FilterSet):
     class Meta:
         model = CheckAccount
         fields = ('firm_full_name', 'taxpayer_number')
-
-    #     # fields = {
-    #     #     'firm_type': ['exact'],
-    #     #     'firm_key_contact_personnel'
-    #     # }
-    #     fields = (
-    #         'firm_type', 'firm_full_name', 'taxpayer_number', 'firm_key_contact_personnel', 'representative_person',
-    #         'customer_id')

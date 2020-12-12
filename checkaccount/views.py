@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render, redirect
 # Create your views here.
 from django.urls import reverse_lazy, reverse
@@ -9,13 +9,10 @@ from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from django.views.generic.list import ListView
 from django_filters.views import FilterView
-from rest_framework import status
-from rest_framework.views import APIView
 
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
 from checkaccount.models import CheckAccount, AccountDocuments, RelatedBlackList, \
     SystemBlackList, KonkordatoList
-from checkaccount.serializers import CheckAccountSerializer
 from risk_analysis.models import SGKDebtListModel, TaxDebtList
 
 
@@ -82,25 +79,6 @@ def get_customer(request, customer_id, state=0):
         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
 
-# API VIEW
-class CheckAccountAPI(APIView):
-    # renderer_classes = [TemplateHTMLRenderer]
-    # template_name = 'templates/abc.html'
-
-    def get(self, request, format=None):
-        snippets = CheckAccount.objects.all()
-        serializer = CheckAccountSerializer(snippets, many=True)
-        return JsonResponse(dict(serializer.data[0]), status=201)
-
-    def post(self, request, format=None):
-        serializer = CheckAccountSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return HttpResponse(serializer.data, status=status.HTTP_201_CREATED)
-        return HttpResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# todo: replace with get_customer function !
 class CheckAccountFormView(View):
     form_class = CheckAccountCreateForm
     initial = {'key': 'value'}
@@ -125,12 +103,12 @@ class CheckAccountFormCreateView(CreateView):
     template_name = 'checkaccount/checkaccount_form.html'
     model = CheckAccount
 
-    # todo: customer_id sütununu doldurmanı falan istiyor, buralar düzeltilmeli.
+    # todo: customer sütununu doldurmanı falan istiyor, buralar düzeltilmeli.
     fields = '__all__'
 
     def get_success_url(self):
         # todo: true meselesi askıda?
-        return f'/checkaccount/get/{self.object.customer_id}'
+        return f'/checkaccount/get/{self.object.customer}'
 
     def form_valid(self, form):
         print("form took")
@@ -185,7 +163,7 @@ class GetAccountDocumentsList(ListView):
 
     def get_queryset(self):
         qset = super(GetAccountDocumentsList, self).get_queryset()
-        customer_id = self.kwargs.get('customer_id')
+        customer_id = self.kwargs.get('customer')
 
         return qset.filter(customer_id=customer_id)
 
@@ -200,7 +178,7 @@ class UploadAccountDocumentsView(CreateView):
         return super(UploadAccountDocumentsView, self).post(request, *args, **kwargs)
 
     def file_all_check(self):
-        checkaccount_id = self.kwargs.get('customer_id')
+        checkaccount_id = self.kwargs.get('customer')
         doc_control = self.document_control(checkaccount_id)
         if all(doc_control.values()):
             return True
@@ -219,7 +197,7 @@ class UploadAccountDocumentsView(CreateView):
         if self.request.method == 'POST':
             if f.is_valid():
                 check_account = CheckAccount.objects.get(customer_id=int(self.request.path.split("/")[-2]))
-                f.instance.customer_id = check_account
+                f.instance.customer = check_account
                 try:
                     f.instance = AccountDocuments.objects.get(customer_id=check_account)
                 except AccountDocuments.DoesNotExist:
@@ -227,7 +205,7 @@ class UploadAccountDocumentsView(CreateView):
                     pass
 
         if self.request.method == 'GET':
-            f = self.form_state_manipulation(f, self.kwargs['customer_id'])
+            f = self.form_state_manipulation(f, self.kwargs['customer'])
 
         return f
 
@@ -277,7 +255,7 @@ class UploadAccountDocumentsView(CreateView):
             return result_dict
 
     def get_context_data(self, **kwargs):
-        customer_id = self.kwargs.get('customer_id')
+        customer_id = self.kwargs.get('customer')
         context = super(UploadAccountDocumentsView, self).get_context_data(**kwargs)
 
         if customer_id is not None:
@@ -286,9 +264,9 @@ class UploadAccountDocumentsView(CreateView):
         return context
 
     def form_valid(self, form):
-        account = CheckAccount.objects.get(customer_id=self.kwargs.get('customer_id'))
+        account = CheckAccount.objects.get(customer_id=self.kwargs.get('customer'))
         form.instance.related_customer = account
-        form.instance.customer_id = account
+        form.instance.customer = account
 
         return super(UploadAccountDocumentsView, self).form_valid(form=form)
 
@@ -310,7 +288,7 @@ class DeleteAccountDocumentsView(DeleteView):
     def get(self, request, *args, **kwargs):
         acc = AccountDocuments.objects.get(pk=kwargs.get(self.pk_url_kwarg))
         acc.delete_by_type(int(request.path.split("/")[4]))
-        kw = {'customer_id': AccountDocuments.objects.get(pk=self.kwargs.get('pk')).customer_id_id}
+        kw = {'customer': AccountDocuments.objects.get(pk=self.kwargs.get('pk')).customer_id_id}
 
         return redirect(reverse('docs', kwargs=kw))
         # return super(DeleteAccountDocumentsView, self).get(request, *args, **kwargs)

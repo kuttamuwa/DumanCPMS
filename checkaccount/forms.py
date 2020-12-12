@@ -1,7 +1,7 @@
 from crispy_forms.tests.forms import forms
 from django.contrib.auth.models import User
 
-from checkaccount.fields import DumanModelFileField, DumanFormFileField
+from checkaccount.fields import DumanFormFileField
 from checkaccount.models import CheckAccount, AccountDocuments
 
 
@@ -25,4 +25,4 @@ class UploadAccountDocumentForm(forms.ModelForm):
 
     class Meta:
         model = AccountDocuments
-        exclude = ('customer_id',)
+        exclude = ('customer',)

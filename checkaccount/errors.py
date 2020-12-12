@@ -1,4 +1,4 @@
-class RiskAnalysisBaseException(Exception):
+class CheckAccountBaseException(Exception):
     raise_state = False
     message = None
     errors = None
@@ -8,22 +8,22 @@ class RiskAnalysisBaseException(Exception):
         self.errors = errors
 
         if self.raise_state:
-            raise super(RiskAnalysisBaseException, self).__init__(self.message)
+            raise super(CheckAccountBaseException, self).__init__(self.message)
         else:
             pass
 
 
-class NoLangSpecified(RiskAnalysisBaseException):
+class NoLangSpecified(CheckAccountBaseException):
     pass
 
 
-class SysException(RiskAnalysisBaseException):
+class SysException(CheckAccountBaseException):
     pass
 
 
-class LegalEntityMustHaveBirthPlace(RiskAnalysisBaseException):
+class LegalEntityMustHaveBirthPlace(CheckAccountBaseException):
     message = "Legal Entity must have birth place. Please select it"
 
 
-class SoleTraderMustHaveTaxPayerNumber(RiskAnalysisBaseException):
+class SoleTraderMustHaveTaxPayerNumber(CheckAccountBaseException):
     message = "Sole trader must have tax payer number or TCKNO"

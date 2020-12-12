@@ -180,12 +180,6 @@ class CheckAccountTest(TestCase, ImportFromExcelfile):
             email_addr = i['email_addr']
             representative_person = i['representative_person']
 
-            # foreign keys relations
-            if CariHesapSpecs.check_legal_entity(firm_type):
-                birthplace = Cities.objects.get_or_create(city_name=birthplace)
-            else:
-                birthplace = None
-
             # general information
             sector = Sectors.objects.get_or_create(name=sector)
             city = Cities.objects.get_or_create(city_name=city)
