@@ -1,16 +1,17 @@
+from bootstrap_modal_forms.generic import BSModalCreateView
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http.response import HttpResponseRedirect
 from django.shortcuts import render, redirect
 # Create your views here.
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
-from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from django.views.generic.list import ListView
 from django_filters.views import FilterView
 
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
+from checkaccount.model_sys_specs import CariHesapSpecs
 from checkaccount.models import CheckAccount, AccountDocuments, RelatedBlackList, \
     SystemBlackList, KonkordatoList
 from risk_analysis.models import SGKDebtListModel, TaxDebtList
@@ -23,11 +24,6 @@ def main_page(request):
 checkaccount_shown_fields = [i.name for i in CheckAccount._meta.get_fields() if i not in CheckAccount.get_auto_fields()]
 
 
-# Site views
-def checkaccount_mainpage(request):
-    return render(request, 'checkaccount/checkaccount_main.html')
-
-
 def not_in_checkaccount_group(user):
     if user.is_authenticated and user.groups.filter(name='CheckAccountAdmin').exists():
         return True
@@ -38,8 +34,16 @@ def not_in_checkaccount_group(user):
     # or user.user_permissions
 
 
-def succeed_create_check_account(request):
-    return render(request, 'checkaccount/succeed_form.html')
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
+class CAIndex(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    template_name = 'checkaccount/checkaccount_main.html'
+
+    def get_login_url(self):
+        if not self.request.user.is_authenticated():
+            return super(CAIndex, self).get_login_url()
+        else:
+            return self.template_name
 
 
 def get_customer(request, customer_id, state=0):
@@ -79,56 +83,29 @@ def get_customer(request, customer_id, state=0):
         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
 
-class CheckAccountFormView(View):
-    form_class = CheckAccountCreateForm
-    initial = {'key': 'value'}
-    template_name = 'checkaccount/checkaccount_form.html'
-
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            # <process form cleaned data>
-            return HttpResponseRedirect('/success/')
-
-        return render(request, self.template_name, {'form': form})
-
-
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
-class CheckAccountFormCreateView(CreateView):
+class CheckAccountFormCreateView(BSModalCreateView):
     template_name = 'checkaccount/checkaccount_form.html'
-    model = CheckAccount
-
-    # todo: customer sütununu doldurmanı falan istiyor, buralar düzeltilmeli.
-    fields = '__all__'
-
-    def get_success_url(self):
-        # todo: true meselesi askıda?
-        return f'/checkaccount/get/{self.object.customer}'
-
-    def form_valid(self, form):
-        print("form took")
-        return super().form_valid(form)
+    form_class = CheckAccountCreateForm
+    success_message = CariHesapSpecs.created_success_message
+    success_url = reverse('ca-index')
 
 
 class CheckAccountFormDeleteView(DeleteView):
     model = CheckAccount
     template_name = 'checkaccount/delete_checkaccount_succeeded.html'
-    success_url = '/'
 
     def get_queryset(self):
         qs = super(CheckAccountFormDeleteView, self).get_queryset()
-        # todo : not a good way but it works
         c_id = int(self.request.path.split("/")[3])
         return qs.filter(customer_id=c_id)
 
+    def get_success_url(self):
+        return redirect(reverse('ca-index'))
+
 
 class CheckAccountFormUpdateView(UpdateView):
-    # model = CheckAccountCreateForm
     fields = checkaccount_shown_fields
 
 

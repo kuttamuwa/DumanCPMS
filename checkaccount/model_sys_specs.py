@@ -31,6 +31,9 @@ class CariHesapSpecs(SystemProperties):
     key_contact_personnel = {'TR': 'FIRMA YETKILI KISISI', 'EN-EN': 'KEY CONTACT PERSONNEL',
                              'EN-US': 'KEY CONTACT PERSONNEL'}
 
+    created_success_message = {'TR': 'Hesap Başarıyla Oluşturuldu',
+                               'EN': 'Check Account was created successfully'}
+
 
 class AccountDocumentsSpec(SystemProperties):
     activity_certificate = {'verbose_name': {'TR': 'FAALIYET BELGESI',

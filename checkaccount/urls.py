@@ -9,7 +9,7 @@ from checkaccount.views import CheckAccountSearchView
 
 urlpatterns = [
     # pages and forms
-    path('', views.checkaccount_mainpage),
+    path('', views.checkaccount_mainpage, name='ca-index'),
     path('retrieve/', CheckAccountSearchView.as_view(filterset_class=CheckAccountFilter,
                                                      template_name='checkaccount/checkaccount_retrieve.html'),
          name='checkaccount-search'),
