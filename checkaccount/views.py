@@ -186,8 +186,9 @@ class GetAccountDocumentsList(ListView):
 
     def get_queryset(self):
         qset = super(GetAccountDocumentsList, self).get_queryset()
+        customer_id = self.kwargs.get('customer_id')
 
-        return qset
+        return qset.filter(customer_id=customer_id)
 
 
 class UploadAccountDocumentsView(CreateView):

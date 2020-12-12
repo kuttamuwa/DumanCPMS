@@ -240,7 +240,7 @@ class AccountDocuments(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        super(AccountDocuments, self).save(force_insert, force_update, using, update_fields)
+        return super(AccountDocuments, self).save(force_insert, force_update, using, update_fields)
 
 
 class PartnershipDocuments(models.Model):

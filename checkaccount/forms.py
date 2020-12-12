@@ -26,6 +26,3 @@ class UploadAccountDocumentForm(forms.ModelForm):
     class Meta:
         model = AccountDocuments
         exclude = ('customer_id',)
-
-    def save(self, commit=True):
-        return super(UploadAccountDocumentForm, self).save(commit=commit)
