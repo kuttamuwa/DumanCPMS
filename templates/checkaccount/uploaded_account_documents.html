@@ -16,33 +16,54 @@
             <tr>
                 <td>{{ doc.description }}</td>
                 <td>
-                    <a href="{{ doc.activity_certificate_pdf.url }}" download class="btn btn-primary btn-sm">
-                        Download PDF
-                    </a>
-                    <a href="{% url 'delete_docs' pk=doc.pk type=1%}"
-                       class="btn btn-primary btn-sm">
-                        Delete PDF
-                    </a>
+                    {% if doc.activity_certificate_pdf.name != "" %}
+                        <a href="{{ doc.activity_certificate_pdf.url }}" download class="btn btn-primary btn-sm">
+                            Download PDF
+                        </a>
+                        <a href="{% url 'delete_docs' pk=doc.pk type=1 %}"
+                           class="btn btn-primary btn-sm">
+                            Delete PDF
+                        </a>
+                    {% else %}
+                        <a href="{% url 'upload_docs' customer_id=doc.customer_id_id  %}" class="btn btn-primary
+                        alert alert-dismissible alert-danger">
+                            You haven't upload a file for Activity Certificate
+                        </a>
+                    {% endif %}
                 </td>
 
                 <td>
-                    <a href="{{ doc.tax_return_pdf.url }}" download class="btn btn-primary btn-sm">
-                        Download PDF
-                    </a>
-                    <a href="{% url 'delete_docs' pk=doc.pk type=2 %}" download
-                       class="btn btn-primary btn-sm">
-                        Delete PDF
-                    </a>
+                   {% if doc.tax_return_pdf.name != "" %}
+                        <a href="{{ doc.tax_return_pdf.url }}" download class="btn btn-primary btn-sm">
+                            Download PDF
+                        </a>
+                        <a href="{% url 'delete_docs' pk=doc.pk type=2 %}"
+                           class="btn btn-primary btn-sm">
+                            Delete PDF
+                        </a>
+                    {% else %}
+                        <a href="{% url 'upload_docs' customer_id=doc.customer_id_id  %}" class="btn btn-primary
+                        alert alert-dismissible alert-danger">
+                            You haven't upload a file for Tax Return.
+                        </a>
+                    {% endif %}
                 </td>
 
                 <td>
-                    <a href="{{ doc.authorized_signatures_list_pdf.url }}" download class="btn btn-primary btn-sm">
-                        Download PDF
-                    </a>
-                    <a href="{% url 'delete_docs' pk=doc.pk type=3%}" download
-                       class="btn btn-primary btn-sm">
-                        Delete PDF
-                    </a>
+                  {% if doc.authorized_signatures_list_pdf.name != "" %}
+                        <a href="{{ doc.authorized_signatures_list_pdf.url }}" download class="btn btn-primary btn-sm">
+                            Download PDF
+                        </a>
+                        <a href="{% url 'delete_docs' pk=doc.pk type=3 %}"
+                           class="btn btn-primary btn-sm">
+                            Delete PDF
+                        </a>
+                    {% else %}
+                        <a href="{% url 'upload_docs' customer_id=doc.customer_id_id  %}" class="btn btn-primary
+                        alert alert-dismissible alert-danger">
+                            You haven't upload a file for Authorized Signatures List
+                        </a>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

@@ -184,6 +184,11 @@ class GetAccountDocumentsList(ListView):
     def get(self, request, *args, **kwargs):
         return super(GetAccountDocumentsList, self).get(request, *args, **kwargs)
 
+    def get_queryset(self):
+        qset = super(GetAccountDocumentsList, self).get_queryset()
+
+        return qset
+
 
 class UploadAccountDocumentsView(CreateView):
     model = AccountDocuments
@@ -197,7 +202,7 @@ class UploadAccountDocumentsView(CreateView):
     def file_all_check(self):
         checkaccount_id = self.kwargs.get('customer_id')
         doc_control = self.document_control(checkaccount_id)
-        if all(doc_control):
+        if all(doc_control.values()):
             return True
         else:
             return False
@@ -206,7 +211,7 @@ class UploadAccountDocumentsView(CreateView):
         if self.file_all_check():
             # If all file uploaded?
             return redirect(reverse('docs', kwargs=self.kwargs))
-        super(UploadAccountDocumentsView, self).get(request, *args, **kwargs)
+        return super(UploadAccountDocumentsView, self).get(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
         f = super(UploadAccountDocumentsView, self).get_form(form_class=form_class)
@@ -232,13 +237,13 @@ class UploadAccountDocumentsView(CreateView):
         aslpname = AccountDocuments.authorized_signatures_list_pdf.field.attname
         acpname = AccountDocuments.activity_certificate_pdf.field.attname
 
-        if doc_control[trpname] is not None:
+        if doc_control[trpname]:
             form.fields.get(trpname).disabled = True
 
-        if doc_control[aslpname] is not None:
+        if doc_control[aslpname]:
             form.fields.get(aslpname).disabled = True
 
-        if doc_control[acpname] is not None:
+        if doc_control[acpname]:
             form.fields.get(acpname).disabled = True
 
         return form
@@ -253,7 +258,7 @@ class UploadAccountDocumentsView(CreateView):
         aslpname = AccountDocuments.authorized_signatures_list_pdf.field.attname
         acpname = AccountDocuments.activity_certificate_pdf.field.attname
 
-        result_dict = {acpname: None, aslpname: None, trpname: None}
+        result_dict = {acpname: False, aslpname: False, trpname: False}
 
         try:
             acc = AccountDocuments.objects.get(customer_id=check_account_pk)
@@ -305,8 +310,10 @@ class DeleteAccountDocumentsView(DeleteView):
     def get(self, request, *args, **kwargs):
         acc = AccountDocuments.objects.get(pk=kwargs.get(self.pk_url_kwarg))
         acc.delete_by_type(int(request.path.split("/")[4]))
+        kw = {'customer_id': AccountDocuments.objects.get(pk=self.kwargs.get('pk')).customer_id_id}
 
-        return super(DeleteAccountDocumentsView, self).get(request, *args, **kwargs)
+        return redirect(reverse('docs', kwargs=kw))
+        # return super(DeleteAccountDocumentsView, self).get(request, *args, **kwargs)
 
 
 class CheckAccountInitialProcesses:
