@@ -15,7 +15,7 @@ class RiskAnalysisFilter(FilterSet):
 class RiskPointsFilter(FilterSet):
     class Meta:
         model = RiskDataSetPoints
-        fields = ('customer',)
+        fields = ('customer_id',)
 
 
 class SGKDataFilter(FilterSet):

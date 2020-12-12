@@ -28,11 +28,11 @@ urlpatterns = [
     path('retrieve/', views.RetrieveRiskAnalysisFormView.as_view(), name='risk_analysis-search'),
 
     path('analyze', views.RiskAnalysisListView.as_view(), name='risk-analyze'),
-    path('analyze/<int:customer>', views.RiskAnalysisListView.as_view(), name='risk-analyze-customer'),
+    path('analyze/<int:customer_id>', views.RiskAnalysisListView.as_view(), name='risk-analyze-customer'),
 
     # main urls
     path('', views.risk_main_page),
-    path('get/<int:customer>/', views.get_risk_by_customer_id,
+    path('get/<int:customer_id>/', views.get_risk_by_customer_id,
          name='get-risk-data'),
 
     path('thanks/', views.generic_thanks),

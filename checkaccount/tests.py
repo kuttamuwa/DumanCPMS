@@ -8,70 +8,40 @@ import geopandas as gpd
 import pandas as pd
 
 from .models import SysDepartments, SysPersonnel, Cities, Districts, CheckAccount, Sectors
-from .models import CariHesapSpecs
 
 
-class ImportFromShapefile(TestCase, ABC):
-    shpfile_folder = r"C:\Users\LENOVO\PycharmProjects\DumanCPMS\geodata\turkeyshp"
-    target_shpfile = ""
+class ImportCityDistricts(ABC):
+    folder_path = r"C:\Users\LENOVO\PycharmProjects\DumanCPMS\testdata"
 
-    city_name_field = "adm1_en"  # related city name also
-    district_name_field = "adm2_en"
-    plate_number_field = "adm1"  # same with district
+    def __init__(self, iller='iller.xlsx', ilceler='ilceler.xlsx'):
+        self.iller_excel = os.path.join(self.folder_path, iller)
+        self.ilce_excel = os.path.join(self.folder_path, ilceler)
 
-    def import_from_shapefile(self):
-        print("import from shapefile test has begun")
+    def read_from_excel(self):
+        df_iller = pd.read_excel(self.iller_excel)
+        df_ilceler = pd.read_excel(self.ilce_excel)
 
-        file = os.path.join(self.shpfile_folder, self.target_shpfile)
-        if os.path.exists(file):
-            df = gpd.read_file(file)
-            return df
+        return df_iller, df_ilceler
 
-        else:
-            warnings.warn(f"{file} shapefile could not be found !")
+    def _save_iller(self, df):
+        for index, row in df.iterrows():
+            Cities.objects.get_or_create(name=row['adm1_en'])
 
+    def _save_ilceler(self, df):
+        for index, row in df.iterrows():
+            Districts.objects.get_or_create(name=row['adm2_en'], city=Cities.objects.get(name=row['adm1_en']))
 
-class ImportFromExcelfile(ABC):
-    excel_path = None
+    def _save_excels(self):
+        if len(Cities.objects.all()) > 5 and len(Districts.objects.all()) > 5:
+            return
 
-    def read_from_excel(self, *args, **kwargs):
-        if self.excel_path is None:
-            raise ValueError("Excel path could not be found !")
+        df_iller, df_ilceler = self.read_from_excel()
+        self._save_iller(df_iller)
+        self._save_ilceler(df_ilceler)
 
-        df = pd.read_excel(self.excel_path, *args, **kwargs)
-        return df
-
-
-class CitiesTest(ImportFromShapefile):
-    target_shpfile = 'iller/iller.shp'
-
-    def test_import_cities(self):
-        print(f"import from shapefile test has begun - CITIES : {self.target_shpfile}")
-        df = self.import_from_shapefile()
-        for i in df.iterrows():
-            c_name = i[1][self.city_name_field]
-            p_number = i[1][self.plate_number_field][4:]
-            print(f"city : {c_name}  -  plate : {p_number}")
-            Cities.objects.get_or_create(city_name=c_name, city_plate_number=p_number)
-
-
-class DistrictTest(ImportFromShapefile):
-    target_shpfile = 'ilceler/ilceler.shp'
-
-    def test_import_all_districts_shp(self):
-        CitiesTest().test_import_cities()
-
-        print("import from shapefile test has begun - DISTRICT")
-        df = self.import_from_shapefile()
-
-        for i in df.iterrows():
-            related_c_name = i[1][self.city_name_field]
-            d_name = i[1][self.district_name_field]
-            # print(f"related city name : {related_c_name}   -   district name : {d_name}")
-            Districts.objects.get_or_create(related_city_name=Cities.objects.get(city_name=related_c_name),
-                                            district_name=d_name)
-
-        print("all districts are imported")
+    def runforme(self):
+        self._save_excels()
+        print("Imported city and districts")
 
 
 class SysDepartmentsTest(TestCase):
@@ -125,7 +95,7 @@ class SectorTest(TestCase):
         print("Many sectors are created")
 
 
-class CheckAccountTest(TestCase, ImportFromExcelfile):
+class CheckAccountTest(TestCase, ImportCityDistricts):
     excel_path = r"C:\Users\LENOVO\PycharmProjects\DumanCPMS\excels\CheckAccountsTest.xls"
 
     @staticmethod
@@ -135,29 +105,26 @@ class CheckAccountTest(TestCase, ImportFromExcelfile):
         SectorTest.test_create_sectors()
 
         # district also imports cities
-        DistrictTest().test_import_all_districts_shp()
+        ImportCityDistricts().runforme()
 
-        CheckAccount.objects.get_or_create(firm_type='SAHIS_ISLETMESI', firm_full_name='UMUT TEST AS',
-                                           taxpayer_number=18319776776,
-                                           birthplace=Cities.objects.get(city_name='CORUM'),
-                                           tax_department='UMRANIYE VERGI DAIRESI',
-                                           firm_address='sample address',
-                                           firm_key_contact_personnel='someone',
-                                           sector=Sectors.objects.get(name='GIS'),
-                                           city=Cities.objects.get(city_name='CORUM'),
-                                           district=Districts.objects.get(district_name='ISKILIP'),
-                                           phone_number='05063791026',
-                                           fax='02122451517', web_url='https://dumanarge.com',
-                                           email_addr='info@dumanarge.com',
-                                           representative_person=SysPersonnel.objects.get(username='sonurbilen'))
+        c = CheckAccount.objects.get_or_create(firm_type='SAHIS_ISLETMESI', firm_full_name='UMUT TEST AS',
+                                               taxpayer_number=18319776776,
+                                               tax_department='UMRANIYE VERGI DAIRESI',
+                                               firm_address='sample address',
+                                               firm_key_contact_personnel='someone',
+                                               sector=Sectors.objects.get(name='GIS'),
+                                               phone_number='05063791026',
+                                               fax='02122451517', web_url='https://dumanarge.com',
+                                               email_addr='info@dumanarge.com',
+                                               representative_person=SysPersonnel.objects.get_or_create(
+                                                   username='sonurbilen'))
+        return c
 
     def test_create_accounts_from_excel(self):
         # required tables and data
         SysPersonnelTest.test_create_personels()
         SectorTest.test_create_sectors()
-
-        # district also imports cities
-        DistrictTest().test_import_all_districts_shp()
+        ImportCityDistricts().runforme()
 
         df = self.read_from_excel()
         print("excel verisi : \n"

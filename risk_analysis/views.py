@@ -469,13 +469,13 @@ class RiskAnalysisListView(generic.ListView):
     template_name = 'risk_analysis/risk_analysis_retrieve.html'
 
     def get(self, request, *args, **kwargs):
-        customer_id = kwargs.get('customer')
+        customer_id = kwargs.get('customer_id')
         if customer_id is None:
             return render(request, 'risk_analysis/analysis/select_customer_page.html',
                           context={'riskdatasets': DataSetModel.objects.all()})
 
         else:
-            customer_id = kwargs.get('customer')
+            customer_id = kwargs.get('customer_id')
             check_account = CheckAccount.objects.get(customer_id=customer_id)
 
             risk_data = DataSetModel.objects.get(related_customer=check_account)

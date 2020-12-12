@@ -1,9 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from checkaccount.models import CheckAccount, RelatedBlackList
-
-
+from checkaccount.models import CheckAccount
 # Create your models here.
 # dependent with CheckAccount application
 from risk_analysis.errors import BalanceError, MaturitySpeedError

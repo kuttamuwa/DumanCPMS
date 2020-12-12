@@ -17,6 +17,12 @@ class CheckAccountSerializer(serializers.ModelSerializer):
                   'district',
                   'phone_number',
                   'fax', 'web_url', 'email_addr',
-                  'customer',
+                  'customer_id',
                   'representative_person'
                   )
+
+
+# class BlackListSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = BlackList
+#         fields = ()  # todo: fill later.
