@@ -62,7 +62,7 @@
                     <div class="card-body">
                         <h4 class="card-title">Do you want to check out your documents?
                             Like activity certificate tax return and authorized signatures list</h4>
-                        <p class="card-text"><a href="/checkaccount/get/{{ checkaccount.customer_id }}/upload"> To see
+                        <p class="card-text"><a href="{% url 'docs' pk=checkaccount.pk %}"> To see
                             your files </a></p>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                     <div class="card-header">Deleting Check Account</div>
                     <div class="card-body">
                         <h4 class="card-title">Do you want to DELETE ACCOUNT?</h4>
-                        <p class="card-text"><a href="{% url 'delete_customer' pk=checkaccount.customer_id %}">
+                        <p class="card-text"><a href="{% url 'delete_customer' pk=checkaccount.pk %}">
                             To Delete your account </a></p>
                     </div>
                 </div>

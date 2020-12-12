@@ -8,9 +8,6 @@ from checkaccount.filters import CheckAccountFilter
 from checkaccount.views import CheckAccountSearchView
 
 urlpatterns = [
-    # api
-    path('api/get/', views.CheckAccountAPI.as_view()),
-
     # pages and forms
     path('', views.checkaccount_mainpage),
     path('retrieve/', CheckAccountSearchView.as_view(filterset_class=CheckAccountFilter,
@@ -20,13 +17,13 @@ urlpatterns = [
     path('create/', views.CheckAccountFormCreateView.as_view(),
          name='checkaccount-create'),
 
-    path('get/<int:customer_id>/<int:state>', views.get_customer),
-    path('get/<int:customer_id>/', views.get_customer),
+    path('get/<int:pk>/<int:state>', views.get_customer),
+    path('get/<int:pk>/', views.CheckAccountView.as_view(), name='get_customer'),
 
     # upload files
-    path('get/<int:customer_id>/upload', views.UploadAccountDocumentsView.as_view(), name='upload_docs'),
+    path('get/<int:pk>/upload', views.UploadAccountDocumentsView.as_view(), name='upload_docs'),
 
-    path('get/<int:customer_id>/docs', views.GetAccountDocumentsList.as_view(), name='docs'),
+    path('get/<int:pk>/docs', views.GetAccountDocumentsList.as_view(), name='docs'),
 
     path('get/<int:pk>/<int:type>/docs/delete', views.DeleteAccountDocumentsView.as_view(), name='delete_docs'),
 
