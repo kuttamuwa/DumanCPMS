@@ -152,6 +152,16 @@ class AccountDocuments(BaseAccountDocument):
     class Meta:
         db_table = 'ACCOUNT_DOCUMENTS'
 
+    def delete_by_type(self, _type):
+        if _type == 1:
+            self.activity_certificate_pdf.delete()
+
+        elif _type == 2:
+            self.tax_return_pdf.delete()
+
+        elif _type == 3:
+            self.authorized_signatures_list_pdf.delete()
+
 
 class PartnershipDocuments(BaseAccountDocument):
     # klasörde depolanabilir

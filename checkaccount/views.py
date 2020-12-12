@@ -186,7 +186,7 @@ class GetAccountDocumentsList(DetailView):
 
     def get(self, request, *args, **kwargs):
         try:
-            self.kwargs['pk'] = AccountDocuments.objects.get(customer=CheckAccount.objects.get(pk=self.kwargs['pk']))
+            self.kwargs['pk'] = AccountDocuments.objects.get(customer=CheckAccount.objects.get(**self.kwargs)).pk
 
         except AccountDocuments.DoesNotExist:
             return redirect('upload_docs', **kwargs)
@@ -326,12 +326,18 @@ class DeleteAccountDocumentsView(DeleteView):
         return super(DeleteAccountDocumentsView, self).post(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        acc = AccountDocuments.objects.get(pk=kwargs.get(self.pk_url_kwarg))
-        acc.delete_by_type(int(request.path.split("/")[4]))
-        kw = {'customer_id': AccountDocuments.objects.get(pk=self.kwargs.get('pk')).customer_id_id}
+        acc = AccountDocuments.objects.get(pk=self.kwargs.get(self.pk_url_kwarg))
+        acc.delete_by_type(int(self.kwargs.get('type')))
+        acc.save()
 
+        doc_pk = self.kwargs.get('pk')  # this pk belongs to doc
+        c_pk = AccountDocuments.objects.get(pk=doc_pk).customer.pk
+
+        kw = {'pk': c_pk}
         return redirect(reverse('docs', kwargs=kw))
-        # return super(DeleteAccountDocumentsView, self).get(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        super(DeleteAccountDocumentsView, self).delete(request, *args, **kwargs)
 
 
 class CheckAccountInitialProcesses:
