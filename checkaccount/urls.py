@@ -1,3 +1,4 @@
+from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.urls import path
@@ -14,7 +15,7 @@ urlpatterns = [
                                                      template_name='checkaccount/checkaccount_retrieve.html'),
          name='checkaccount-search'),
 
-    path('create/', views.CheckAccountFormCreateView.as_view(),
+    path('create/', views.CheckAccountFormCreateView2.as_view(),
          name='checkaccount-create'),
 
     path('get/<int:pk>/<int:state>', views.get_customer),

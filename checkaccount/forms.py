@@ -2,18 +2,13 @@ from crispy_forms.tests.forms import forms
 from dal import autocomplete
 from django.contrib.auth.models import User
 
-from checkaccount.models import CheckAccount, AccountDocuments, Districts
+from checkaccount.models import CheckAccount, AccountDocuments, Districts, Cities
 
 
 class CheckAccountCreateForm(forms.ModelForm):
-    another_field = forms.ModelChoiceField(queryset=Districts.objects.all(), empty_label='İl Seçiniz')
-
     class Meta:
         model = CheckAccount
         exclude = ('Created by',)
-        widgets = {
-            'another_field': autocomplete.ModelSelect2('cities-autocomplete', forward=['Cities'])
-        }
 
     def __init__(self, *args, **kwargs):
         super(CheckAccountCreateForm, self).__init__(*args, **kwargs)

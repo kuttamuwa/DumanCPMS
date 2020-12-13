@@ -12,7 +12,8 @@ from django_filters.views import FilterView
 from dal import autocomplete
 from checkaccount import tests
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
-from checkaccount.models import CheckAccount, AccountDocuments, SystemBlackList, KonkordatoList, ExternalBlackList
+from checkaccount.models import CheckAccount, AccountDocuments, SystemBlackList, KonkordatoList, ExternalBlackList, \
+    Cities, Districts
 from risk_analysis.models import SGKDebtListModel, TaxDebtList
 
 
@@ -82,11 +83,6 @@ def get_customer(request, pk, state=0):
         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
 
-class CitiesAutoComplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        pass
-
-
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
 class CheckAccountView(DetailView):
@@ -135,10 +131,10 @@ class CheckAccountFormCreateView(CreateView):
         # form.instance.created_by = self.request.user
 
         # FOR TESTING
-        ca = tests.CheckAccountTest.test_create_one_account()
-        ca.created_by = self.request.user
+        # ca = tests.CheckAccountTest.test_create_one_account()
+        # ca.created_by = self.request.user
 
-        form = CheckAccountCreateForm(instance=ca)
+        # form = CheckAccountCreateForm(instance=ca)
 
         return form
 
@@ -184,9 +180,6 @@ class GetAccountDocumentsList(DetailView):
     template_name = 'checkaccount/uploaded_account_documents.html'
     context_object_name = 'AccountDocuments'
 
-    # pk_url_kwarg = 'customer_id_id'
-    # slug_field = 'customer'
-
     def get(self, request, *args, **kwargs):
         try:
             self.kwargs['pk'] = AccountDocuments.objects.get(customer=CheckAccount.objects.get(**self.kwargs)).pk
@@ -195,18 +188,6 @@ class GetAccountDocumentsList(DetailView):
             return redirect('upload_docs', **kwargs)
 
         return super(GetAccountDocumentsList, self).get(request, *args, **kwargs)
-    #
-    # def get_queryset(self):
-    #     qset = super(GetAccountDocumentsList, self).get_queryset()
-    #     customer_id = self.kwargs.get('customer_id')
-    #     customer = CheckAccount.objects.get(pk=customer_id)
-    #
-    #     try:
-    #         self.kwargs['pk'] = AccountDocuments.objects.get(customer=customer).pk
-    #     except AccountDocuments.DoesNotExist:
-    #         pass
-    #
-    #     return qset.filter(customer=customer)
 
 
 class UploadAccountDocumentsView(CreateView):
