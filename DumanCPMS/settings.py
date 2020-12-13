@@ -39,7 +39,11 @@ INSTALLED_APPS = [
     # CORS
     'corsheaders',
 
-    # dashboard - dash
+    # autocomplete
+    'dal',
+    'dal_select2',
+    # 'grappelli',
+
 
     # project apps
     'checkaccount',

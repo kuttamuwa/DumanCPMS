@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http.response import JsonResponse, HttpResponse, HttpResponseRedirect
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render, redirect
 # Create your views here.
 from django.urls import reverse_lazy, reverse
@@ -8,16 +8,12 @@ from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
 from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
-from django.views.generic.list import ListView
 from django_filters.views import FilterView
-from rest_framework import status
-from rest_framework.views import APIView
-
+from dal import autocomplete
+from checkaccount import tests
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
 from checkaccount.models import CheckAccount, AccountDocuments, SystemBlackList, KonkordatoList, ExternalBlackList
-from checkaccount.serializers import CheckAccountSerializer
 from risk_analysis.models import SGKDebtListModel, TaxDebtList
-from checkaccount import tests
 
 
 def main_page(request):
@@ -84,6 +80,11 @@ def get_customer(request, pk, state=0):
                    }
 
         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
+
+
+class CitiesAutoComplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        pass
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')

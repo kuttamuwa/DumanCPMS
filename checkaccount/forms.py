@@ -1,18 +1,21 @@
 from crispy_forms.tests.forms import forms
+from dal import autocomplete
 from django.contrib.auth.models import User
-from django.forms import FileField
 
-from checkaccount.fields import DumanModelFileField, DumanFormFileField
-from checkaccount.models import CheckAccount, AccountDocuments
+from checkaccount.models import CheckAccount, AccountDocuments, Districts
 
 
 class CheckAccountCreateForm(forms.ModelForm):
+    another_field = forms.ModelChoiceField(queryset=Districts.objects.all(), empty_label='İl Seçiniz')
+
     class Meta:
         model = CheckAccount
         exclude = ('Created by',)
+        widgets = {
+            'another_field': autocomplete.ModelSelect2('cities-autocomplete', forward=['Cities'])
+        }
 
     def __init__(self, *args, **kwargs):
-        # self.base_fields['Created by'].disabled = True
         super(CheckAccountCreateForm, self).__init__(*args, **kwargs)
 
 
@@ -31,4 +34,3 @@ class UploadAccountDocumentForm(forms.ModelForm):
     class Meta:
         model = AccountDocuments
         exclude = ('customer', 'Created by')
-
