@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 # Create your views here.
 from django.urls import reverse_lazy, reverse
@@ -367,3 +367,9 @@ class CheckAccountInitialProcesses:
 #         name = fs.save(uploaded_file.name, uploaded_file)
 #         context['url'] = fs.url(name)
 #     return render(request, 'uploadtest.html', context)
+
+
+def filter_districts(request, city):
+    # todo: filtering districts
+    if request.method == 'POST' and request.is_ajax():
+        form = CheckAccountCreateForm(request.POST)

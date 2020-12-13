@@ -34,4 +34,6 @@ urlpatterns = [
     path('docs/delete/succeed/', views.delete_succeed_doc),
 
     path('loginapp/', auth_views.LoginView.as_view(), name='app-login'),
+
+    # path('ajaxtest/', views.ajaxtest, name='ajax-test'),
 ]
