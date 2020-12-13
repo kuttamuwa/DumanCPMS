@@ -15,7 +15,7 @@ urlpatterns = [
                                                      template_name='checkaccount/checkaccount_retrieve.html'),
          name='checkaccount-search'),
 
-    path('create/', views.CheckAccountFormCreateView2.as_view(),
+    path('create/', views.CheckAccountFormCreateView.as_view(),
          name='checkaccount-create'),
 
     path('get/<int:pk>/<int:state>', views.get_customer),
