@@ -16,16 +16,3 @@ class RiskPointsFilter(FilterSet):
     class Meta:
         model = RiskDataSetPoints
         fields = ('customer_id',)
-
-
-class SGKDataFilter(FilterSet):
-    class Meta:
-        model = SGKDebtListModel
-        fields = ('taxpayer_number', 'firm_title')
-
-
-class TaxDataFilter(FilterSet):
-    class Meta:
-        model = TaxDebtList
-        fields = ('tax_department', 'taxpayer_number', 'dept_title', 'real_operating_income',
-                  'dept_amount')

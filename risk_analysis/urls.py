@@ -1,6 +1,6 @@
 from django.urls import path
+
 from risk_analysis import views
-from risk_analysis.filters import RiskAnalysisFilter, RiskPointsFilter, SGKDataFilter, TaxDataFilter
 
 urlpatterns = [
     # create or import risk analysis dataset
@@ -12,18 +12,7 @@ urlpatterns = [
     path('create/importform', views.UploadRiskAnalysisDataView.as_view(),
          name='risk_analysis-upload'),
 
-    # additional data: sgk
-    path('create/importsgkdata', views.UploadSGKData.as_view(),
-         name='risk_analysis-sgkupload'),
-    path('retrieve/sgkdata', views.RetrieveSGKFormView.as_view(filterset_class=SGKDataFilter,
-                                                               template_name='risk_analysis/sgk_data_retrieve.html')),
-
-    # additional data : tax
-    path('create/importtaxdata', views.UploadTaxData.as_view(),
-         name='risk_analysis-taxupload'),
-    path('retrieve/taxdata', views.RetrieveTaxFormView.as_view(filterset_class=TaxDataFilter,
-                                                               template_name='risk_analysis/tax_data_retrieve.html')),
-
+    path('get/<int:risk_id>', views.RiskAnalysisDetailView.as_view()),
     # retrieving created risk analysis dataset
     path('retrieve/', views.RetrieveRiskAnalysisFormView.as_view(), name='risk_analysis-search'),
 

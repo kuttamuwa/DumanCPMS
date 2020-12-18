@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View, generic
+from django.views.generic import DetailView
 from django.views.generic.edit import FormView
 from django_filters.views import FilterView
 
@@ -32,6 +33,9 @@ def generic_thanks(request):
 
 
 def not_in_riskanalysis_group(user):
+    if user.is_superuser:
+        return True
+
     if user.is_authenticated and user.groups.filter(name='RiskAnalysisAdmin').exists():
         return True
     else:
@@ -194,6 +198,12 @@ class UploadRiskAnalysisDataView(FormView):
 
             except Exception as err:
                 return self.get_error_url(request, err)
+
+
+class RiskAnalysisDetailView(DetailView):
+    model = DataSetModel
+    template_name = 'checkaccount/uploaded_account_documents.html'
+    context_object_name = 'AccountDocuments'
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')

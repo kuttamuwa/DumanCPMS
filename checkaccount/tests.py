@@ -99,7 +99,7 @@ class CheckAccountTest(TestCase, ImportCityDistricts):
     excel_path = r"C:\Users\LENOVO\PycharmProjects\DumanCPMS\excels\CheckAccountsTest.xls"
 
     @staticmethod
-    def test_create_one_account():
+    def test_create_one_account(user=None):
         # required tables and data
         SysPersonnelTest.test_create_personels()
         SectorTest.test_create_sectors()
@@ -107,10 +107,11 @@ class CheckAccountTest(TestCase, ImportCityDistricts):
         # district also imports cities
         ImportCityDistricts().runforme()
 
-        s = Sectors.objects.get_or_create(name='GIS')
-        s = s[0]
-        sp = SysPersonnel.objects.get_or_create(username='sonurbilen')
+        s = Sectors.objects.get(name='GIS')
+        # s = s[0]
+        sp = SysPersonnel.objects.get_or_create(username='sonurbilen', created_by=user)
         sp = sp[0]
+        sp.save()
 
         c = Cities.objects.get(name='CORUM')
         d = Districts.objects.get(name='ISKILIP', city=c)
@@ -119,14 +120,13 @@ class CheckAccountTest(TestCase, ImportCityDistricts):
                                                taxpayer_number=18319776776,
                                                tax_department='UMRANIYE VERGI DAIRESI',
                                                firm_address='sample address',
-                                               firm_key_contact_personnel='someone',
+                                               firm_key_contact_personnel=sp,
                                                city=c,
                                                district=d,
                                                sector=s,
                                                phone_number='05063791026',
                                                fax='02122451517', web_url='https://dumanarge.com',
-                                               email_addr='info@dumanarge.com',
-                                               representative_person=sp)
+                                               email_addr='info@dumanarge.com')
 
         c = c[0]
         return c

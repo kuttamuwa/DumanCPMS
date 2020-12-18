@@ -11,7 +11,7 @@ from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from django_filters.views import FilterView
 from dal import autocomplete
 from checkaccount import tests
-from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
+from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm, CheckAccountCreateFormExplicit
 from checkaccount.models import CheckAccount, AccountDocuments, SystemBlackList, KonkordatoList, ExternalBlackList, \
     Cities, Districts
 from risk_analysis.models import SGKDebtListModel, TaxDebtList
@@ -98,45 +98,35 @@ class CheckAccountView(DetailView):
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
-class CheckAccountFormView(View):
-    form_class = CheckAccountCreateForm
-    initial = {'key': 'value'}
-    template_name = 'checkaccount/checkaccount_form.html'
-
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            # <process form cleaned data>
-            return HttpResponseRedirect('/success/')
-
-        return render(request, self.template_name, {'form': form})
-
-
-@method_decorator(login_required(login_url='/login'), name='dispatch')
-@method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
 class CheckAccountFormCreateView(CreateView):
     template_name = 'checkaccount/checkaccount_form.html'
     model = CheckAccount
     form_class = CheckAccountCreateForm
 
     def get_success_url(self):
-        return f'/checkaccount/get/{self.object.customer_id}'
+        return f'/checkaccount/get/{self.object.pk}'
 
     def get_form(self, form_class=None):
         form = super(CheckAccountFormCreateView, self).get_form(form_class)
-        # form.instance.created_by = self.request.user
 
-        # FOR TESTING
-        # ca = tests.CheckAccountTest.test_create_one_account()
-        # ca.created_by = self.request.user
+        if self.request.method == 'POST':
+            return form
 
-        # form = CheckAccountCreateForm(instance=ca)
+            # if form.is_valid():
+            #     form.save()
+            #
+            #     return form
 
-        return form
+        elif self.request.method == 'GET':
+            form.instance.created_by = self.request.user
+
+            # FOR TESTING
+            ca = tests.CheckAccountTest.test_create_one_account(self.request.user)
+            ca.created_by = self.request.user
+
+            form = CheckAccountCreateForm(instance=ca)
+
+            return form
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -369,7 +359,7 @@ class CheckAccountInitialProcesses:
 #     return render(request, 'uploadtest.html', context)
 
 
-def filter_districts(request, city):
-    # todo: filtering districts
-    if request.method == 'POST' and request.is_ajax():
-        form = CheckAccountCreateForm(request.POST)
+# def filter_districts(request, city):
+#     todo: filtering districts
+    # if request.method == 'POST' and request.is_ajax():
+    #     form = CheckAccountCreateForm(request.POST)

@@ -44,7 +44,7 @@ class SysDepartments(BaseModel):
 
 
 class Sectors(BaseModel):
-    name = models.CharField(max_length=50, unique=True, db_column='SECTOR_NAME')
+    name = models.CharField(max_length=50, unique=False, db_column='SECTOR_NAME', null=True)
 
     class Meta:
         db_table = 'SECTORS'
@@ -54,10 +54,11 @@ class Sectors(BaseModel):
 
 
 class SysPersonnel(BaseModel):
-    firstname = models.CharField(max_length=50, db_column='FIRSTNAME', null=True)
-    surname = models.CharField(max_length=50, db_column='SURNAME', null=True)
-    username = models.CharField(max_length=50, db_column='USERNAME', null=True)
-    department = models.ForeignKey(SysDepartments, on_delete=models.CASCADE, null=True)  # if department goes?
+    firstname = models.CharField(max_length=50, db_column='FIRSTNAME', null=True, unique=False)
+    surname = models.CharField(max_length=50, db_column='SURNAME', null=True, unique=False)
+    username = models.CharField(max_length=50, db_column='USERNAME', null=True, unique=False) # True
+    department = models.ForeignKey(SysDepartments, on_delete=models.CASCADE, null=True,
+                                   unique=False)  # if department goes?
     position = models.CharField(max_length=50, db_column='POSITION', null=True)
 
     class Meta:
@@ -89,9 +90,8 @@ class CheckAccount(BaseModel):
                                       null=True)
     firm_address = models.CharField(max_length=200, verbose_name='FIRM ADDRESS', db_column='FIRM_ADDRESS', null=True)
 
-    firm_key_contact_personnel = models.CharField(max_length=70,
-                                                  verbose_name='Firm Contact Name',
-                                                  db_column='FIRM_KEY_PERSON', null=True)
+    firm_key_contact_personnel = models.ForeignKey(SysPersonnel, max_length=70, on_delete=models.SET_NULL,
+                                                   verbose_name='Firm Contact Name', null=True)
     sector = models.ForeignKey(Sectors, on_delete=models.SET_NULL, null=True, verbose_name='Sektör')
 
     city = models.ForeignKey(Cities, on_delete=models.SET_NULL, null=True,
@@ -103,8 +103,6 @@ class CheckAccount(BaseModel):
     fax = models.CharField(max_length=15, unique=False, db_column='FAX_NUMBER', verbose_name='Fax Numarası', null=True)
     web_url = models.URLField(db_column='WEB_URL', verbose_name='Web adresi', null=True)
     email_addr = models.EmailField(unique=False, db_column='EMAIL_ADDR', verbose_name='Email adresi', null=True)
-    representative_person = models.ForeignKey(SysPersonnel, on_delete=models.PROTECT,
-                                              verbose_name='Temsilci', null=True)
 
     class Meta:
         db_table = 'CHECKACCOUNT'

@@ -7,6 +7,23 @@ from checkaccount.models import CheckAccount
 from risk_analysis.errors import BalanceError, MaturitySpeedError
 
 
+class BaseModel(models.Model):
+    # objects = models.Manager
+
+    data_id = models.AutoField(primary_key=True)
+
+    created_date = models.DateTimeField(auto_now_add=True, db_column='CREATED_DATE',
+                                        name='Created Date')
+
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                   on_delete=models.SET_NULL, name='Created by')
+
+    # edited_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        db_table = 'BASEMODEL'
+
+
 class DataSetManager(models.Manager):
     @staticmethod
     def calc_period_day(period_velocity, **kwargs):
@@ -77,23 +94,6 @@ class DataSetManager(models.Manager):
                                                                                                         warrant)
 
         return super(DataSetManager, self).create(*args, **kwargs)
-
-
-class BaseModel(models.Model):
-    objects = models.Manager
-
-    data_id = models.AutoField(primary_key=True)
-
-    created_date = models.DateTimeField(auto_now_add=True, db_column='CREATED_DATE',
-                                        name='Created Date')
-
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
-                                   on_delete=models.SET_NULL, name='Created by')
-
-    # edited_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
-
-    class Meta:
-        db_table = 'BASEMODEL'
 
 
 class DataSetModel(BaseModel):
