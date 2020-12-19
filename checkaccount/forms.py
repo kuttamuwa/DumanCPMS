@@ -2,8 +2,17 @@ from bootstrap_modal_forms import forms as bsforms
 from crispy_forms.tests.forms import forms
 from dal import autocomplete
 from django.contrib.auth.models import User
+from django.forms import FileField, model_to_dict
 
 from checkaccount.models import CheckAccount, AccountDocuments, Districts, Cities, Sectors, SysPersonnel
+
+
+class DumanFormFileField(FileField):
+    def __init__(self, *, max_length=None, allow_empty_file=True, **kwargs):
+        self.max_length = max_length
+        self.allow_empty_file = allow_empty_file
+
+        super().__init__(**kwargs)
 
 
 class CheckAccountCreateForm(forms.ModelForm):
@@ -24,14 +33,18 @@ class LoginUserForm(forms.ModelForm):
 
 
 class UploadAccountDocumentForm(forms.ModelForm):
-    # activity_certificate_pdf = FileField(label='Activity Certificate', required=False, allow_empty_file=True)
-    # tax_return_pdf = FileField(label='TAX Return', required=False, allow_empty_file=True)
-    # authorized_signatures_list_pdf = FileField(label='Authorized Signatures List', required=False,
-    #                                            allow_empty_file=True)
+    activity_certificate_pdf = FileField(label='Activity Certificate', required=False, allow_empty_file=True)
+    tax_return_pdf = FileField(label='TAX Return', required=False, allow_empty_file=True)
+    authorized_signatures_list_pdf = FileField(label='Authorized Signatures List', required=False,
+                                               allow_empty_file=True)
 
     class Meta:
         model = AccountDocuments
-        exclude = ('customer', 'Created by')
+        exclude = ('customer', 'created_by', 'created_date')
+
+    def save(self, commit=True):
+        # acc_dict = model_to_dict(self.instance)
+        super(UploadAccountDocumentForm, self).save(commit)
 
 
 # DEV

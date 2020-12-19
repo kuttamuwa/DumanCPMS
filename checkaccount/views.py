@@ -1,5 +1,10 @@
+from datetime import datetime
+
+import requests
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
+from django.forms import model_to_dict
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 # Create your views here.
@@ -10,7 +15,7 @@ from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from django_filters.views import FilterView
 from dal import autocomplete
-from checkaccount import tests
+from checkaccount import tests, errors
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm, CheckAccountCreateFormExplicit
 from checkaccount.models import CheckAccount, AccountDocuments, SystemBlackList, KonkordatoList, ExternalBlackList, \
     Cities, Districts
@@ -46,41 +51,41 @@ def succeed_create_check_account(request):
     return render(request, 'checkaccount/succeed_form.html')
 
 
-def get_customer(request, pk, state=0):
-    """
-
-    :param request:
-    :param pk:
-    :param state: 1 -> comes from creating check account form.
-                  0 -> just retrieve one account
-    :return:
-    """
-    try:
-        check_account = CheckAccount.objects.get(pk=pk)
-
-    except CheckAccount.DoesNotExist:
-        return render(request, 'checkaccount/no_check_account_error.html')
-
-    # related account documents checking
-    acc_doc_state = False
-    try:
-        AccountDocuments.objects.get(pk=pk)
-        acc_doc_state = True
-
-    except AccountDocuments.DoesNotExist:
-        pass
-
-    except AccountDocuments.MultipleObjectsReturned:
-        # todo: logging
-        print("Bir hesaba bagli birden çok döküman tespit edildi.")
-        acc_doc_state = True
-
-    if request.method == 'GET':
-        context = {'checkaccount': check_account, 'state': state, 'acc_doc_state': acc_doc_state,
-                   'part_doc_state': True, 'bank_state': True
-                   }
-
-        return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
+# def get_customer(request, pk, state=0):
+#     """
+#
+#     :param request:
+#     :param pk:
+#     :param state: 1 -> comes from creating check account form.
+#                   0 -> just retrieve one account
+#     :return:
+#     """
+#     try:
+#         check_account = CheckAccount.objects.get(pk=pk)
+#
+#     except CheckAccount.DoesNotExist:
+#         return render(request, 'checkaccount/no_check_account_error.html')
+#
+#     # related account documents checking
+#     acc_doc_state = False
+#     try:
+#         AccountDocuments.objects.get(pk=pk)
+#         acc_doc_state = True
+#
+#     except AccountDocuments.DoesNotExist:
+#         pass
+#
+#     except AccountDocuments.MultipleObjectsReturned:
+#         # todo: logging
+#         print("Bir hesaba bagli birden çok döküman tespit edildi.")
+#         acc_doc_state = True
+#
+#     if request.method == 'GET':
+#         context = {'checkaccount': check_account, 'state': state, 'acc_doc_state': acc_doc_state,
+#                    'part_doc_state': True, 'bank_state': True
+#                    }
+#
+#         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -90,6 +95,14 @@ class CheckAccountView(DetailView):
     model = CheckAccount
 
     def get(self, request, *args, **kwargs):
+        try:
+            CheckAccount.objects.get(pk=kwargs.get('pk'))  # exists?
+            super(CheckAccountView, self).get(request, *args, **kwargs)
+
+        except CheckAccount.DoesNotExist:
+            # messages.warning(request, errors.DoesNotExistsWarning.message, extra_tags='alert')
+            return redirect('checkaccount-create')
+
         return super(CheckAccountView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
@@ -136,6 +149,31 @@ class CheckAccountFormDeleteView(DeleteView):
     template_name = 'checkaccount/delete_checkaccount_succeeded.html'
     success_url = '/'
 
+    def get(self, request, *args, **kwargs):
+        try:
+            CheckAccount.objects.get(pk=kwargs.get('pk'))  # exists?
+            return super(CheckAccountFormDeleteView, self).get(request, *args, **kwargs)
+
+        except CheckAccount.DoesNotExist:
+            messages.warning(request, messages.WARNING, errors.DoesNotExistsWarning.message)
+            return redirect('ch-index')
+
+    def post(self, request, *args, **kwargs):
+        try:
+            ca = CheckAccount.objects.get(pk=self.kwargs.get('pk'))
+
+            # if customers deleted, also documents must be deleted
+            # kw = {'pk': ca.pk, 'type': 4}
+            # reverse('delete_docs', kwargs=kw)
+            # messages.add_message(request, messages.INFO, 'Related documents were deleted also !')
+
+            super(CheckAccountFormDeleteView, self).post(request, *args, **kwargs)
+            return redirect('ch-index')
+
+        except CheckAccount.DoesNotExist:
+            messages.add_message(request, messages.WARNING, 'There is no Check account !')
+            return redirect('ch-index')
+
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_checkaccount_group, login_url='/login'), name='dispatch')
@@ -172,10 +210,22 @@ class GetAccountDocumentsList(DetailView):
 
     def get(self, request, *args, **kwargs):
         try:
-            self.kwargs['pk'] = AccountDocuments.objects.get(customer=CheckAccount.objects.get(**self.kwargs)).pk
+            ca = CheckAccount.objects.get(**self.kwargs)
+            acc = AccountDocuments.objects.get(customer=ca)
+            all_uploaded = acc.check_all_field_uploaded()  # True -> all is uploaded, False is at least one is not
+
+            if all_uploaded:
+                self.kwargs['pk'] = acc.pk  # we redirect with check account pk
+
+            else:  # objects were created before but deleted one of them.
+                return redirect('upload_docs', **kwargs)
 
         except AccountDocuments.DoesNotExist:
+            messages.warning(request, errors.DoesNotExistsWarning)
             return redirect('upload_docs', **kwargs)
+
+        except CheckAccount.DoesNotExist:
+            return redirect('ch-index')
 
         return super(GetAccountDocumentsList, self).get(request, *args, **kwargs)
 
@@ -186,10 +236,26 @@ class UploadAccountDocumentsView(CreateView):
     success_url = reverse_lazy('docs')
     template_name = 'checkaccount/upload_account_document.html'
 
+    def update(self):
+        form = UploadAccountDocumentForm(self.request.FILES)
+
+        pk = self.kwargs.get('pk')
+        check_account = CheckAccount.objects.get(pk=pk)
+        acc = AccountDocuments.objects.get(customer=check_account)
+        form.instance = acc
+
     def post(self, request, *args, **kwargs):
-        # f = UploadAccountDocumentForm(request.POST)
-        # f.created_by = request.user
-        return super(UploadAccountDocumentsView, self).post(request, *args, **kwargs)
+        try:
+            ca = CheckAccount.objects.get(pk=self.kwargs.get('pk'))
+            acc = AccountDocuments.objects.get(customer=ca)
+            kwargs['pk'] = acc.pk
+
+        except CheckAccount.DoesNotExist:
+            # messages.warning(request, errors.DoesNotExistsWarning)
+            return redirect('ch-index')
+
+        except AccountDocuments.DoesNotExist:
+            return super(UploadAccountDocumentsView, self).post(request, *args, **kwargs)
 
     def file_all_check(self):
         checkaccount_id = self.kwargs.get('pk')
@@ -200,10 +266,52 @@ class UploadAccountDocumentsView(CreateView):
             return False
 
     def get(self, request, *args, **kwargs):
-        if self.file_all_check():
-            # If all file uploaded?
-            return redirect(reverse('docs', kwargs=self.kwargs))
-        return super(UploadAccountDocumentsView, self).get(request, *args, **kwargs)
+        try:
+            if self.file_all_check():
+                # If all file uploaded?
+                return redirect(reverse('docs', kwargs=self.kwargs))
+
+            response = super(UploadAccountDocumentsView, self).get(request, *args, **kwargs)
+
+            return response
+        except CheckAccount.DoesNotExist:
+            # messages.warning(request, errors.DoesNotExistsWarning)
+            return redirect('ch-index')
+
+    def fill_other_fields_auto(self, form):
+        acc = AccountDocuments.objects.get(customer=self.kwargs.get('pk'))
+
+        if acc.activity_certificate_pdf.name not in ("", None):
+            form.instance.activity_certificate_pdf = acc.activity_certificate_pdf
+
+        if acc.tax_return_pdf.name not in ("", None):
+            form.instance.tax_return_pdf = acc.tax_return_pdf
+
+        if acc.authorized_signatures_list_pdf.name not in ("", None):
+            form.instance.authorized_signatures_lidf_pdf = acc
+
+        return form
+
+    def fill_form_auto(self, form):
+        check_account = CheckAccount.objects.get(pk=self.kwargs.get('pk'))
+
+        form.instance.created_by = self.request.user
+        form.instance.created_date = datetime.now()
+        form.instance.customer = check_account
+
+        # form all fields
+        f_fields = list(form.fields.keys())
+        for f in f_fields:
+            if getattr(form.instance, f).name is not None:
+                f.instance = getattr(form.instance, f)
+
+        # if another field was filled before ?
+        try:
+            self.fill_other_fields_auto(form)
+        except AccountDocuments.DoesNotExist:
+            pass
+
+        return form
 
     def get_form(self, form_class=None):
         f = super(UploadAccountDocumentsView, self).get_form(form_class=form_class)
@@ -220,6 +328,7 @@ class UploadAccountDocumentsView(CreateView):
 
         if self.request.method == 'GET':
             f = self.form_state_manipulation(f, self.kwargs['pk'])
+            f = self.fill_form_auto(f)
 
         return f
 
@@ -293,9 +402,6 @@ class DeleteAccountDocumentsView(DeleteView):
     model = AccountDocuments
     template_name = 'checkaccount/delete_check_account.html'
 
-    # pk_url_kwarg = 'attachment_id'
-    # success_url = 'checkaccount/docs/delete/succeed/'
-
     def post(self, request, *args, **kwargs):
         return super(DeleteAccountDocumentsView, self).post(request, *args, **kwargs)
 
@@ -361,5 +467,5 @@ class CheckAccountInitialProcesses:
 
 # def filter_districts(request, city):
 #     todo: filtering districts
-    # if request.method == 'POST' and request.is_ajax():
-    #     form = CheckAccountCreateForm(request.POST)
+# if request.method == 'POST' and request.is_ajax():
+#     form = CheckAccountCreateForm(request.POST)

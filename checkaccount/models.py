@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.fields.files import FieldFile
 
 from .basemodels import GeoModel, BaseModel
 from .errors import SoleTraderMustHaveTaxPayerNumber, LegalEntityMustHaveBirthPlace
@@ -56,7 +57,7 @@ class Sectors(BaseModel):
 class SysPersonnel(BaseModel):
     firstname = models.CharField(max_length=50, db_column='FIRSTNAME', null=True, unique=False)
     surname = models.CharField(max_length=50, db_column='SURNAME', null=True, unique=False)
-    username = models.CharField(max_length=50, db_column='USERNAME', null=True, unique=False) # True
+    username = models.CharField(max_length=50, db_column='USERNAME', null=True, unique=False)  # True
     department = models.ForeignKey(SysDepartments, on_delete=models.CASCADE, null=True,
                                    unique=False)  # if department goes?
     position = models.CharField(max_length=50, db_column='POSITION', null=True)
@@ -159,6 +160,28 @@ class AccountDocuments(BaseAccountDocument):
 
         elif _type == 3:
             self.authorized_signatures_list_pdf.delete()
+
+        elif _type == 4:
+            self.delete()
+
+    def check_all_field_uploaded(self):
+        fields = self._get_only_file_field_names()
+        uploaded_fields = []
+
+        for f in fields:
+            data = getattr(self, f.attname)
+            if data.name in ("", None):
+                uploaded_fields.append(False)
+            else:
+                uploaded_fields.append(True)
+
+        return all(uploaded_fields)
+
+    def _get_all_field_names(self):
+        return [i for i in self._meta.get_fields()]
+
+    def _get_only_file_field_names(self):
+        return [i for i in self._meta.get_fields() if isinstance(i, DumanModelFileField)]
 
 
 class PartnershipDocuments(BaseAccountDocument):

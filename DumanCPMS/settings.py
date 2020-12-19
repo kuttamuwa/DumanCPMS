@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'bootstrap_modal_forms',
     'datatableview',
     'widget_tweaks',
+
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -122,12 +123,6 @@ DATABASES = {
         'PORT': 5432,
     }
 }
-
-# HAYSTACK_CONNECTIONS = {
-#     'default': {
-#         'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
-#     },
-# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
