@@ -4,24 +4,27 @@ from collections import Counter
 
 import pandas as pd
 from bootstrap_modal_forms.generic import BSModalFormView
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View, generic
 from django.views.generic import DetailView
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, CreateView
 from django_filters.views import FilterView
 
 from DumanCPMS.settings import MEDIA_ROOT
-from checkaccount.models import CheckAccount
+from risk_analysis import errors
 from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, \
     TAXImportDataForm, RiskAnalysisRetrieveForm
 from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList
+from risk_analysis.tests import CreateRiskDatasetOne
+from risk_analysis.usermodel import UserAdaptor
 
 
 def risk_main_page(request):
@@ -102,6 +105,20 @@ class UploadRiskAnalysisDataView(FormView):
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name, context={'forms': RiskAnalysisImportDataForm})
 
+    @staticmethod
+    def handle_with_customer(customer):
+        if customer not in ("", None):
+            try:
+                customer = UserAdaptor.objects.get(firm_full_name=customer)
+
+            except UserAdaptor.DoesNotExist:
+                customer = UserAdaptor.objects.create(firm_full_name=customer)
+
+        else:
+            customer = UserAdaptor.dummy_creator.create_dummy()
+
+        return customer
+
     def post(self, request, *args, **kwargs):
         data = request.FILES['riskDataFile']
 
@@ -121,7 +138,7 @@ class UploadRiskAnalysisDataView(FormView):
             limit = self.__nan_to_none(row.get('limit'))
             warrant_state = self.__nan_to_none(row.get('warrant_state'))  # todo: string converting
             warrant_amount = self.__nan_to_none(row.get('warrant_amount'))
-            customer_name = self.__nan_to_none(row.get('customer_name'))
+            customer = self.__nan_to_none(row.get('customer_name'))
 
             # if warrant_state is None or warrant_state is False or warrant_state == 'Yok':
             #     if warrant_amount is None:
@@ -157,14 +174,10 @@ class UploadRiskAnalysisDataView(FormView):
             last_12_months_total_endorsement = self.__nan_to_none(row.get('last_12_months_total_endorsement'))
             # period_percent = row.get('period_percent')
 
-            try:
-                related_check_account = CheckAccount.objects.get(firm_full_name=customer_name)
-
-            except CheckAccount.DoesNotExist:
-                related_check_account = CheckAccount(firm_full_name=customer_name).save()
+            customer = self.handle_with_customer(customer)
 
             risk_model_object = DataSetModel(
-                related_customer=related_check_account,
+                customer=customer,
                 last_12_months_total_endorsement=last_12_months_total_endorsement,
                 maturity=maturity,
                 limit=limit,
@@ -190,20 +203,28 @@ class UploadRiskAnalysisDataView(FormView):
                 profit_percent=profit_percent
             )
             risk_model_object.save()
-            try:
-                # saving data
-                # analyzedata.save_risk_dataset_data()
-                # analyzedata.save_risk_points_data()
-                return self.get_success_url_primitive(request, customer=related_check_account)
 
-            except Exception as err:
-                return self.get_error_url(request, err)
+            kw = {'pk': risk_model_object.pk}
+            return redirect('get-riskds', **kw)
 
 
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class RiskAnalysisDetailView(DetailView):
+    template_name = 'risk_analysis/get_risk_data.html'
     model = DataSetModel
-    template_name = 'checkaccount/uploaded_account_documents.html'
-    context_object_name = 'AccountDocuments'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            DataSetModel.objects.get(**kwargs)
+
+        except DataSetModel.DoesNotExist:
+            return redirect('risk_analysis-create-page')
+
+        return super(RiskAnalysisDetailView, self).get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super(RiskAnalysisDetailView, self).get_queryset()
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -219,16 +240,25 @@ class RetrieveRiskAnalysisFormView(BSModalFormView):
             return render(request, self.template_name, context={'filter': self.form_class,
                                                                 'riskdatasets': riskdatasets})
         else:
-            riskds = DataSetModel.objects.filter(
-                related_customer=CheckAccount.objects.get(customer_id=related_customer_id))
-            return render(request, self.template_name, context={'filter': self.form_class,
-                                                                'riskdatasets': riskds})
+            try:
+                riskds = DataSetModel.objects.filter(
+                    customer=UserAdaptor.objects.get(pk=related_customer_id))
+
+                if len(riskds) == 0:
+                    return redirect('risk_analysis-create-page')
+
+                return render(request, self.template_name, context={'filter': self.form_class,
+                                                                    'riskdatasets': riskds})
+
+            except UserAdaptor.DoesNotExist:
+                # messages.warning(request, errors.CADoesNotExists)
+                return redirect('ra-index')
 
     def form_valid(self, form):
         if 'clear' in self.request.POST:
             self.filter = ''
         else:
-            self.filter = '?related_customer=' + form.cleaned_data['related_customer']
+            self.filter = '?related_customer=' + form.cleaned_data['customer']
 
         response = super().form_valid(form)
         return response
@@ -237,22 +267,42 @@ class RetrieveRiskAnalysisFormView(BSModalFormView):
         return reverse_lazy('index') + self.filter
 
 
-class CreateRiskAnalysisFormView(View):
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class CreateRiskAnalysisFormView(CreateView):
     form_class = RiskAnalysisCreateForm
-    initial = {'key': 'value'}
     template_name = 'risk_analysis/create_page/create_form.html'
+    model = DataSetModel
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form})
+    def get_success_url(self):
+        kw = self.kwargs
+        return redirect('get-riskds', **kw)
 
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            # <process form cleaned data>
-            return HttpResponseRedirect('/success/')
+    def get_form(self, form_class=None):
+        form = super(CreateRiskAnalysisFormView, self).get_form(form_class)
 
-        return render(request, self.template_name, {'form': form})
+        if self.request.method == 'POST':
+            return form
+
+        elif self.request.method == 'GET':
+            form.instance.created_by = self.request.user
+            rd = CreateRiskDatasetOne.create()
+            form = RiskAnalysisCreateForm(instance=rd)
+
+            return form
+
+    # def get(self, request, *args, **kwargs):
+    #     form = self.form_class(initial=self.initial)
+    #     form.instance = CreateRiskDatasetOne.create()
+    #     return render(request, self.template_name, {'form': form})
+    #
+    # def post(self, request, *args, **kwargs):
+    #     form = self.form_class(request.POST)
+    #     if form.is_valid():
+    #         # <process form cleaned data>
+    #         return HttpResponseRedirect('/success/')
+    #
+    #     return render(request, self.template_name, {'form': form})
 
 
 # SGK
@@ -425,7 +475,7 @@ class DataSetWarnings(BaseWarnings):
         """
         artis_gecmis_aylara_gore = None
 
-        customer_data = DataSetModel.objects.all().filter(customer_id=self.dataset.related_customer)
+        customer_data = DataSetModel.objects.all().filter(customer_id=self.dataset.customer)
 
         payback_this_month = customer_data[-1].last_month_payback_comparison
         payback_back_month = customer_data[-2].last_month_payback_comparison
@@ -448,7 +498,7 @@ class DataSetWarnings(BaseWarnings):
         """
         Alacak devir hızı geçmiş aylara kıyasla artarsa veya genel müşteri ortalamasına kıyasla yüksekse
         """
-        customer_data = DataSetModel.objects.all().filter(customer_id=self.dataset.related_customer)
+        customer_data = DataSetModel.objects.all().filter(customer_id=self.dataset.customer)
 
         income_freq_this_month = customer_data[-1].period_velocity
         income_freq_back_month = customer_data[-2].period_velocity
@@ -486,7 +536,7 @@ class RiskAnalysisListView(generic.ListView):
 
         else:
             customer_id = kwargs.get('customer_id')
-            check_account = CheckAccount.objects.get(customer_id=customer_id)
+            check_account = UserAdaptor.objects.get(customer_id=customer_id)
 
             risk_data = DataSetModel.objects.get(related_customer=check_account)
             analyze_risk_ds = AnalyzingRiskDataSet(risk_data)
@@ -499,9 +549,9 @@ class BasicDashboardData:
     def __init__(self, customer_id):
         self.customer_id = customer_id
         try:
-            customer = CheckAccount.objects.get(customer_id=customer_id)
+            customer = UserAdaptor.objects.get(customer_id=customer_id)
 
-        except CheckAccount.DoesNotExist:
+        except UserAdaptor.DoesNotExist:
             # todo : logging
             print(f"{customer_id} idli musteri bulunamadı !")
             raise ValueError
@@ -567,4 +617,4 @@ class BasicDashboardData:
         pass
 
     def recent_added_check_accounts(self):
-        return CheckAccount.objects[:-5]
+        return UserAdaptor.objects[:-5]

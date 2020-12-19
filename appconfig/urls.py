@@ -4,7 +4,7 @@
 from django.urls import path
 from appconfig import views
 
-from DumanCPMS.urls import cviews
+from DumanCPMS import siteviews as sviews
 
 
 urlpatterns = [
@@ -29,6 +29,6 @@ urlpatterns = [
     path('subtypes/all', views.subtypes_list, name='subtypes'),
     
     # site urls
-    path('login/', cviews.LoginUserView.as_view(), name='login'),
-    path('logout/', cviews.LogoutUserView.as_view(), name='logout'),
+    path('login/', sviews.LoginUserView.as_view(), name='login'),
+    path('logout/', sviews.LogoutUserView.as_view(), name='logout'),
 ]

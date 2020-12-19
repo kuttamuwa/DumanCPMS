@@ -1,25 +1,21 @@
 from datetime import datetime
 
-import requests
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
-from django.forms import model_to_dict
-from django.http.response import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 # Create your views here.
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
-from django.views.generic.base import View
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from django_filters.views import FilterView
-from dal import autocomplete
+
 from checkaccount import tests, errors
-from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm, CheckAccountCreateFormExplicit
-from checkaccount.models import CheckAccount, AccountDocuments, SystemBlackList, KonkordatoList, ExternalBlackList, \
-    Cities, Districts
+from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
+from checkaccount.models import CheckAccount, AccountDocuments, SystemBlackList, KonkordatoList, ExternalBlackList
 from risk_analysis.models import SGKDebtListModel, TaxDebtList
+from DumanCPMS.settings import DEBUG as debug_setting
 
 
 def main_page(request):
@@ -49,43 +45,6 @@ def not_in_checkaccount_group(user):
 
 def succeed_create_check_account(request):
     return render(request, 'checkaccount/succeed_form.html')
-
-
-# def get_customer(request, pk, state=0):
-#     """
-#
-#     :param request:
-#     :param pk:
-#     :param state: 1 -> comes from creating check account form.
-#                   0 -> just retrieve one account
-#     :return:
-#     """
-#     try:
-#         check_account = CheckAccount.objects.get(pk=pk)
-#
-#     except CheckAccount.DoesNotExist:
-#         return render(request, 'checkaccount/no_check_account_error.html')
-#
-#     # related account documents checking
-#     acc_doc_state = False
-#     try:
-#         AccountDocuments.objects.get(pk=pk)
-#         acc_doc_state = True
-#
-#     except AccountDocuments.DoesNotExist:
-#         pass
-#
-#     except AccountDocuments.MultipleObjectsReturned:
-#         # todo: logging
-#         print("Bir hesaba bagli birden çok döküman tespit edildi.")
-#         acc_doc_state = True
-#
-#     if request.method == 'GET':
-#         context = {'checkaccount': check_account, 'state': state, 'acc_doc_state': acc_doc_state,
-#                    'part_doc_state': True, 'bank_state': True
-#                    }
-#
-#         return render(request, context=context, template_name='checkaccount/get_check_account_and_upload.html')
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -124,11 +83,6 @@ class CheckAccountFormCreateView(CreateView):
 
         if self.request.method == 'POST':
             return form
-
-            # if form.is_valid():
-            #     form.save()
-            #
-            #     return form
 
         elif self.request.method == 'GET':
             form.instance.created_by = self.request.user

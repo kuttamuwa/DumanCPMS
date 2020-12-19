@@ -1,8 +1,9 @@
 from bootstrap_modal_forms.forms import BSModalForm
 from crispy_forms.tests.forms import forms
 
-from checkaccount.models import CheckAccount
+# from checkaccount.models import CheckAccount
 from risk_analysis.models import DataSetModel, SGKDebtListModel, TaxDebtList
+from risk_analysis.usermodel import UserAdaptor
 
 
 class SGKImportDataForm(forms.ModelForm):
@@ -12,8 +13,6 @@ class SGKImportDataForm(forms.ModelForm):
                   'Please consult on this page: ',
 
     )
-
-    # todo: şu help_text'in oraya sütunlara bakabileceği bir yer vermek lazım
 
     class Meta:
         model = SGKDebtListModel
@@ -35,7 +34,12 @@ class TAXImportDataForm(forms.ModelForm):
 class RiskAnalysisCreateForm(forms.ModelForm):
     class Meta:
         model = DataSetModel
-        fields = '__all__'
+        exclude = (
+            'created_by', 'created_date', 'customer',
+        )
+
+    def __init__(self, *args, **kwargs):
+        super(RiskAnalysisCreateForm, self).__init__(*args, **kwargs)
 
 
 class RiskAnalysisImportDataForm(forms.ModelForm):
@@ -52,8 +56,8 @@ class RiskAnalysisImportDataForm(forms.ModelForm):
 
 
 class RiskAnalysisRetrieveForm(BSModalForm):
-    related_customer = forms.ModelChoiceField(queryset=CheckAccount.objects.all(),
+    related_customer = forms.ModelChoiceField(queryset=UserAdaptor.objects.all(),
                                               required=False)
 
     class Meta:
-        fields = ['related_customer']
+        fields = ['customer']

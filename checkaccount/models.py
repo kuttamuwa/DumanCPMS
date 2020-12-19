@@ -74,12 +74,34 @@ class CheckAccountManager(models.Manager):
         return super(CheckAccountManager, self).create(*args, **kwargs)
 
 
+class DummyCreator(models.Manager):
+    def generate_dummy_username(self, **kwargs):
+        max_value = kwargs.get('number')
+        default_value = self.model.firm_full_name.field.default
+
+        if max_value is None:
+            max_value = self.model.objects.all().last().pk + 1
+
+        username = default_value + f"_{max_value}"
+
+        return username
+
+    def create_dummy(self, username=None, **kwargs):
+        if username is None:
+            username = self.generate_dummy_username(**kwargs)
+
+        return self.create(firm_full_name=username)
+
+
 class CheckAccount(BaseModel):
+    dummy_creator = DummyCreator()
+    objects = models.Manager()
+
     firm_type = models.CharField(max_length=50, choices=[('t', 'TUZEL_KISILIK'), ('s', 'SAHIS_ISLETMESI')],
                                  verbose_name='FIRM TYPE', help_text='Business type of the firm',
                                  db_column='FIRM_TYPE', null=True, default='t')
     firm_full_name = models.CharField(max_length=70, verbose_name='FIRM FULLNAME',
-                                      db_column='FIRM_FULLNAME', null=True)
+                                      db_column='FIRM_FULLNAME', null=True, default='Firm')
     taxpayer_number = models.CharField(unique=False,
                                        help_text='Sahis firmasi ise TCKNO, Tuzel Kisilik ise Vergi No',
                                        db_column='TAXPAYER_NUMBER', max_length=15, null=True)

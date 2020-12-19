@@ -31,7 +31,7 @@ class ImportCityDistricts(ABC):
         for index, row in df.iterrows():
             Districts.objects.get_or_create(name=row['adm2_en'], city=Cities.objects.get(name=row['adm1_en']))
 
-    def _save_excels(self):
+    def _save_excels(self, **kwargs):
         if len(Cities.objects.all()) > 5 and len(Districts.objects.all()) > 5:
             return
 
@@ -39,8 +39,8 @@ class ImportCityDistricts(ABC):
         self._save_iller(df_iller)
         self._save_ilceler(df_ilceler)
 
-    def runforme(self):
-        self._save_excels()
+    def runforme(self, **kwargs):
+        self._save_excels(**kwargs)
         print("Imported city and districts")
 
 
@@ -105,7 +105,7 @@ class CheckAccountTest(TestCase, ImportCityDistricts):
         SectorTest.test_create_sectors()
 
         # district also imports cities
-        ImportCityDistricts().runforme()
+        ImportCityDistricts().runforme(one=True, dname='ISKILIP', name='CORUM')
 
         s = Sectors.objects.get(name='GIS')
         # s = s[0]

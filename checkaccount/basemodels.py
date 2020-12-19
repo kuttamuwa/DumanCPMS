@@ -19,7 +19,7 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
-        db_table = 'BASEMODEL'
+        db_table = 'CA_BASEMODEL'
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):

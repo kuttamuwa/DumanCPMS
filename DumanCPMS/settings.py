@@ -46,8 +46,8 @@ INSTALLED_APPS = [
 
 
     # project apps
-    'checkaccount',
-    'risk_analysis',
+    'checkaccount',  # modular
+    'risk_analysis',  # statick module
     'dashboard',
     'finance_checkup',
     'modalex',
@@ -116,7 +116,7 @@ WSGI_APPLICATION = 'DumanCPMS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'umut_dev',
+        'NAME': 'umut_devv',
         'USER': 'postgres',
         'PASSWORD': 'figo1190',
         'HOST': 'localhost',

@@ -29,7 +29,7 @@ class DomainModalForm(BSModalModelForm):
                              validators=[domains_point_sum_exceeds_100])  # todo: validators
 
     class Meta:
-        exclude = ['created_by']
+        fields = ['name', 'point']
         model = Domains
 
 
@@ -37,18 +37,18 @@ class SubtypeModalForm(BSModalModelForm):
     domain = forms.ModelChoiceField(queryset=Domains.objects.all(),
                                     help_text='Subtype is sub choicable value '
                                               'under domains')
-    subpoint = forms.FloatField(min_value=0.0, max_value=100.0, help_text='Point between intervals')
+    pts = forms.FloatField(min_value=0.0, max_value=100.0, help_text='Point between intervals')
     min_interval = forms.FloatField(max_value=100, min_value=0.0, help_text='Minimum interval')
 
     max_interval = forms.FloatField(max_value=100, min_value=0.0, help_text='Maximum interval')
 
     def save(self, commit=True):
         # subtypes_point_sum_exceeds_100(self.subpoint, self.domain)
-        super(SubtypeModalForm, self).save()
+        return super(SubtypeModalForm, self).save()
 
     class Meta:
         model = Subtypes
-        fields = ['domain', 'subpoint', 'min_interval', 'max_interval']
+        fields = ['domain', 'pts', 'min_interval', 'max_interval']
 
 
 class SubtypeFilterForm(BSModalForm):

@@ -33,7 +33,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         self.analyzed_data = None
         self.analyze_decision = True  # default value
 
-        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.related_customer)  # almost empty
+        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.customer)  # almost empty
 
         if analyze_right_now:
             self.analyze_all()

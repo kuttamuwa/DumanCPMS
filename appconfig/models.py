@@ -52,7 +52,7 @@ class Subtypes(BaseModel):
 
     @staticmethod
     def get_total_points(domain):
-        return sum(i.pts for i in Subtypes.objects.filter(domain_name=domain))
+        return sum(i.pts for i in Subtypes.objects.filter(domain=domain))
 
     def __str__(self):
         return f"Points of {self.domain} : \n" \

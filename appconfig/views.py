@@ -14,7 +14,7 @@ from appconfig.models import Domains, Subtypes
 
 
 # indexes, main pages
-from checkaccount.models import CheckAccount
+# from checkaccount.models import CheckAccount
 
 
 class Index(generic.ListView):

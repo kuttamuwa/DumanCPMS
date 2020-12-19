@@ -7,42 +7,60 @@
             <div class="card card-body">
                 <table class="table table-sm">
                     <tr>
-                        <th>Firm Type</th>
-                        <th>Firm full name</th>
-                        <th>Tax Payer Number</th>
-                        <th>Birth place</th>
-                        <th>Tax department</th>
-                        <th>Firm address</th>
-                        <th>Firm key contact personnel</th>
-                        <th>Sector</th>
-                        <th>City</th>
-                        <th>District</th>
-                        <th>Phone number</th>
-                        <th>Fax</th>
-                        <th>Web url</th>
-                        <th>Email addr</th>
-                        <th>Representative person</th>
+                        <th>Müşteri</th>
+                        <th>Limit</th>
+                        <th>Teminat Durumu</th>
+                        <th>Teminat Tutarı</th>
+                        <th>Vade</th>
+                        <th>Ödeme Sıklığı</th>
+                        <th>Ortalama Gecikme Gün Bakiyesi</th>
+                        <th>Son 12 ay Ortalama Sipariş Tutarı</th>
+                        <th>3-11 aylık satış ortalamasından sapma</th>
+                        <th>Son ay iade yüzdesi</th>
+                        <th>Son 12 ay iade yüzdesi</th>
+                        <th>3-11 aylık iade % karşılaştırması</th>
+                        <th>Son 3 ay iade yüzdesi</th>
+                        <th>Ortalama Gecikme Gün Sayısı</th>
+                        <th>Ortalama Gecikme Gün Bakiyesi</th>
+                        <th>Devir Günü</th>
+                        <th>Teminat Harici Bakiye - Risk</th>
+                        <th>Bakiye</th>
+                        <th>Kar</th>
+                        <th>Kar yüzdesi</th>
+                        <th>Son 12 Ay Toplam Ciro</th>
                     </tr>
 
                     <tr>
-                        <td>{{ dataset.firm_type }}</td>
-                        <td>{{ dataset.firm_full_name }}</td>
-                        <td>{{ dataset.taxpayer_number }}</td>
-                        <td>{{ dataset.birthplace }}</td>
-                        <td>{{ dataset.tax_department }}</td>
-                        <td>{{ dataset.firm_address }}</td>
-                        <td>{{ dataset.firm_key_contact_personnel }}</td>
-                        <td>{{ dataset.sector }}</td>
-                        <td>{{ dataset.city }}</td>
-                        <td>{{ dataset.district }}</td>
-                        <td>{{ dataset.phone_number }}</td>
-                        <td>{{ dataset.fax }}</td>
-                        <td>{{ dataset.web_url }}</td>
-                        <td>{{ dataset.email_addr }}</td>
-                        <td>{{ dataset.representative_person }}</td>
+                        <td>{{ datasetmodel.customer }}</td>
+                        <td>{{ datasetmodel.limit }}</td>
+                        <td>{{ datasetmodel.warrant_state }}</td>
+                        <td>{{ datasetmodel.warrant_amount }}</td>
+                        <td>{{ datasetmodel.maturity }}</td>
+                        <td>{{ datasetmodel.payment_frequency }}</td>
+                        <td>{{ datasetmodel.maturity_exceed_avg }}</td>
+                        <td>{{ datasetmodel.avg_order_amount_last_twelve_months }}</td>
+                        <td>{{ datasetmodel.avg_order_amount_last_three_months }}</td>
+                        <td>{{ datasetmodel.last_3_months_aberration }}</td>
+                        <td>{{ datasetmodel.last_month_payback_perc }}</td>
+                        <td>{{ datasetmodel.last_twelve_months_payback_perc }}</td>
+                        <td>{{ datasetmodel.last_three_months_payback_comparison }}</td>
+                        <td>{{ datasetmodel.avg_last_three_months_payback_perc }}</td>
+                        <td>{{ datasetmodel.avg_delay_time }}</td>
+                        <td>{{ datasetmodel.avg_delay_balance }}</td>
+                        <td>{{ datasetmodel.period_day }}</td>
+                        <td>{{ datasetmodel.period_velocity }}</td>
+                        <td>{{ datasetmodel.risk_excluded_warrant_balance }}</td>
+                        <td>{{ datasetmodel.balance }}</td>
+                        <td>{{ datasetmodel.profit }}</td>
+                        <td>{{ datasetmodel.profit_percent }}</td>
+                        <td>{{ datasetmodel.total_risk_including_cheque }}</td>
+                        <td>{{ datasetmodel.last_12_months_total_endorsement }}</td>
                     </tr>
-
                 </table>
+                <a href="{% url 'analyze' pk=datasetmodel.pk %}"
+                   class="btn btn-primary btn-sm">
+                    Analyze This !
+                </a>
             </div>
         </div>
     </div>
