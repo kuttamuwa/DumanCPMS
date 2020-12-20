@@ -1,7 +1,6 @@
-import django_filters
 from django_filters import FilterSet
 
-from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListModel, TaxDebtList
+from risk_analysis.models import DataSetModel, RiskDataSetPoints
 
 
 class RiskAnalysisFilter(FilterSet):

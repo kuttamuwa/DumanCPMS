@@ -14,7 +14,6 @@ from django_filters.views import FilterView
 from checkaccount import tests, errors
 from checkaccount.forms import CheckAccountCreateForm, UploadAccountDocumentForm
 from checkaccount.models import CheckAccount, AccountDocuments
-from risk_analysis.models import SGKDebtListModel, TaxDebtList
 
 
 def main_page(request):
