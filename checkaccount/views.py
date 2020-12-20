@@ -341,10 +341,6 @@ class UploadAccountDocumentsView(CreateView):
         return context
 
     def form_valid(self, form):
-        account = CheckAccount.objects.get(**self.kwargs)
-        # form.instance.customer = account
-        # form.instance.customer_id = account.pk
-
         return super(UploadAccountDocumentsView, self).form_valid(form=form)
 
 

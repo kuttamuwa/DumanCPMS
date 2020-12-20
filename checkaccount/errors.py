@@ -19,7 +19,7 @@ class DumanMessageInterface(ABC):
         pass
 
 
-class CheckAccountBaseException(Exception, DumanMessageInterface):
+class CheckAccountBaseException(BaseException, DumanMessageInterface):
     raise_state = False
     message = None
     errors = None
@@ -55,7 +55,7 @@ class CheckAccountBaseException(Exception, DumanMessageInterface):
         cls.translate_errors()
 
 
-class AccountDocumentBaseException(Exception, DumanMessageInterface):
+class AccountDocumentBaseException(BaseException, DumanMessageInterface):
     @classmethod
     def translate_message(cls):
         super().translate_message()

@@ -1,8 +1,9 @@
 from bootstrap_modal_forms.forms import BSModalModelForm, BSModalForm
 from django import forms
 
-from .errors import SubtypePoints, DomainPoints
+from .errors import SubtypePoints, DomainPointsValueError
 from .models import Domains, Subtypes
+import numpy as np
 
 
 def subtypes_point_sum_exceeds_100(value, domain):
@@ -12,7 +13,7 @@ def subtypes_point_sum_exceeds_100(value, domain):
 
 def domains_point_sum_exceeds_100(value):
     if sum([d.point for d in Domains.objects.all()] + [value]) > 100:
-        raise DomainPoints
+        raise DomainPointsValueError
 
 
 class DomainFilterForm(BSModalForm):
@@ -38,12 +39,20 @@ class SubtypeModalForm(BSModalModelForm):
                                     help_text='Subtype is sub choicable value '
                                               'under domains')
     pts = forms.FloatField(min_value=0.0, max_value=100.0, help_text='Point between intervals')
-    min_interval = forms.FloatField(max_value=100, min_value=0.0, help_text='Minimum interval')
+    min_interval = forms.FloatField(help_text='Minimum interval')
 
-    max_interval = forms.FloatField(max_value=100, min_value=0.0, help_text='Maximum interval')
+    max_interval = forms.FloatField(help_text='Maximum interval', required=False)
+
+    def max_interval_null_check(self):
+        if self.cleaned_data['max_interval'] is None:
+            self.cleaned_data['max_interval'] = np.inf
+
+    def controls(self):
+        self.max_interval_null_check()
 
     def save(self, commit=True):
         # subtypes_point_sum_exceeds_100(self.subpoint, self.domain)
+        self.controls()
         return super(SubtypeModalForm, self).save()
 
     class Meta:

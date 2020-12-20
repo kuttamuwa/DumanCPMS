@@ -4,21 +4,18 @@ from collections import Counter
 
 import pandas as pd
 from bootstrap_modal_forms.generic import BSModalFormView
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views import View, generic
+from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import FormView, CreateView
 from django_filters.views import FilterView
 
 from DumanCPMS.settings import MEDIA_ROOT
-from risk_analysis import errors
 from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, SGKImportDataForm, \
     TAXImportDataForm, RiskAnalysisRetrieveForm
@@ -269,6 +266,13 @@ class RetrieveRiskAnalysisFormView(BSModalFormView):
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
+class RiskAnalysisSearchView(FilterView):
+    def get(self, request, *args, **kwargs):
+        return super(RiskAnalysisSearchView, self).get(request, *args, **kwargs)
+
+
+@method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
 class CreateRiskAnalysisFormView(CreateView):
     form_class = RiskAnalysisCreateForm
     template_name = 'risk_analysis/create_page/create_form.html'
@@ -303,6 +307,22 @@ class CreateRiskAnalysisFormView(CreateView):
     #         return HttpResponseRedirect('/success/')
     #
     #     return render(request, self.template_name, {'form': form})
+
+
+# Analyzing
+def analyze_one(request, pk):
+    rd = DataSetModel(pk=pk)
+    analyze = AnalyzingRiskDataSet(rd)
+
+    return render(request)
+
+
+class AnalyzeOne(View):
+    def get(self, request, pk, *args, **kwargs):
+        super(AnalyzeOne, self).get(request, *args, **kwargs)
+
+    def post(self, request, pk, *args, **kwargs):
+        super(AnalyzeOne, self).post(request, *args, **kwargs)
 
 
 # SGK
@@ -523,26 +543,6 @@ class DataSetWarnings(BaseWarnings):
         todo: important.
         """
         pass
-
-
-class RiskAnalysisListView(generic.ListView):
-    template_name = 'risk_analysis/risk_analysis_retrieve.html'
-
-    def get(self, request, *args, **kwargs):
-        customer_id = kwargs.get('customer_id')
-        if customer_id is None:
-            return render(request, 'risk_analysis/analysis/select_customer_page.html',
-                          context={'riskdatasets': DataSetModel.objects.all()})
-
-        else:
-            customer_id = kwargs.get('customer_id')
-            check_account = UserAdaptor.objects.get(customer_id=customer_id)
-
-            risk_data = DataSetModel.objects.get(related_customer=check_account)
-            analyze_risk_ds = AnalyzingRiskDataSet(risk_data)
-            analyze_risk_ds.analyze_all()
-
-            return render(request, self.template_name)
 
 
 class BasicDashboardData:

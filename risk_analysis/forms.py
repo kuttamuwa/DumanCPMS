@@ -61,3 +61,4 @@ class RiskAnalysisRetrieveForm(BSModalForm):
 
     class Meta:
         fields = ['customer']
+

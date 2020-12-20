@@ -5,11 +5,9 @@ from risk_analysis.models import DataSetModel, RiskDataSetPoints, SGKDebtListMod
 
 
 class RiskAnalysisFilter(FilterSet):
-    firm_full_name = django_filters.CharFilter(lookup_expr='icontains', label='Firm full name')
-
     class Meta:
         model = DataSetModel
-        fields = ('related_customer',)
+        fields = ('customer',)
 
 
 class RiskPointsFilter(FilterSet):

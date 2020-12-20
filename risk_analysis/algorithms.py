@@ -1,7 +1,10 @@
-from appconfig.models import Domains, Subtypes
-from risk_analysis.models import DataSetModel, RiskDataSetPoints, DataSetManager
 import numpy as np
 import pandas as pd
+
+from DumanCPMS import settings
+from appconfig.models import Domains, Subtypes
+from appconfig.tests import ImportAllDomains, ImportAllSubtypes
+from risk_analysis.models import RiskDataSetPoints, DataSetManager
 
 """
 # todo : Puanlamaların yönetileceği bir admin paneli hazırlanacak.
@@ -32,11 +35,37 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         super().__init__(risk_model_object)
         self.analyzed_data = None
         self.analyze_decision = True  # default value
+        self.domains, self.subtypes = self.get_domain_and_subtypes()
+        self.controls()
 
-        self.risk_point_object = RiskDataSetPoints(customer_id=self.risk_model_object.customer)  # almost empty
+        self.risk_point_object = RiskDataSetPoints(customer=self.risk_model_object.customer)  # almost empty
 
         if analyze_right_now:
             self.analyze_all()
+
+    def domain_controls(self):
+        Domains.get_total_points(alert=True)
+
+    def controls(self):
+        self.domain_controls()
+        # bla bla
+        # if settings.DEBUG:
+        #     ImportAllDomains.import_all_domains()
+        #     ImportAllSubtypes.import_subtypes()
+
+    @staticmethod
+    def get_domains():
+        return Domains.objects.all()
+
+    @staticmethod
+    def get_subtypes():
+        return Subtypes.objects.all()
+
+    def get_domain_and_subtypes(self):
+        domains = self.get_domains()
+        subtypes = self.get_subtypes()
+
+        return domains, subtypes
 
     def get_analyzed_data(self):
         return self.analyzed_data
@@ -80,15 +109,11 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         %20-50 azalış	5
         %50-75 azalış	10
         """
-        pts_dict = {(0, -20): 3,
-                    (-20, -50): 5,
-                    (-50, -75): 10,
-                    (-75, -100): 15}
+        d = self.domains.get(name='Son 12 Ay Satış Ortalamasından Sapma')
+        s = self.subtypes.filter(domain=d)
 
         # todo: Veride son 12 aylik satis ortalamasindan sapma yazmiyor. Burayı nasıl bulacağız ? -> DAVUT ABIYE.
         # TODO: Biz son 3 aylık sapmayı kullanarak hesapladık, doğru mu?
-
-        # last_3_months_aberration = self.risk_model_object.last_3_months_aberration
 
         avg_order_last_3_months = self.risk_model_object.avg_order_amount_last_three_months
         avg_order_last_12_months = self.risk_model_object.avg_order_amount_last_twelve_months
@@ -212,7 +237,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         """
         pts_dict = {
             (0, 50000): 5,
-            (50000, 10000): 8,
+            (50000, 100000): 8,
             (100000, np.inf): 10
         }
         pts = None
@@ -281,7 +306,8 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             print("Teminat durumu olmadığı için limit risk karşılama seviyesi puanı yapılmamıştır.")
 
         else:
-            teminat_limit_risk_kars_seviyesi = (self.risk_model_object.warrant_amount / self.risk_model_object.limit) * 100
+            teminat_limit_risk_kars_seviyesi = (
+                                                       self.risk_model_object.warrant_amount / self.risk_model_object.limit) * 100
 
             if teminat_limit_risk_kars_seviyesi is None:
                 print("Teminat limit riskini karsilama seviyesi ")

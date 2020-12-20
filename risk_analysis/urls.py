@@ -1,6 +1,7 @@
 from django.urls import path
 
 from risk_analysis import views
+from risk_analysis.filters import RiskAnalysisFilter
 
 urlpatterns = [
     # create or import risk analysis dataset
@@ -15,9 +16,13 @@ urlpatterns = [
     path('get/<int:pk>', views.RiskAnalysisDetailView.as_view(), name='get-riskds'),
 
     # retrieving created risk analysis dataset
-    path('retrieve/', views.RetrieveRiskAnalysisFormView.as_view(), name='risk_analysis-search'),
+    path('retrieve/', views.RiskAnalysisSearchView.as_view(
+        filterset_class=RiskAnalysisFilter,
+        template_name='risk_analysis/risk_analysis_retrieve.html'), name='risk_analysis-search'),
 
-    path('analyze/<int:pk>', views.RiskAnalysisListView.as_view(), name='analyze'),
+    path('analyze/<int:pk>', views.analyze_one, name='analyze-one'),
+
+    # path('riskds/', views.RiskAnalysisSearchView.as_view(), name='riskds-list-analyze'),
 
     # main urls
     path('', views.risk_main_page, name='ra-index'),

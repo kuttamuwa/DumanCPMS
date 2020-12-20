@@ -1,4 +1,4 @@
-class RiskAnalysisBaseException(Exception):
+class RiskAnalysisBaseException(BaseException):
     raise_state = False
     message = None
     errors = None
