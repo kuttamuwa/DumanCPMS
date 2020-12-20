@@ -1,125 +1,45 @@
-# from django.http import JsonResponse
-# from django.shortcuts import render
-#
-# from checkaccount.models import CheckAccount
-# from dashboard.models import Order
-# from django.core import serializers
-#
-# from risk_analysis.models import DataSetModel
-#
-#
-# def dashboard_with_pivot(request):
-#     return render(request, 'dboards/dashboard_with_pivot.html', {})
-#
-#
-# def pivot_data(request):
-#     dataset = Order.objects.all()
-#     data = serializers.serialize('json', dataset)
-#     return JsonResponse(data, safe=False)
-#
-#
-# # Create your views here.
-# def test_view(request):
-#     return render(request, template_name='dboards/test_temp.html')
-#
-#
-# def test_maps(request):
-#     return render(request, template_name='dboards/ui-maps.html')
-#
-#
-# def test_index(request):
-#     return render(request, template_name='dboards/test_index.html')
-#
-#
-# def test_notifications(request):
-#     return render(request, template_name='dboards/test_notifications.html')
-#
-#
-# def find_exceeds_limit(request):
-#     pass
-#
-#
-# def find_exceeds_maturity(request):
-#     pass
-#
-#
-# def find_worst_performance(request):
-#     """
-#     Alacak devir hızı (en kotu performans)
-#     """
-#     pass
-#
-#
-# def warn_check_index_data(request):
-#     """
-#     Çek endeksi verisi istenmeyen aralıkta ise uyarı verilir
-#     """
-#     pass
-#
-#
-# def find_behind_written_checks(request):
-#     """
-#     Arkası yazılı çekler varsa uyarı verilir
-#     """
-#     pass
-#
-#
-# def warn_credit_limit_narrowing(request):
-#     """
-#     Kredi limiti daralanlar-kapatılanlar uyarı
-#     """
-#     pass
-#
-#
-# def warn_tax_debt(request):
-#     """
-#     Vergi borcu Uyarılar
-#     """
-#     pass
-#
-#
-# def warn_sgk_debts(request):
-#     """
-#     SGK Borcu Uyarılar
-#     """
-#     pass
-#
-#
-# def warn_black_list_sector(request, sector_name):
-#     """
-#     Sektör Kara Liste
-#     """
-#     pass
-#
-#
-# def findeks_credit_note(request):
-#     """
-#     Findeks Kredi notu
-#     """
-#     pass
-#
-#
-# def warn_qr_check_score(request):
-#     """
-#     Karekodlu Çek Skoruna paralel uyarı verilir
-#     """
-#     pass
-#
-#
-# def get_newest_check_accounts(request, count=5):
-#     """
-#     Yeni eklenen müşteriler
-#     """
-#     accounts = CheckAccount.objects.all()[:count]
-#     print(accounts)
-#     data_set = DataSetModel.objects.all().filter(customer_id__in=(i.related_customer for i in accounts))
-#
-#     data = {'customer_names': (i.firm_full_name for i in accounts),
-#             'limit': (i.limit for i in data_set),
-#             'warrant_state': (i.warrant_state for i in data_set),
-#             'birthplace': (i.city for i in accounts)}
-#
-#     context = {'data': data}
-#
-#     # (Müşteri Adı, Limit, Teminat Durumu, İl)
-#     return render(request, 'dboards/checkaccounts/get_latest_accounts.html', context=context)
+from django.shortcuts import render
+
+from externalapp.models import ExternalBlackList, SystemBlackList, KonkordatoList
+from risk_analysis.models import TaxDebtList, SGKDebtListModel
+from risk_analysis.views import DataSetWarnings
+
+
+class AccountInitialProcesses:
+    """
+    Including warnings and importing some files, pulling some data etc.
+    """
+    account_warning_template = 'checkaccount/added_dataset_warning_base.html'
+
+    def render_base(self, request, **kwargs):
+        return render(request, self.account_warning_template, kwargs)
+
+    def alert_popup(self, request, message_type, *messages):
+        context = {'messages': messages, 'message_type': message_type}
+        return self.render_base(request, context=context)
+
+    def find_recent_accounts(self):
+        customers = DataSetWarnings.recent_accounts()
+        return customers
+
+    def find_related_black_list(self, request, customer_id):
+        related_black_list_record = ExternalBlackList.objects.all().filter(customer_id=customer_id)
+        return self.alert_popup(request, 'Black list', related_black_list_record)
+
+    def find_related_black_list_in_system(self, request, customer_id):
+        related_sys_black_list_record = SystemBlackList.objects.all().filter(customer_id=customer_id)
+        return self.alert_popup(request, 'System Black List', related_sys_black_list_record)
+
+    def find_tax_debt_list(self, request, customer_id):
+        tax_debts = TaxDebtList.objects.all().filter(customer_id=customer_id)
+        return self.alert_popup(request, "Tax Debt List", tax_debts)
+
+    def find_sgk_debt_list(self, request, customer_id):
+        sgk_debts = SGKDebtListModel.objects.all().filter(customer_id=customer_id)
+        return self.alert_popup(request, 'SGK Debt List', sgk_debts)
+
+    @FutureWarning
+    def find_konkordato_list(self, request, customer_id):
+        related_konkordato_lists = KonkordatoList.objects.all().filter(customer_id=customer_id)
+        return self.alert_popup(request, 'Konkordato List', related_konkordato_lists)
+

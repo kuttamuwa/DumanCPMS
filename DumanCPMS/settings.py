@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'finance_checkup',
     'modalex',
     'appconfig',
+    'externalapp',
 
     'debug_toolbar',
     'rest_framework',

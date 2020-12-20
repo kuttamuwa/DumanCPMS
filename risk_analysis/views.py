@@ -485,6 +485,9 @@ class DataSetWarnings(BaseWarnings):
         if self.dataset.balance > self.dataset.limit:
             self.messages.append('Bakiye Limitten yüksek !')
 
+    def recent_accounts(self):
+        return self.dataset.values('customer')
+
     def maturity_exceed_warning(self):
         # todo: davut abi bekleniyor -> whatsapp
         pass

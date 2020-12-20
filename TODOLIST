@@ -1,0 +1,23 @@
+** Kara Liste, Vergi ve SGK Borcu upload ekranı
+** Cari hesap açılırken popup çıkarma (modalex veya appconfig'den alabilirsin)
+** Cari hesap açılırken yapılacak kontroller (CheckAccount InitialProcesses class'i)
+ve bu kontrollerin popup olarak getirilmesi
+
+
+** Dashboard:
+    * Performans Algoritma Raporu
+    * Limit aşımı yapanlar
+    * Vade aşımı yapanlar
+    * Alacak devir hızı (en kötü performans)
+    * Çek endeksi verisi istenmeyen aralıkta ise uyarı verilir
+    * Arkası yazılı çekler varsa uyarı verilir
+    * Kredi limiti daralanlar-kapatılanlar uyarı
+    * Vergi borcu Uyarılar
+    * SGK Borcu Uyarılar
+    * Sektör Kara Liste
+    * Findeks Kredi notu
+    * Karekodlu Çek Skoruna paralel uyarı verilir
+    * Yeni eklenen müşteriler
+
+
+
