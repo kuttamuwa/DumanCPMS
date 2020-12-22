@@ -1,0 +1,98 @@
+{% block content %}
+
+  {% include "appconfig/_modal.html" %}
+
+  <div class="container mt-3">
+    <div class="row">
+      <div class="col">
+        <h4>
+          <strong>Configuration of Risk Analysis</strong>
+        </h4>
+        <p>Create, Read, Update and Delete Risk Analysis Field Matching Configuration.</p>
+
+        <div class="row">
+          <div class="col-12 mb-3">
+            <button id="create-subtype" class="btn btn-primary" type="button" name="button">
+              <span class="fa fa-plus mr-2"></span>Create matching field
+            </button>
+            <button id="filter-subtype" class="bs-modal btn btn-primary" type="button" name="button" data-form-url="{% url 'filter-riskconfig' %}">
+              <span class="fa fa-filter mr-2"></span>Filter matching
+            </button>
+          </div>
+          <div class="col-12 mb-3">
+            {% if riskconfigs %}
+              {% include "appconfig/riskdata/_rdfields_table.html" %}
+            {% else %}
+              <p class="no-subtypes text-primary">No config added yet.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block extrascripts %}
+  <script type="text/javascript">
+      $(function () {
+          // Log in & Sign up buttons
+          // The formURL is given explicitly
+          $("#login-btn").modalForm({
+            formURL: "{% url 'login' %}"
+          });
+          $("#logout-btn").modalForm({
+              formURL: "{% url 'logout' %}"
+          });
+
+          // Create subtype button opens modal with id="create-modal"
+          $("#create-subtype").modalForm({
+            formURL: "{% url 'create-subtype' %}",
+            modalID: "#create-modal"
+          });
+
+          var asyncSuccessMessage = [
+            "<div ",
+            "style='position:fixed;top:0;z-index:10000;width:100%;border-radius:0;' ",
+            "class='alert alert-icon alert-success alert-dismissible fade show mb-0' role='alert'>",
+            "Success: Subtype was updated.",
+            "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>",
+            "<span aria-hidden='true'>&times;</span>",
+            "</button>",
+            "</div>",
+            "<script>",
+            "$('.alert').fadeTo(2000, 500).slideUp(500, function () {$('.alert').slideUp(500).remove();});",
+            "<\/script>"
+          ].join("");
+
+          function updateSubtypeModalForm() {
+            $(".update-subtype").each(function () {
+              $(this).modalForm({
+                formURL: $(this).data("form-url"),
+                asyncUpdate: true,
+                asyncSettings: {
+                  closeOnSubmit: false,
+                  successMessage: asyncSuccessMessage,
+                  dataUrl: "subtypes/",
+                  dataElementId: "#subtypes-table",
+                  dataKey: "table",
+                  addModalFormFunction: updateSubtypeModalForm
+                }
+              });
+            });
+          }
+          updateSubtypeModalForm();
+
+          // Read and Delete subtype buttons open modal with id="modal"
+          // The formURL is retrieved from the data of the element
+          $(".bs-modal").each(function () {
+              $(this).modalForm({formURL: $(this).data("form-url")});
+          });
+
+          // Hide message
+          $(".alert").fadeTo(2000, 500).slideUp(500, function () {
+              $(".alert").slideUp(500);
+          });
+      });
+  </script>
+{% endblock extrascripts %}

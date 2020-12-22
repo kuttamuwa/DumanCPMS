@@ -1,0 +1,36 @@
+<table id="subtypes-table" class="table">
+    <thead>
+    <tr>
+        <th class="text-center" scope="col">#</th>
+        <th class="text-center" scope="col">Source Field</th>
+        <th class="text-center" scope="col">Target Field</th>
+        <th class="text-center" scope="col">Read / Update / Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for r in riskconfigs %}
+        <tr>
+            <th class="text-center" scope="row">{{ forloop.counter }}</th>
+            <td class="text-center">{{ r.source_field }}</td>
+            <td class="text-center">{{ r.target_field }}</td>
+            <td class="text-center">
+                <!-- Read domain buttons -->
+                <button type="button" class="bs-modal read-book btn btn-sm btn-primary"
+                        data-form-url="{% url 'read-riskconfig' r.pk %}">
+                    <span class="fa fa-eye"></span>
+                </button>
+                <!-- Update domain buttons -->
+                <button type="button" class="update-subtype btn btn-sm btn-primary"
+                        data-form-url="{% url 'update-riskconfig' r.pk %}">
+                    <span class="fa fa-pencil"></span>
+                </button>
+                <!-- Delete domain buttons -->
+                <button type="button" class="bs-modal delete-subtype btn btn-sm btn-danger"
+                        data-form-url="{% url 'delete-riskconfig' r.pk %}">
+                    <span class="fa fa-trash"></span>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

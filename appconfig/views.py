@@ -9,14 +9,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import generic
 
-from appconfig.forms import DomainFilterForm, DomainModalForm, SubtypeFilterForm, SubtypeModalForm
-from appconfig.models import Domains, Subtypes
+from appconfig.forms import DomainFilterForm, DomainModalForm, SubtypeFilterForm, SubtypeModalForm, \
+    RiskConfigFilterForm, RiskConfigModalForm
+from appconfig.models import Domains, Subtypes, RiskDataConfigModel
 
 
-# indexes, main pages
-# from checkaccount.models import CheckAccount
-
-
+# All Indexes
 class Index(generic.ListView):
     template_name = 'appconfig/index.html'
     model = [Domains, Subtypes]
@@ -31,18 +29,24 @@ class Index(generic.ListView):
 
     def get(self, request, *args, **kwargs):
         context = {'domains': Domains.objects.all(),
-                   'subtypes': Subtypes.objects.all()}
+                   'subtypes': Subtypes.objects.all(),
+                   'riskconfigs': RiskDataConfigModel.objects.all()}
         get_req = request.GET
 
         if get_req:
             domain_name = get_req.get('domain_name')
             sub_domain = get_req.get('sub_domain')
+            riskconfigs = get_req.get('riskconfigs')
 
             if domain_name is not None:
                 context['domains'] = Domains.objects.filter(pk=domain_name)
 
             if sub_domain is not None:
                 context['subtypes'] = Subtypes.objects.filter(domain_id=sub_domain)
+
+            # if riskconfigs is not None:
+            #     context['riskconfigs'] = RiskDataConfigModel.objects.filter(source_field=)
+
         return render(request, 'appconfig/index.html', context=context)
 
 
@@ -67,6 +71,17 @@ class DomainIndex(generic.ListView):
         qs = super().get_queryset()
         if 'domain_name' in self.request.GET:
             qs = qs.filter(domain_name=str(self.request.GET['domain_name']))
+        return qs
+
+
+class RiskDataIndex(generic.ListView):
+    model = RiskDataConfigModel
+    context_object_name = 'riskconfigs'
+    template_name = 'appconfig/riskdata/riskdataset_index.html'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
         return qs
 
 
@@ -124,18 +139,6 @@ class DomainDeleteView(BSModalDeleteView):
         return super(DomainDeleteView, self).post(request, *args, **kwargs)
 
 
-def domains_list(request):
-    data = dict()
-    if request.method == 'GET':
-        domains = Domains.objects.all()
-        data['table'] = render_to_string(
-            'appconfig/domaindirs/_domains_table.html',
-            {'domains': domains},
-            request=request
-        )
-        return JsonResponse(data)
-
-
 # Subtypes
 class SubtypeFilterView(BSModalFormView):
     template_name = 'appconfig/subtypedirs/filter_subtype.html'
@@ -154,17 +157,36 @@ class SubtypeFilterView(BSModalFormView):
         return reverse_lazy('app-index') + self.filter
 
 
+class RiskConfigFilterView(BSModalFormView):
+    template_name = 'appconfig/riskdata/filter_rdfield.html'
+    form_class = RiskConfigFilterForm
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy('app-index')
+
+
 class SubtypeCreateView(BSModalCreateView):
     template_name = 'appconfig/subtypedirs/create_subtype.html'
     form_class = SubtypeModalForm
     success_message = 'Success: Subtype was created.'
     success_url = reverse_lazy('app-index')
 
-    # def get(self, request, *args, **kwargs):
-    #     return super(SubtypeCreateView, self).get(request, *args, **kwargs)
-
     def form_valid(self, form):
         return super(SubtypeCreateView, self).form_valid(form)
+
+
+class RiskConfigCreateView(BSModalCreateView):
+    template_name = 'appconfig/riskdata/create_rdfield.html'
+    form_class = RiskConfigModalForm
+    success_message = 'Success: Risk Data Config was created.'
+    success_url = reverse_lazy('app-index')
+
+    def form_valid(self, form):
+        return super(RiskConfigCreateView, self).form_valid(form)
 
 
 class SubtypeUpdateView(BSModalUpdateView):
@@ -178,9 +200,25 @@ class SubtypeUpdateView(BSModalUpdateView):
         return super(SubtypeUpdateView, self).form_valid(form)
 
 
+class RiskConfigUpdateView(BSModalUpdateView):
+    model = RiskDataConfigModel
+    template_name = 'appconfig/riskdata/update_rdfield.html'
+    form_class = RiskConfigModalForm
+    success_message = 'Success: Risk Config was updated.'
+    success_url = reverse_lazy('app-index')
+
+    def form_valid(self, form):
+        return super(RiskConfigUpdateView, self).form_valid(form)
+
+
 class SubtypeReadView(BSModalReadView):
     model = Subtypes
     template_name = 'appconfig/subtypedirs/read_subtype.html'
+
+
+class RiskConfigReadView(BSModalReadView):
+    model = RiskDataConfigModel
+    template_name = 'appconfig/riskdata/read_rdfield.html'
 
 
 class SubtypeDeleteView(BSModalDeleteView):
@@ -190,6 +228,25 @@ class SubtypeDeleteView(BSModalDeleteView):
     success_url = reverse_lazy('app-index')
 
 
+class RiskDataDeleteView(BSModalDeleteView):
+    model = RiskDataConfigModel
+    template_name = 'appconfig/riskdata/delete_rdfield.html'
+    success_message = 'Success: Risk Config object was deleted.'
+    success_url = reverse_lazy('app-index')
+
+
+def domains_list(request):
+    data = dict()
+    if request.method == 'GET':
+        domains = Domains.objects.all()
+        data['table'] = render_to_string(
+            'appconfig/domaindirs/_domains_table.html',
+            {'domains': domains},
+            request=request
+        )
+        return JsonResponse(data)
+
+
 def subtypes_list(request):
     data = dict()
     if request.method == 'GET':
@@ -197,6 +254,18 @@ def subtypes_list(request):
         data['table'] = render_to_string(
             'appconfig/subtypedirs/_subtypes_table.html',
             {'subtypes': subtypes},
+            request=request
+        )
+        return JsonResponse(data)
+
+
+def riskconfigs_list(request):
+    data = dict()
+    if request.method == 'GET':
+        subtypes = Subtypes.objects.all()
+        data['table'] = render_to_string(
+            'appconfig/riskdata/_rdfields_table.html',
+            {'riskconfigs': subtypes},
             request=request
         )
         return JsonResponse(data)

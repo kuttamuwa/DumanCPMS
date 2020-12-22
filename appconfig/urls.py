@@ -28,6 +28,15 @@ urlpatterns = [
     path('subtypes/delete/<int:pk>', views.SubtypeDeleteView.as_view(), name='delete-subtype'),
     path('subtypes/all', views.subtypes_list, name='subtypes'),
     
+    # risk dataset config
+    path('riskconfig/', views.RiskDataIndex.as_view(), name='rd-index'),
+    path('riskconfig/filter/', views.RiskConfigFilterView.as_view(), name='filter-riskconfig'),
+    path('riskconfig/create/', views.RiskConfigCreateView.as_view(), name='create-riskconfig'),
+    path('riskconfig/update/<int:pk>', views.RiskConfigUpdateView.as_view(), name='update-riskconfig'),
+    path('riskconfig/read/<int:pk>', views.RiskConfigReadView.as_view(), name='read-riskconfig'),
+    path('riskconfig/delete/<int:pk>', views.RiskDataDeleteView.as_view(), name='delete-riskconfig'),
+    path('riskconfig/all', views.riskconfigs_list, name='riskconfigs'),
+    
     # site urls
     path('login/', sviews.LoginUserView.as_view(), name='login'),
     path('logout/', sviews.LogoutUserView.as_view(), name='logout'),
