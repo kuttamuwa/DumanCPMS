@@ -127,50 +127,54 @@ class UploadRiskAnalysisDataView(FormView):
         # saving process
         p = os.path.join(MEDIA_ROOT, p)
 
-        df = pd.read_excel(p, sheet_name="MPYS Sn")
+        df = pd.read_excel(p)
 
         # Analyzing process
         for index, row in df.iterrows():
+            customer = self.handle_with_customer(self.__nan_to_none(row.get('Müşteri')))
             limit = self.__nan_to_none(row.get('limit'))
-            warrant_state = self.__nan_to_none(row.get('warrant_state'))  # todo: string converting
-            warrant_amount = self.__nan_to_none(row.get('warrant_amount'))
-            customer = self.__nan_to_none(row.get('customer_name'))
+            warrant_state = self.__nan_to_none(row.get('teminat'))  # todo: string converting
+            warrant_amount = self.__nan_to_none(row.get('Teminat Tutarı'))
+            maturity = self.__nan_to_none(row.get('Vade'))
 
-            # if warrant_state is None or warrant_state is False or warrant_state == 'Yok':
-            #     if warrant_amount is None:
-            #         warrant_amount = None
+            maturity_exceed_avg = self.__nan_to_none(row.get('Ort. Gecikme Gün Bakiyesi (TL)'))
+            avg_order_amount_last_twelve_months = self.__nan_to_none(row.get('Son 12 Ay Ortalama Sipariş Tutarı'))
+            avg_order_amount_last_three_months = self.__nan_to_none(row.get('Son 3 Ay Ortalama Sipariş Tutarı'))
+            last_3_months_aberration = self.__nan_to_none(
+                row.get('Son 3 ay ile Son 11 aylık satış ortalamasından sapma')) # veride yok
 
-            maturity = self.__nan_to_none(row.get('maturity'))
-            payment_frequency = self.__nan_to_none(row.get('payment_frequency'))
-            maturity_exceed_avg = self.__nan_to_none(row.get('maturity_exceed_avg'))
-            avg_order_amount_last_twelve_months = self.__nan_to_none(row.get('avg_order_amount_last_twelve_months'))
-            avg_order_amount_last_three_months = self.__nan_to_none(row.get('avg_order_amount_last_three_months'))
-            last_3_months_aberration = self.__nan_to_none(row.get('last_3_months_aberration'))
-            last_month_payback_perc = self.__nan_to_none(row.get('last_month_payback_perc'))
-            last_twelve_months_payback_perc = self.__nan_to_none(row.get('last_twelve_months_payback_perc'))
-            avg_last_three_months_payback_perc = self.__nan_to_none(row.get('avg_last_three_months_payback_perc'))
+            # veride yok
+            last_month_payback_perc = self.__nan_to_none(row.get('Son ay iade yüzdesi'))
+
+            last_twelve_months_payback_perc = self.__nan_to_none(row.get('Son 12 ay iade yüzdesi'))
+
+            # veride yok
+            avg_last_three_months_payback_perc = self.__nan_to_none(row.get('Son 3 ay ortalama iade yüzdesi'))
+
+            # veride yok ayrıca saçma, hesaplanabilir
             last_three_months_payback_comparison = self.__nan_to_none(row.get('last_three_months_payback_comparison'))
-            avg_delay_time = self.__nan_to_none(row.get('avg_delay_time'))
-            avg_delay_balance = self.__nan_to_none(row.get('avg_delay_balance'))
-            period_day = self.__nan_to_none(row.get('period_day'))
-            period_velocity = self.__nan_to_none(row.get('period_velocity'))
+
+            avg_delay_time = self.__nan_to_none(row.get('Ort. Gecikme Gün Sayısı'))
+            avg_delay_balance = self.__nan_to_none(row.get('Ort. Gecikme Gün Bakiyesi (TL)'))
+            period_day = self.__nan_to_none(row.get('Devir Günü'))
+
+            # Devir hızı: Müşterinin Aylık Sipariş Hacmi / Müşterinin Aylık Ortalama Bakiye
+            period_velocity = self.__nan_to_none(row.get('Devir Hızı'))
 
             # bakiye - teminat tutarı: balance - warrant amount
-            risk_excluded_warrant_balance = self.__nan_to_none(row.get('risk_excluded_warrant_balance'))
+            risk_excluded_warrant_balance = self.__nan_to_none(row.get('Teminat Harici Bakiye-Risk'))
 
-            balance = self.__nan_to_none(row.get('balance'))
-            profit = self.__nan_to_none(row.get('profit'))  # d. a. ş. y.
+            balance = self.__nan_to_none(row.get('Bakiye'))
+            profit = self.__nan_to_none(row.get('Kar'))  # d. a. ş. y.
 
-            profit_percent = self.__nan_to_none(row.get('profit_percent'))  # kar yuzdesi davut a. v. v, ş.y.
+            profit_percent = self.__nan_to_none(row.get('Kar yüzdesi'))  # kar yuzdesi davut a. v. v, ş.y.
 
             # çek dahili toplam risk davut abinin veride var, şemada yok.
-            total_risk_including_cheque = self.__nan_to_none(row.get('total_risk_including_cheque'))
+            total_risk_including_cheque = self.__nan_to_none(row.get('Çek Dahil Toplam Risk'))
 
             # bu veri şemamızda yok, davut abinin gönderdiği örnek veride var.
-            last_12_months_total_endorsement = self.__nan_to_none(row.get('last_12_months_total_endorsement'))
+            last_12_months_total_endorsement = self.__nan_to_none(row.get('Son 12 Ay Toplam Ciro'))
             # period_percent = row.get('period_percent')
-
-            customer = self.handle_with_customer(customer)
 
             risk_model_object = DataSetModel(
                 customer=customer,
@@ -191,7 +195,6 @@ class UploadRiskAnalysisDataView(FormView):
                 balance=balance,
                 period_velocity=period_velocity,
                 period_day=period_day,
-                payment_frequency=payment_frequency,
                 maturity_exceed_avg=maturity_exceed_avg,
                 avg_delay_balance=avg_delay_balance,
                 last_month_payback_perc=last_month_payback_perc,
@@ -200,8 +203,7 @@ class UploadRiskAnalysisDataView(FormView):
             )
             risk_model_object.save()
 
-            kw = {'pk': risk_model_object.pk}
-            return redirect('get-riskds', **kw)
+        return redirect('ra-index')
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -293,19 +295,6 @@ class CreateRiskAnalysisFormView(CreateView):
             form = RiskAnalysisCreateForm(instance=rd)
 
             return form
-
-    # def get(self, request, *args, **kwargs):
-    #     form = self.form_class(initial=self.initial)
-    #     form.instance = CreateRiskDatasetOne.create()
-    #     return render(request, self.template_name, {'form': form})
-    #
-    # def post(self, request, *args, **kwargs):
-    #     form = self.form_class(request.POST)
-    #     if form.is_valid():
-    #         # <process form cleaned data>
-    #         return HttpResponseRedirect('/success/')
-    #
-    #     return render(request, self.template_name, {'form': form})
 
 
 # Analyzing
@@ -409,4 +398,3 @@ class DataSetWarnings(BaseWarnings):
         todo: important.
         """
         pass
-

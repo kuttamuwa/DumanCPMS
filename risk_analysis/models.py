@@ -92,9 +92,9 @@ class DataSetModel(BaseModel):
                                                  null=True, verbose_name='Teminat Tutarı', blank=True)  # 500 000 vs
     maturity = models.IntegerField(db_column='MATURITY', help_text='vade günü', null=True, blank=True,
                                    verbose_name='Vade Günü')  # gun
-    payment_frequency = models.PositiveSmallIntegerField(db_column='PAYMENT_FREQ',
-                                                         help_text='odeme sikligi', null=True, blank=True,
-                                                         verbose_name='Ödeme Sıklığı')  # 10, 5 gun
+    # payment_frequency = models.PositiveSmallIntegerField(db_column='PAYMENT_FREQ',
+    #                                                      help_text='odeme sikligi', null=True, blank=True,
+    #                                                      verbose_name='Ödeme Sıklığı')  # 10, 5 gun
     maturity_exceed_avg = models.IntegerField(db_column='MATURITY_EXCEED_AVG',
                                               help_text='ortalama gecikme gun bakiyesi',
                                               verbose_name='Ortalama Gecikme Gün Bakiyesi', blank=True,

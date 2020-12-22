@@ -6,11 +6,6 @@ from appconfig.models import Domains, Subtypes
 from appconfig.tests import ImportAllDomains, ImportAllSubtypes
 from risk_analysis.models import RiskDataSetPoints, DataSetManager
 
-"""
-# todo : Puanlamaların yönetileceği bir admin paneli hazırlanacak.
-
-"""
-
 
 class ControlRiskDataSet:
     def __init__(self, risk_model_object):
@@ -53,19 +48,25 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         #     ImportAllDomains.import_all_domains()
         #     ImportAllSubtypes.import_subtypes()
 
-    @staticmethod
-    def get_domains():
-        return Domains.objects.all()
+    def set_domains(self, overwrite=False):
+        if overwrite or self.domains is None:
+            self.domains = Domains.objects.all()
 
-    @staticmethod
-    def get_subtypes():
-        return Subtypes.objects.all()
+    def set_subtypes(self, overwrite=False):
+        if overwrite or self.subtypes is None:
+            self.subtypes = Subtypes.objects.all()
+
+    def get_domains(self):
+        return self.domains
+
+    def get_subtypes(self):
+        return self.subtypes
 
     def get_domain_and_subtypes(self):
-        domains = self.get_domains()
-        subtypes = self.get_subtypes()
+        return self.get_domains(), self.get_subtypes()
 
-        return domains, subtypes
+    def get_subtype_via_domain(self):
+        self.get_domain_and_subtypes()
 
     def get_analyzed_data(self):
         return self.analyzed_data
@@ -118,27 +119,9 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         avg_order_last_3_months = self.risk_model_object.avg_order_amount_last_three_months
         avg_order_last_12_months = self.risk_model_object.avg_order_amount_last_twelve_months
 
-        last_3_months_aberration = ((
-                                            avg_order_last_3_months - avg_order_last_12_months) / avg_order_last_12_months) * 100
+        last_3_months_aberration = ((avg_order_last_3_months - avg_order_last_12_months) / avg_order_last_12_months) * 100
         pts = None
-        if not pd.isna(last_3_months_aberration):
-            last_3_months_aberration = float(last_3_months_aberration)
-            if last_3_months_aberration >= 0:
-                pts = 0
 
-            else:
-                for t in pts_dict.items():
-                    if t[0][0] < last_3_months_aberration < t[0][1]:
-                        pts = t[1]
-
-            if pts is not None:
-                self.risk_point_object.son_12ay_ortalama_sapma_pts = pts
-            else:
-                # todo: logging
-                print("Son 12 ay ortalama sapmaya gore risk puan hesaplamasi yapilamadi ?")
-        else:
-            # todo: logging
-            print("Son 3 ayin yila oranla satış ortalamasından sapma verisi bulunamamıştır.")
 
     def analyze_kar(self):
         """
