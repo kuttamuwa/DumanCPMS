@@ -68,57 +68,57 @@ class Subtypes(BaseModel):
 
 
 class RiskDataConfigModel(models.Model):
-    CUSTOMER = 0
-    LIMIT = 1
-    WARRANT_STATE = 2
-    WARRANT_AMOUNT = 3
-    MATURITY = 4
-    MATURITY_EXCEED_AVG = 5
-    AVG_ORDER_AMOUNT_LAST_TWELVE_MONTHS = 6
-    AVG_ORDER_AMOUNT_LAST_THREE_MONTHS = 7
-    LAST_3_MONTHS_ABERRATION = 8
-    LAST_MONTH_PAYBACK_PERC = 9
-    LAST_TWELVE_MONTHS_PAYBACK_PERC = 10
-    LAST_THREE_MONTHS_PAYBACK_COMPARISON = 11
-    AVG_LAST_THREE_MONTHS_PAYBACK_PERC = 12
-    AVG_DELAY_TIME = 13
-    AVG_DELAY_BALANCE = 14
-    PERIOD_DAY = 15
-    PERIOD_VELOCITY = 16
-    RISK_EXCLUDED_WARRANT_BALANCE = 17
-    BALANCE = 18
-    PROFIT = 19
-    PROFIT_PERCENT = 20
-    TOTAL_RISK_INCLUDING_CHEQUE = 21
-    LAST_12_MONTHS_TOTAL_ENDORSEMENT = 22
+    # CUSTOMER = 0
+    # LIMIT = 1
+    # WARRANT_STATE = 2
+    # WARRANT_AMOUNT = 3
+    # MATURITY = 4
+    # MATURITY_EXCEED_AVG = 5
+    # AVG_ORDER_AMOUNT_LAST_TWELVE_MONTHS = 6
+    # AVG_ORDER_AMOUNT_LAST_THREE_MONTHS = 7
+    # LAST_3_MONTHS_ABERRATION = 8
+    # LAST_MONTH_PAYBACK_PERC = 9
+    # LAST_TWELVE_MONTHS_PAYBACK_PERC = 10
+    # LAST_THREE_MONTHS_PAYBACK_COMPARISON = 11
+    # AVG_LAST_THREE_MONTHS_PAYBACK_PERC = 12
+    # AVG_DELAY_TIME = 13
+    # AVG_DELAY_BALANCE = 14
+    # PERIOD_DAY = 15
+    # PERIOD_VELOCITY = 16
+    # RISK_EXCLUDED_WARRANT_BALANCE = 17
+    # BALANCE = 18
+    # PROFIT = 19
+    # PROFIT_PERCENT = 20
+    # TOTAL_RISK_INCLUDING_CHEQUE = 21
+    # LAST_12_MONTHS_TOTAL_ENDORSEMENT = 22
 
     # source fields
     SOURCE_FIELD_CHOICES = (
-        (CUSTOMER, 'Müşteri'),
-         (LIMIT, 'Limit'),
-         (WARRANT_STATE, 'Teminat Durumu'),
-         (WARRANT_AMOUNT, 'Teminat Tutarı'),
-         (MATURITY, 'Vade'),
-         (MATURITY_EXCEED_AVG, 'Ortalama Gecikme Gün Bakiyesi'),
-         (AVG_ORDER_AMOUNT_LAST_TWELVE_MONTHS, 'Son 12 Ay Ortalama Sipariş Tutarı'),
-         (AVG_ORDER_AMOUNT_LAST_THREE_MONTHS, 'Son 3 Ay Ortalama Sipariş Tutarı'),
-         (LAST_3_MONTHS_ABERRATION,
+         ('CUSTOMER', 'Müşteri'),
+         ('LIMIT', 'Limit'),
+         ('WARRANT_STATE', 'Teminat Durumu'),
+         ('WARRANT_AMOUNT', 'Teminat Tutarı'),
+         ('MATURITY', 'Vade'),
+         ('MATURITY_EXCEED_AVG', 'Ortalama Gecikme Gün Bakiyesi'),
+         ('AVG_ORDER_AMOUNT_LAST_TWELVE_MONTHS', 'Son 12 Ay Ortalama Sipariş Tutarı'),
+         ('AVG_ORDER_AMOUNT_LAST_THREE_MONTHS', 'Son 3 Ay Ortalama Sipariş Tutarı'),
+         ('LAST_3_MONTHS_ABERRATION',
           'Son 3 ay ile son 11 aylık satış ortalamasından sapma'),
-         (LAST_MONTH_PAYBACK_PERC, 'Son ay iade yuzdesi'),
-         (LAST_TWELVE_MONTHS_PAYBACK_PERC, 'Son 12 ay iade yüzdesi'),
-         (LAST_THREE_MONTHS_PAYBACK_COMPARISON,
+         ('LAST_MONTH_PAYBACK_PERC', 'Son ay iade yuzdesi'),
+         ('LAST_TWELVE_MONTHS_PAYBACK_PERC', 'Son 12 ay iade yüzdesi'),
+         ('LAST_THREE_MONTHS_PAYBACK_COMPARISON',
           'Son 3 ay ile son 11 aylık iade yüzdesi karşılaştırması'),
-         (AVG_LAST_THREE_MONTHS_PAYBACK_PERC, 'Son 3 ay iade yuzdesi'),
-         (AVG_DELAY_TIME, 'Ortalama gecikme gün sayısı'),
-         (AVG_DELAY_BALANCE, 'Ortalama gecikme gün bakiyesi'),
-         (PERIOD_DAY, 'Devir günü'),
-         (PERIOD_VELOCITY, 'Devir hızı'),
-         (RISK_EXCLUDED_WARRANT_BALANCE, 'Teminat harici bakiye - risk'),
-         (BALANCE, 'Bakiye'),
-         (PROFIT, 'Kar'),
-         (PROFIT_PERCENT, 'Kar yüzdesi'),
-         (TOTAL_RISK_INCLUDING_CHEQUE, 'Çek dahil toplam risk'),
-         (LAST_12_MONTHS_TOTAL_ENDORSEMENT, 'Son 12 aylık toplam ciro')
+         ('AVG_LAST_THREE_MONTHS_PAYBACK_PERC', 'Son 3 ay iade yuzdesi'),
+         ('AVG_DELAY_TIME', 'Ortalama gecikme gün sayısı'),
+         ('AVG_DELAY_BALANCE', 'Ortalama gecikme gün bakiyesi'),
+         ('PERIOD_DAY', 'Devir günü'),
+         ('PERIOD_VELOCITY', 'Devir hızı'),
+         ('RISK_EXCLUDED_WARRANT_BALANCE', 'Teminat harici bakiye - risk'),
+         ('BALANCE', 'Bakiye'),
+         ('PROFIT', 'Kar'),
+         ('PROFIT_PERCENT', 'Kar yüzdesi'),
+         ('TOTAL_RISK_INCLUDING_CHEQUE', 'Çek dahil toplam risk'),
+         ('LAST_12_MONTHS_TOTAL_ENDORSEMENT', 'Son 12 aylık toplam ciro')
     )
     source_field = models.CharField(max_length=100, help_text='Kaynak veri ismi',
                                     choices=SOURCE_FIELD_CHOICES)

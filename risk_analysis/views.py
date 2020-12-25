@@ -16,6 +16,7 @@ from django.views.generic.edit import FormView, CreateView
 from django_filters.views import FilterView
 
 from DumanCPMS.settings import MEDIA_ROOT
+from appconfig.models import RiskDataConfigModel
 from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, RiskAnalysisRetrieveForm
 from risk_analysis.models import DataSetModel, RiskDataSetPoints

@@ -43,6 +43,43 @@ class DataSetManager(models.Manager):
 
         return balance - warrant
 
+    def get_value_by_name(self, name, **kwargs):
+        """
+        @attention Domain ve Subtype
+        Domains ve subtypes kısmında puanlama için ana veri tiplerinin adları ve onların
+        interval puanları yazılır. Örneğin Domain Son 12 Ay Satış Ortalamasından Sapma iken
+
+        Subtypes kısmında bunun alt kırılımları
+        #	Domain	Sub Point	Min interval	Max interval	Read / Update / Delete
+        1	Son 12 Ay Satış Ortalamasından Sapma	3.0	0.0	-20.0
+        2	Son 12 Ay Satış Ortalamasından Sapma	5.0	-20.0	-50.0
+        3	Son 12 Ay Satış Ortalamasından Sapma	10.0	-50.0	-75.0
+        4	Son 12 Ay Satış Ortalamasından Sapma	15.0	-75.0	-100.0
+
+        Puanlama tamamen dinamiktir. Yeni puanlamalar eklenebilir ve alt kırılımları verilebilir.
+
+
+        @attention Admin configuration.
+        Admin configurations içerisindeki Risk analysis configuration kısmında gelecek olan
+        excellerin isim eşleşmesi yapılır.
+        Gelecek olan seçimler uygulamanın beklediği alanları ve exceldeki karşılıkları olacaktır.
+        Eşleştirme tamamen dinamiktir.
+
+        @attention !! Şu an için: Kullanıcı yeni sütunlar tanımlayamaz.
+
+        @attention
+        Şimdi gelelim algoritma kısmına.:
+         *  Kullanıcı dinamik excel'i ile verilerini girdi
+         *  Kullanıcı domain ve subtype değerlerini girdi.
+         # todo: Buradan sonra devam edelim...
+
+        @param name:
+
+        """
+        # todo: bu fonksiyon ile uygulama tamamen dynamic olacak !
+        value = getattr(self, name)
+        return value
+
     def save(self, *args, **kwargs):
         DataSetManager.save(*args, **kwargs)
 
@@ -83,7 +120,7 @@ class DataSetModel(BaseModel):
     objects = DataSetManager()
 
     customer = models.ForeignKey(UserAdaptor, on_delete=models.SET_NULL, verbose_name='İlişkili Müşteri',
-                                 null=True, blank=True)
+                                 null=True, blank=True, db_column='CUSTOMER')
 
     limit = models.PositiveIntegerField(db_column='LIMIT', null=True, verbose_name='Limit', blank=True)  # 500 0000 vs
     warrant_state = models.BooleanField(db_column='WARRANT_STATE', help_text='teminat durumu',
@@ -201,6 +238,15 @@ class DataSetModel(BaseModel):
 
     def __str__(self):
         return f"Risk Dataset for : {self.customer}"
+
+    def get_field_config_name(self, config_object, **kwargs):
+        desired_field = kwargs.get('field')
+        if desired_field not in list(self.field_names):
+            raise ValueError('Specified field is not in Risk Dataset Model')
+
+        excel_field = config_object.get(source_field=desired_field)
+
+        return excel_field
 
     class Meta:
         db_table = 'RISK_DATA'

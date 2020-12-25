@@ -17,14 +17,10 @@ from appconfig.models import Domains, Subtypes, RiskDataConfigModel
 # All Indexes
 class Index(generic.ListView):
     template_name = 'appconfig/index.html'
-    model = [Domains, Subtypes]
-
-    # context_object_name = ['domains', 'subtypes']
+    model = [Domains, Subtypes, RiskDataConfigModel]
 
     def get_queryset(self):
         qs = super().get_queryset()
-        if 'type' in self.request.GET:
-            qs = qs.filter(book_type=int(self.request.GET['type']))
         return qs
 
     def get(self, request, *args, **kwargs):
@@ -231,7 +227,7 @@ class SubtypeDeleteView(BSModalDeleteView):
     success_url = reverse_lazy('app-index')
 
 
-class RiskDataDeleteView(BSModalDeleteView):
+class RiskConfigDeleteView(BSModalDeleteView):
     model = RiskDataConfigModel
     template_name = 'appconfig/riskdata/delete_rdfield.html'
     success_message = 'Success: Risk Config object was deleted.'
@@ -265,10 +261,10 @@ def subtypes_list(request):
 def riskconfigs_list(request):
     data = dict()
     if request.method == 'GET':
-        subtypes = Subtypes.objects.all()
+        riskconfigs = RiskDataConfigModel.objects.all()
         data['table'] = render_to_string(
             'appconfig/riskdata/_rdfields_table.html',
-            {'riskconfigs': subtypes},
+            {'riskconfigs': riskconfigs},
             request=request
         )
         return JsonResponse(data)

@@ -71,12 +71,8 @@ class SubtypeFilterForm(BSModalForm):
 
 # Risk Configs
 class RiskConfigModalForm(BSModalModelForm):
-    def max_interval_null_check(self):
-        if self.cleaned_data['max_interval'] is None:
-            self.cleaned_data['max_interval'] = np.inf
-
     def controls(self):
-        self.max_interval_null_check()
+        pass
 
     def save(self, commit=True):
         # subtypes_point_sum_exceeds_100(self.subpoint, self.domain)
@@ -85,7 +81,7 @@ class RiskConfigModalForm(BSModalModelForm):
 
     class Meta:
         model = RiskDataConfigModel
-        fields = '__all__'
+        fields = ['source_field', 'target_field']
 
 
 class RiskConfigFilterForm(BSModalForm):
