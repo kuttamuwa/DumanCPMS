@@ -36,7 +36,9 @@ urlpatterns = [
     path('riskconfig/read/<int:pk>', views.RiskConfigReadView.as_view(), name='read-riskconfig'),
     path('riskconfig/delete/<int:pk>', views.RiskDataDeleteView.as_view(), name='delete-riskconfig'),
     path('riskconfig/all', views.riskconfigs_list, name='riskconfigs'),
-    
+
+    # tests
+    path('riskconfig/test', views.RiskConfigCreateView.as_view(), name='test'),
     # site urls
     path('login/', sviews.LoginUserView.as_view(), name='login'),
     path('logout/', sviews.LogoutUserView.as_view(), name='logout'),

@@ -172,6 +172,9 @@ class DataSetModel(BaseModel):
         elif isinstance(self.customer, int):
             dummy_user = UserAdaptor.dummy_creator.create_dummy(number=self.customer)
 
+        elif isinstance(self.customer, UserAdaptor):
+            return self
+
         else:
             CustomerNumberError()
             dummy_user = None
@@ -201,6 +204,10 @@ class DataSetModel(BaseModel):
 
     class Meta:
         db_table = 'RISK_DATA'
+
+
+class RiskDataSetPointManagers(models.Manager):
+    pass
 
 
 class RiskDataSetPoints(BaseModel):

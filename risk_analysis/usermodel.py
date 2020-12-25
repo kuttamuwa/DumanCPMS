@@ -17,3 +17,6 @@ class UserAdaptorManager(models.Manager):
 class UserAdaptor(usermodel):
     objects = UserAdaptorManager()
     dummy_creator = dcreator()
+
+    def __str__(self):
+        return self.firm_full_name

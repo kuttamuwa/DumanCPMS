@@ -18,7 +18,7 @@ from django_filters.views import FilterView
 from DumanCPMS.settings import MEDIA_ROOT
 from risk_analysis.algorithms import AnalyzingRiskDataSet
 from risk_analysis.forms import RiskAnalysisCreateForm, RiskAnalysisImportDataForm, RiskAnalysisRetrieveForm
-from risk_analysis.models import DataSetModel
+from risk_analysis.models import DataSetModel, RiskDataSetPoints
 from risk_analysis.tests import CreateRiskDatasetOne
 from risk_analysis.usermodel import UserAdaptor
 
@@ -299,8 +299,10 @@ class CreateRiskAnalysisFormView(CreateView):
 
 # Analyzing
 def analyze_one(request, pk):
-    rd = DataSetModel(pk=pk)
-    analyze = AnalyzingRiskDataSet(rd)
+    try:
+        analyze = AnalyzingRiskDataSet(riskds_pk=pk)
+    except RiskDataSetPoints.DoesNotExist as err:
+        return render(request, err)
 
     return render(request)
 

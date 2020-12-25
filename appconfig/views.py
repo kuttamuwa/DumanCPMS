@@ -36,7 +36,7 @@ class Index(generic.ListView):
         if get_req:
             domain_name = get_req.get('domain_name')
             sub_domain = get_req.get('sub_domain')
-            riskconfigs = get_req.get('riskconfigs')
+            source_field = get_req.get('source_field')
 
             if domain_name is not None:
                 context['domains'] = Domains.objects.filter(pk=domain_name)
@@ -44,8 +44,8 @@ class Index(generic.ListView):
             if sub_domain is not None:
                 context['subtypes'] = Subtypes.objects.filter(domain_id=sub_domain)
 
-            # if riskconfigs is not None:
-            #     context['riskconfigs'] = RiskDataConfigModel.objects.filter(source_field=)
+            if source_field is not None:
+                context['riskconfigs'] = RiskDataConfigModel.objects.filter(source_field=source_field)
 
         return render(request, 'appconfig/index.html', context=context)
 
@@ -187,6 +187,9 @@ class RiskConfigCreateView(BSModalCreateView):
 
     def form_valid(self, form):
         return super(RiskConfigCreateView, self).form_valid(form)
+
+    def get(self, request, *args, **kwargs):
+        return super(RiskConfigCreateView, self).get(request, *args, **kwargs)
 
 
 class SubtypeUpdateView(BSModalUpdateView):

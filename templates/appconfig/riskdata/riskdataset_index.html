@@ -47,7 +47,7 @@
 
           // Create subtype button opens modal with id="create-modal"
           $("#create-subtype").modalForm({
-            formURL: "{% url 'create-subtype' %}",
+            formURL: "{% url 'create-riskconfig' %}",
             modalID: "#create-modal"
           });
 
@@ -65,23 +65,23 @@
             "<\/script>"
           ].join("");
 
-          function updateSubtypeModalForm() {
-            $(".update-subtype").each(function () {
+          function updateRiskConfigModalForm() {
+            $(".update-riskconfig").each(function () {
               $(this).modalForm({
                 formURL: $(this).data("form-url"),
                 asyncUpdate: true,
                 asyncSettings: {
                   closeOnSubmit: false,
                   successMessage: asyncSuccessMessage,
-                  dataUrl: "subtypes/",
-                  dataElementId: "#subtypes-table",
+                  dataUrl: "riskconfig/",
+                  dataElementId: "#riskconfigs-table",
                   dataKey: "table",
-                  addModalFormFunction: updateSubtypeModalForm
+                  addModalFormFunction: updateRiskConfigModalForm
                 }
               });
             });
           }
-          updateSubtypeModalForm();
+          updateRiskConfigModalForm();
 
           // Read and Delete subtype buttons open modal with id="modal"
           // The formURL is retrieved from the data of the element

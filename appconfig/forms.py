@@ -71,14 +71,6 @@ class SubtypeFilterForm(BSModalForm):
 
 # Risk Configs
 class RiskConfigModalForm(BSModalModelForm):
-    domain = forms.ModelChoiceField(queryset=Domains.objects.all(),
-                                    help_text='Subtype is sub choicable value '
-                                              'under domains')
-    pts = forms.FloatField(min_value=0.0, max_value=100.0, help_text='Point between intervals')
-    min_interval = forms.FloatField(help_text='Minimum interval')
-
-    max_interval = forms.FloatField(help_text='Maximum interval', required=False)
-
     def max_interval_null_check(self):
         if self.cleaned_data['max_interval'] is None:
             self.cleaned_data['max_interval'] = np.inf
@@ -92,8 +84,8 @@ class RiskConfigModalForm(BSModalModelForm):
         return super(RiskConfigModalForm, self).save()
 
     class Meta:
-        model = Subtypes
-        fields = ['domain', 'pts', 'min_interval', 'max_interval']
+        model = RiskDataConfigModel
+        fields = '__all__'
 
 
 class RiskConfigFilterForm(BSModalForm):

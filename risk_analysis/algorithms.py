@@ -1,17 +1,56 @@
 import numpy as np
 import pandas as pd
 
-from DumanCPMS import settings
-from appconfig.models import Domains, Subtypes
-from appconfig.tests import ImportAllDomains, ImportAllSubtypes
-from risk_analysis.models import RiskDataSetPoints, DataSetManager
+from appconfig.errors import DomainPointsValueError
+from appconfig.models import Domains, Subtypes, RiskDataConfigModel
+from risk_analysis.models import DataSetManager, DataSetModel
 
 
 class ControlRiskDataSet:
-    def __init__(self, risk_model_object):
-        self.risk_model_object = risk_model_object
+    def __init__(self, riskds_pk=None):
         self.domains = Domains.objects.all()
         self.subtypes = Subtypes.objects.all()
+        self.risk_dataset = None
+
+        self.risk_configs = RiskDataConfigModel.objects.all()
+
+        # setter
+        self.set_risk_dataset(riskds_pk)
+
+    def set_risk_dataset(self, riskds_pk):
+        if riskds_pk is None:
+            rd = DataSetModel.objects.all()
+
+        else:
+            rd = DataSetModel.objects.get(pk=riskds_pk)
+
+        print(f"Risk dataset : {rd.customer}")
+        self.risk_dataset = rd
+
+    @property
+    def get_risk_dataset(self):
+        return self.risk_dataset
+
+    def domain_controls(self, silent=True):
+        try:
+            self.domains.model.get_total_points(alert=True)
+        except DomainPointsValueError as err:
+            if silent:
+                raise err
+            else:
+                return False
+
+    def get_domains(self):
+        return self.domains
+
+    def get_subtypes(self):
+        return self.subtypes
+
+    def get_domain_and_subtypes(self):
+        return self.get_domains(), self.get_subtypes()
+
+    def get_subtype_via_domain(self):
+        self.get_domain_and_subtypes()
 
     def control_columns(self):
         pass
@@ -26,20 +65,17 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
     # todo: 100'den buyukse veya 0'dan kucukse uyari ver.
     """
 
-    def __init__(self, risk_model_object, analyze_right_now=True):
-        super().__init__(risk_model_object)
+    def __init__(self, riskds_pk=None, analyze_right_now=True):
+        super().__init__(riskds_pk)
         self.analyzed_data = None
         self.analyze_decision = True  # default value
+        self.risk_pts = None
+
         self.domains, self.subtypes = self.get_domain_and_subtypes()
         self.controls()
 
-        self.risk_point_object = RiskDataSetPoints(customer=self.risk_model_object.customer)  # almost empty
-
         if analyze_right_now:
             self.analyze_all()
-
-    def domain_controls(self):
-        Domains.get_total_points(alert=True)
 
     def controls(self):
         self.domain_controls()
@@ -48,41 +84,16 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         #     ImportAllDomains.import_all_domains()
         #     ImportAllSubtypes.import_subtypes()
 
-    def set_domains(self, overwrite=False):
-        if overwrite or self.domains is None:
-            self.domains = Domains.objects.all()
-
-    def set_subtypes(self, overwrite=False):
-        if overwrite or self.subtypes is None:
-            self.subtypes = Subtypes.objects.all()
-
-    def get_domains(self):
-        return self.domains
-
-    def get_subtypes(self):
-        return self.subtypes
-
-    def get_domain_and_subtypes(self):
-        return self.get_domains(), self.get_subtypes()
-
-    def get_subtype_via_domain(self):
-        self.get_domain_and_subtypes()
-
     def get_analyzed_data(self):
         return self.analyzed_data
-
-    def save_risk_dataset_data(self):
-        self.risk_model_object.save()
-
-    def save_risk_points_data(self):
-        self.risk_point_object.save()
 
     def detect_son_12ay_iade_yuzdesi(self):
         """
         Son 12 Ay İade %si: İade aylık satışın % 10 unu aşmazsa hesaplama yapılmayacak
         HINT: Puanlaması başka fonksiyonda
         """
-        last_twelve_months_payback_perc = self.risk_model_object.last_twelve_months_payback_perc
+        rd = self.get_risk_dataset
+        last_twelve_months_payback_perc = rd.last_twelve_months_payback_perc
         if pd.isna(last_twelve_months_payback_perc):
             # todo: logging
             print("Son 12 aylık ortalama iade yuzdesi verisi bulunamamıştır. \n"
@@ -90,7 +101,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             self.analyze_decision = True  # no data but we will analyze
 
         else:
-            avg_order_amount_last_twelve_months = self.risk_model_object.avg_order_amount_last_twelve_months
+            avg_order_amount_last_twelve_months = rd.avg_order_amount_last_twelve_months
             if avg_order_amount_last_twelve_months is np.nan:
                 # todo: logging
                 print("Analiz karari son 12 aylık ortalama sipariş tutarı verisi olmadığı için verilemedi. \n")
@@ -112,16 +123,17 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         """
         d = self.domains.get(name='Son 12 Ay Satış Ortalamasından Sapma')
         s = self.subtypes.filter(domain=d)
+        rd = self.get_risk_dataset
 
         # todo: Veride son 12 aylik satis ortalamasindan sapma yazmiyor. Burayı nasıl bulacağız ? -> DAVUT ABIYE.
         # TODO: Biz son 3 aylık sapmayı kullanarak hesapladık, doğru mu?
 
-        avg_order_last_3_months = self.risk_model_object.avg_order_amount_last_three_months
-        avg_order_last_12_months = self.risk_model_object.avg_order_amount_last_twelve_months
+        avg_order_last_3_months = rd.avg_order_amount_last_three_months
+        avg_order_last_12_months = rd.avg_order_amount_last_twelve_months
 
-        last_3_months_aberration = ((avg_order_last_3_months - avg_order_last_12_months) / avg_order_last_12_months) * 100
+        last_3_months_aberration = ((
+                                            avg_order_last_3_months - avg_order_last_12_months) / avg_order_last_12_months) * 100
         pts = None
-
 
     def analyze_kar(self):
         """
@@ -132,6 +144,8 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         %20 ve üzeri	3
 
         """
+        rd = self.get_risk_dataset
+
         pts_dict = {
             (0, 5): 15,
             (5, 10): 10,
@@ -139,7 +153,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
             (15, 20): 5,
             (20, 100): 3
         }
-        kar = round(self.risk_model_object.profit_percent * 100)
+        kar = round(rd.profit_percent * 100)
         pts = None
 
         if not pd.isna(kar):
@@ -162,13 +176,14 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         %75 üzeri 	15
 
         """
+        rd = self.get_risk_dataset
         pts_dict = {
             (0, 20): 3,
             (20, 50): 5,
             (50, 75): 10,
             (75, 100): 15
         }
-        iade = self.risk_model_object.last_twelve_months_payback_perc
+        iade = rd.last_twelve_months_payback_perc
         pts = None
 
         if not pd.isna(iade):
@@ -190,6 +205,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         30 gün ve üzeri	15
 
         """
+        rd = self.get_risk_dataset
         pts_dict = {
             (0, 10): 5,
             (10, 20): 10,
@@ -198,7 +214,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         }
         pts = None
 
-        avg_delay_time = self.risk_model_object.avg_delay_time
+        avg_delay_time = rd.avg_delay_time
         if not pd.isna(avg_delay_time):
             for t in pts_dict.items():
                 if t[0][0] < avg_delay_time <= t[0][1]:
@@ -218,6 +234,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         100000 ve üzeri	10
 
         """
+        rd = self.get_risk_dataset
         pts_dict = {
             (0, 50000): 5,
             (50000, 100000): 8,
@@ -225,7 +242,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         }
         pts = None
 
-        ort_gecikme_gun_bakiyesi = self.risk_model_object.avg_delay_balance
+        ort_gecikme_gun_bakiyesi = rd.avg_delay_balance
         if not pd.isna(ort_gecikme_gun_bakiyesi):
             for t in pts_dict.items():
                 if t[0][0] < ort_gecikme_gun_bakiyesi <= t[0][1]:
@@ -250,6 +267,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         30 ve üzeri	15
 
         """
+        rd = self.get_risk_dataset
         pts_dict = {
             (0, 90): 5,
             (90, 150): 10,
@@ -257,10 +275,10 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         }
         pts = None
 
-        devir_gunu = self.risk_model_object.period_day
+        devir_gunu = rd.period_day
         if pd.isna(devir_gunu):
             # veride yok, hesaplamak gerek
-            devir_gunu = DataSetManager.calc_period_day(self.risk_model_object.period_velocity)
+            devir_gunu = DataSetManager.calc_period_day(rd.period_velocity)
 
         for t in pts_dict.items():
             if t[0][0] < devir_gunu <= t[0][1]:
@@ -277,6 +295,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         %75 üzeri 	3
 
         """
+        rd = self.get_risk_dataset
         pts_dict = {
             (0, 20): 15,
             (20, 50): 10,
@@ -285,12 +304,12 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         }
         pts = None
 
-        if self.risk_model_object.warrant_state is False:
+        if rd.warrant_state is False:
             print("Teminat durumu olmadığı için limit risk karşılama seviyesi puanı yapılmamıştır.")
 
         else:
             teminat_limit_risk_kars_seviyesi = (
-                                                       self.risk_model_object.warrant_amount / self.risk_model_object.limit) * 100
+                                                       rd.warrant_amount / rd.limit) * 100
 
             if teminat_limit_risk_kars_seviyesi is None:
                 print("Teminat limit riskini karsilama seviyesi ")
