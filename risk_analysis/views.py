@@ -142,7 +142,7 @@ class UploadRiskAnalysisDataView(FormView):
             avg_order_amount_last_twelve_months = self.__nan_to_none(row.get('Son 12 Ay Ortalama Sipariş Tutarı'))
             avg_order_amount_last_three_months = self.__nan_to_none(row.get('Son 3 Ay Ortalama Sipariş Tutarı'))
             last_3_months_aberration = self.__nan_to_none(
-                row.get('Son 3 ay ile Son 11 aylık satış ortalamasından sapma')) # veride yok
+                row.get('Son 3 ay ile Son 11 aylık satış ortalamasından sapma'))  # veride yok
 
             # veride yok
             last_month_payback_perc = self.__nan_to_none(row.get('Son ay iade yüzdesi'))
@@ -272,6 +272,9 @@ class RiskAnalysisSearchView(FilterView):
     def get(self, request, *args, **kwargs):
         return super(RiskAnalysisSearchView, self).get(request, *args, **kwargs)
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return super(RiskAnalysisSearchView, self).get_context_data(object_list=object_list, **kwargs)
+
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 @method_decorator(user_passes_test(not_in_riskanalysis_group, login_url='/login'), name='dispatch')
@@ -301,11 +304,14 @@ class CreateRiskAnalysisFormView(CreateView):
 # Analyzing
 def analyze_one(request, pk):
     try:
-        analyze = AnalyzingRiskDataSet(riskds_pk=pk)
+        analyze = AnalyzingRiskDataSet(riskds_pk=pk, analyze_right_now=False)
+        analyze_result = analyze.analyze_all()
+        general_pts = analyze.compute_general_point(overwrite=True)
+
     except RiskDataSetPoints.DoesNotExist as err:
         return render(request, err)
 
-    return render(request)
+    return redirect('risk_analysis-search')
 
 
 class AnalyzeOne(View):

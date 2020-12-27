@@ -196,6 +196,7 @@ class DataSetModel(BaseModel):
     last_12_months_total_endorsement = models.PositiveIntegerField(db_column='LAST_12_TOTAL_ENDORSEMENT',
                                                                    help_text='Son 12 aylık toplam ciro', blank=True,
                                                                    null=True, verbose_name='Son 12 aylık toplam ciro')
+    analyzed_pts = models.FloatField(db_column='ANALYZED_PTS', null=True)
 
     def auto_blank_fields(self):
         self.user_check()
@@ -257,7 +258,8 @@ class RiskDataSetPointManagers(models.Manager):
 
 
 class RiskDataSetPoints(BaseModel):
-    customer = models.ForeignKey(UserAdaptor, on_delete=models.CASCADE, db_column='CUSTOMER', null=True, blank=True)
+    risk_dataset = models.ForeignKey(DataSetModel, on_delete=models.PROTECT, db_column='RELATED_RISK',
+                                     null=True)
     calculated_pts = models.FloatField(db_column='CALC_PTS', null=True, blank=True)
     variable = models.CharField(max_length=100, db_column='VARIABLE', null=True, blank=True)
 
@@ -265,7 +267,4 @@ class RiskDataSetPoints(BaseModel):
         db_table = 'RISK_DATASET_POINTS'
 
     def __str__(self):
-        return f'POINTS OF {self.customer}'
-
-
-
+        return f'POINTS OF {self.risk_dataset.customer}'

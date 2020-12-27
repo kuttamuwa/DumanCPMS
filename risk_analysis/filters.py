@@ -12,4 +12,4 @@ class RiskAnalysisFilter(FilterSet):
 class RiskPointsFilter(FilterSet):
     class Meta:
         model = RiskDataSetPoints
-        fields = ('customer_id',)
+        fields = ('risk_dataset', 'variable', )

@@ -2,6 +2,7 @@ from django.urls import path
 
 from risk_analysis import views
 from risk_analysis.filters import RiskAnalysisFilter
+from risk_analysis.models import RiskDataSetPoints
 
 urlpatterns = [
     # create or import risk analysis dataset
