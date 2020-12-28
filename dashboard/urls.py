@@ -3,6 +3,6 @@ from django.urls import path, include
 from dashboard import views
 
 urlpatterns = [
-    path('limitexceeds/', views.limitexceeds),
+    path('get/limitexceeds/', views.AccountInitialProcesses().limitexceeds, name='limit-exceeds'),
 
 ]

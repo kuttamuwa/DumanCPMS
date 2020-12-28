@@ -40,17 +40,19 @@ urlpatterns = [
     # financial Check Up - api
     path('finance_checkup/', include('finance_checkup.urls')),
 
-    path('login/', sviews.LoginUserView.as_view()),
-    path('logout/', sviews.LogoutUserView.as_view()),
+    path('login/', sviews.LoginUserView.as_view(), name='login'),
+    path('logout/', sviews.LogoutUserView.as_view(), name='logout'),
+    path('register/', sviews.register_user, name='register'),
 
     # appconfig
     path('appconfig/', include('appconfig.urls')),
 
     # dashboard
-    # path('dashboard/', include('dashboard.urls')),
+    path('dashboard/', include('dashboard.urls')),
 
     # example - modal
-    path('modalex/', include('modalex.urls'))
+    path('modalex/', include('modalex.urls')),
+
 ]
 
 if settings.DEBUG:

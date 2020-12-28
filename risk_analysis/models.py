@@ -83,6 +83,11 @@ class DataSetManager(models.Manager):
     def save(self, *args, **kwargs):
         DataSetManager.save(*args, **kwargs)
 
+    def get_limit_exceeds(self, count=10):
+        pk_list = [i for i in self.values('customer', 'balance', 'limit')]
+
+        return self.filter()
+
     def create(self, *args, **kwargs):
         period_velocity = kwargs.get('period_velocity')
         period_day = kwargs.get('period_day')

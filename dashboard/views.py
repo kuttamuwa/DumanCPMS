@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
-from externalapp.models import ExternalBlackList, SystemBlackList, KonkordatoList
-from risk_analysis.models import TaxDebtList, SGKDebtListModel, DataSetModel
+from externalapp.models import ExternalBlackList, SystemBlackList, KonkordatoList, SGKDebtListModel, TaxDebtList
+from risk_analysis.models import DataSetModel
 from risk_analysis.views import DataSetWarnings
 
 
@@ -43,6 +43,5 @@ class AccountInitialProcesses:
         related_konkordato_lists = KonkordatoList.objects.all().filter(customer_id=customer_id)
         return self.alert_popup(request, 'Konkordato List', related_konkordato_lists)
 
-
-def limitexceeds(request):
-    return DataSetModel.objects.values('customer')
+    def limitexceeds(self, request):
+        return DataSetModel.objects.get_limit_exceeds()
