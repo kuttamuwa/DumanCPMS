@@ -1,10 +1,8 @@
-from django.conf.urls import url
-from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, include
 
-from DumanCPMS import settings
 from checkaccount import views
+from checkaccount.routers import router
 from checkaccount.filters import CheckAccountFilter
 from checkaccount.views import CheckAccountSearchView
 
@@ -18,7 +16,6 @@ urlpatterns = [
     path('create/', views.CheckAccountFormCreateView.as_view(),
          name='checkaccount-create'),
 
-    # path('get/<int:pk>/<int:state>', views.get_customer),  # pk: ca
     path('get/<int:pk>/', views.CheckAccountView.as_view(), name='get_customer'),  #
 
     # upload files
@@ -36,5 +33,6 @@ urlpatterns = [
 
     path('loginapp/', auth_views.LoginView.as_view(), name='app-login'),
 
-    # path('ajaxtest/', views.ajaxtest, name='ajax-test'),
+    # crud - api
+    path('api/', include(router.urls))
 ]

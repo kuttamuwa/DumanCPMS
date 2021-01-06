@@ -134,13 +134,12 @@ class DataSetModel(BaseModel):
                                                  null=True, verbose_name='Teminat Tutarı', blank=True)  # 500 000 vs
     maturity = models.IntegerField(db_column='MATURITY', help_text='vade günü', null=True, blank=True,
                                    verbose_name='Vade Günü')  # gun
-    # payment_frequency = models.PositiveSmallIntegerField(db_column='PAYMENT_FREQ',
-    #                                                      help_text='odeme sikligi', null=True, blank=True,
-    #                                                      verbose_name='Ödeme Sıklığı')  # 10, 5 gun
     maturity_exceed_avg = models.IntegerField(db_column='MATURITY_EXCEED_AVG',
                                               help_text='ortalama gecikme gun bakiyesi',
                                               verbose_name='Ortalama Gecikme Gün Bakiyesi', blank=True,
                                               null=True)  # gun
+
+    # Sipariş tutarları
     avg_order_amount_last_twelve_months = models.FloatField(db_column='AVG_ORDER_AMOUNT_12',
                                                             help_text='Son 12 ay ortalama sipariş tutarı',
                                                             null=True, verbose_name='Son 12 Ay Ortalama Sipariş Tutarı',
@@ -148,12 +147,15 @@ class DataSetModel(BaseModel):
     avg_order_amount_last_three_months = models.FloatField(db_column='AVG_ORDER_AMOUNT_3', blank=True,
                                                            help_text='Son 3 ay ortalama sipariş tutarı',
                                                            null=True, verbose_name='Son 3 Ay Ortalama Sipariş Tutarı')
+
+    # Satış ortalamasından sapmalar
     last_3_months_aberration = models.PositiveSmallIntegerField(db_column='ABERRATION', blank=True,
                                                                 help_text="Son 3 ay ile son "
                                                                           "11 aylık satış ortalamasından sapma",
                                                                 null=True, verbose_name='Son 3 ay ile son 11 aylık '
                                                                                         'Satış ortalamasından sapma')
 
+    # iade yüzdeleri
     last_month_payback_perc = models.PositiveSmallIntegerField(db_column='PAYBACK_PERC_LAST',
                                                                help_text='Son ay iade yuzdesi',
                                                                null=True, verbose_name='Son ay iade yüzdesi',
@@ -169,15 +171,17 @@ class DataSetModel(BaseModel):
                                                                                             'karşılaştırması',
                                                                     blank=True)
 
-    avg_last_three_months_payback_perc = models.PositiveSmallIntegerField(db_column='AVG_PAYBACK_PERC_3', blank=True,
-                                                                          help_text='Son 3 ay iade yuzdesi', null=True,
-                                                                          verbose_name='Son 3 ay iade yüzdesi')
+    last_three_months_payback_perc = models.PositiveSmallIntegerField(db_column='PAYBACK_PERC_3', blank=True,
+                                                                      help_text='Son 3 ay iade yuzdesi', null=True,
+                                                                      verbose_name='Son 3 ay iade yüzdesi')
 
+    # gecikmeler
     avg_delay_time = models.SmallIntegerField(db_column='AVG_DELAY_TIME', help_text='Ort gecikme gun sayisi', null=True,
                                               verbose_name='Ortalama gecikme gün sayısı', blank=True)
     avg_delay_balance = models.PositiveIntegerField(db_column='AVG_DELAY_BALANCE',
                                                     help_text='Ortalama gecikme gun bakiyesi', null=True,
                                                     verbose_name='Ortalama gecikme gün bakiyesi', blank=True)
+
     # calculated -> 30 / devir hizi
     period_day = models.PositiveIntegerField(db_column='PERIOD_DAY', help_text='Devir gunu', null=True,
                                              verbose_name='Devir günü', blank=True)
@@ -192,7 +196,7 @@ class DataSetModel(BaseModel):
     # bakiye verisi yerine çek dahil toplam risk gelecek.
     balance = models.PositiveIntegerField(db_column='BALANCE', blank=True, help_text='Bakiye', null=True,
                                           verbose_name='Bakiye')
-    profit = models.PositiveIntegerField(db_column='PROFIT', help_text='Ka<r', null=True, blank=True,
+    profit = models.PositiveIntegerField(db_column='PROFIT', help_text='Kar', null=True, blank=True,
                                          verbose_name='Kar')
     profit_percent = models.FloatField(db_column='PERC_PROFIT', help_text='Kar yuzdesi', null=True, blank=True,
                                        verbose_name='Kar yüzdesi')
@@ -205,8 +209,31 @@ class DataSetModel(BaseModel):
 
     def auto_blank_fields(self):
         self.user_check()
+        self.check_last_three_months_payback_comparison()
+        self.check_last_three_months_sale_comparison()
 
-        print(self)
+    @staticmethod
+    def x_y_z(x, y):
+        value = ((x - y) / y) * 100
+        return value
+
+    def check_last_three_months_payback_comparison(self):
+        """
+
+        last_three_months_payback_comparison = ((son 3 ay - son 12 ay) / son 12 ay) * 100
+        @return:
+        """
+        if self.last_three_months_payback_comparison is None:
+            if not any([self.last_three_months_payback_perc,
+                        self.last_twelve_months_payback_perc]):
+                self.last_three_months_payback_comparison = self.x_y_z(self.last_three_months_payback_perc,
+                                                                       self.last_twelve_months_payback_perc)
+
+    def check_last_three_months_sale_comparison(self):
+        if self.last_3_months_aberration is None:
+            if not any([self.avg_order_amount_last_twelve_months, self.avg_order_amount_last_three_months]):
+                self.last_3_months_aberration = self.x_y_z(self.avg_order_amount_last_three_months,
+                                                           self.avg_order_amount_last_twelve_months)
 
     def user_check(self):
         if self.customer is None:
@@ -232,8 +259,6 @@ class DataSetModel(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        # todo: last_three_months_payback_comparison = ((son 3 ay - son 12 ay) / son 12 ay) * 100
-        # todo: son 3 ay ile son 11 aylik satış ortalamasından sapma -> ((son 3 ay - son 12 ay) / son 12 ay) * 100
         self.auto_blank_fields()
         return super(DataSetModel, self).save(force_insert, force_update, using, update_fields)
 
@@ -247,7 +272,7 @@ class DataSetModel(BaseModel):
 
     def get_field_config_name(self, config_object, **kwargs):
         desired_field = kwargs.get('field')
-        if desired_field not in list(self.field_names):
+        if desired_field not in list(self._meta.fields):
             raise ValueError('Specified field is not in Risk Dataset Model')
 
         excel_field = config_object.get(source_field=desired_field)

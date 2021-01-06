@@ -10,7 +10,7 @@ class RiskAnalysisCreateForm(forms.ModelForm):
     class Meta:
         model = DataSetModel
         exclude = (
-            'created_by', 'created_date', 'customer',
+            'created_by', 'created_date', 'customer', 'analyzed_pts'
         )
 
     def __init__(self, *args, **kwargs):

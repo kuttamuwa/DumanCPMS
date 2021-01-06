@@ -20,6 +20,7 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
         db_table = 'CA_BASEMODEL'
+        ordering = ['created_date']
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):

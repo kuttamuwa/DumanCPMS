@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'appconfig',
     'externalapp',
 ]
-ALLOWED_HOSTS = ['192.168.1.42', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '192.168.1.42', '127.0.0.1']
 
 # Application definition
 
@@ -145,7 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'tr-tr'
 
 TIME_ZONE = 'UTC'
 

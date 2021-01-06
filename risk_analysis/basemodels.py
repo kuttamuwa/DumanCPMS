@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from rest_framework import serializers
 
 
 class BaseModel(models.Model):
@@ -44,3 +45,9 @@ class DummyUser(BaseModel):
 
     def __str__(self):
         return self.username
+
+
+class DummySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DummyUser
+        fields = '__all__'

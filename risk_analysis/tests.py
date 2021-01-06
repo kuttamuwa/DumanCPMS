@@ -17,7 +17,6 @@ class CreateRiskDatasetOne(TestCase):
             warrant_state=False,
             warrant_amount=None,
             maturity=150,
-            payment_frequency=None,
             maturity_exceed_avg=20000,
             avg_order_amount_last_three_months=690000,
             avg_order_amount_last_twelve_months=521141,
