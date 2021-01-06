@@ -18,14 +18,12 @@ import debug_toolbar
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from DumanCPMS import siteviews as sviews
 
 from DumanCPMS import settings
-# from checkaccount import views as cviews
+from DumanCPMS import siteviews as sviews
 
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
-    path('admin/', admin.site.urls),
 
     # application
     # home page
@@ -51,9 +49,12 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
 
     # example - modal
-    path('modalex/', include('modalex.urls')),
+    # path('modalex/', include('modalex.urls')),
 
+    path('django_plotly_dash/', include('django_plotly_dash.urls')),
+    path('admin/', admin.site.urls),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

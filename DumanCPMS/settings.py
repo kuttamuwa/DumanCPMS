@@ -25,10 +25,6 @@ SECRET_KEY = '-^jezq)+g@xp--tla4y=95e!2a+xlb#pv4g+$=2ip61woh7yvc'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.42', '127.0.0.1']
-
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,24 +32,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # CORS
-    'corsheaders',
 
-    # autocomplete
-    'dal',
-    'dal_select2',
-    # 'grappelli',
-
-
-    # project apps
-    'checkaccount',  # modular
-    'risk_analysis',  # statick module
-    'dashboard',
-    'finance_checkup',
-    'modalex',
-    'appconfig',
-    'externalapp',
-
+    # project libraries
     'debug_toolbar',
     'rest_framework',
     'crispy_forms',
@@ -62,8 +42,27 @@ INSTALLED_APPS = [
     'bootstrap_modal_forms',
     'datatableview',
     'widget_tweaks',
+    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
 
+    'dal',
+    'dal_select2',
+
+    # CORS
+    'corsheaders',
+
+    # project apps
+    'checkaccount',  # modular
+    'risk_analysis',  # statick module
+    'dashboard',
+    'finance_checkup',
+    # 'modalex',
+    'appconfig',
+    'externalapp',
 ]
+ALLOWED_HOSTS = ['192.168.1.42', '127.0.0.1']
+
+# Application definition
+
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -117,7 +116,7 @@ WSGI_APPLICATION = 'DumanCPMS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'umut_devv',
+        'NAME': 'dcpms_dev',
         'USER': 'postgres',
         'PASSWORD': 'figo1190',
         'HOST': 'localhost',
@@ -167,7 +166,7 @@ LOGIN_REDIRECT_URL = '/'
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'dashboard/static'),
+    os.path.join(BASE_DIR, 'static'),
 )
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
