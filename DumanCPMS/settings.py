@@ -85,7 +85,9 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
+    'http://localhost:8080'  # vue js
 )
+
 INTERNAL_IPS = [
     '127.0.0.1'
 ]
