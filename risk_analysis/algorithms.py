@@ -301,7 +301,7 @@ class AnalyzingRiskDataSet(ControlRiskDataSet):
         # eger yukaridaki False dondururse hesaplama yapilmaz?<
         if self.analyze_decision:
             self.detect_son_12ay_satis_ort_sapma()
-            self.analyze_kar()
+            # self.analyze_kar()
             self.analyze_son_12_ay_iade_yuzdesi()
             self.analyze_ort_gecikme_gun_sayisi()
             self.analyze_ort_gecikme_gun_bakiyesi()

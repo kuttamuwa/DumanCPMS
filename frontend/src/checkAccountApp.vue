@@ -1,22 +1,22 @@
 <template>
   <div id="checkaccountapp">
 
-    <form action="">
+    <form @submit.prevent="createCheckAccount">
       <div class="form-group row">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Firma tipi">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Firma ismi">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Kimlik no">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Doğum yeri">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Vergi Departmanı">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Firma adresi">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Firma iletişim personeli">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Sektör">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Şehir">
-        <input type="text" class="form-control col-3 mx-2" placeholder="İlçe">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Telefon">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Fax">
-        <input type="text" class="form-control col-3 mx-2" placeholder="Web url">
-        <input type="text" class="form-control col-3 mx-2" placeholder="E-mail">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Firma tipi" v-model="account.firm_type">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Firma ismi" v-model="account.firm_full_name">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Kimlik no" v-model="account.taxpayer_number">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Doğum yeri" v-model="account.birthplace">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Vergi Departmanı" v-model="account.tax_department">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Firma adresi" v-model="account.firm_address">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Firma iletişim personeli" v-model="account.firm_key_contact_personnel">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Sektör" v-model="account.sector">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Şehir" v-model="account.city">
+        <input type="text" class="form-control col-3 mx-2" placeholder="İlçe" v-model="account.district">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Telefon" v-model="account.phone_number">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Fax" v-model="account.fax">
+        <input type="text" class="form-control col-3 mx-2" placeholder="Web url" v-model="account.web_url">
+        <input type="text" class="form-control col-3 mx-2" placeholder="E-mail" v-model="account.email_addr">
 
         <button class="btn btn-success"> Oluştur</button>
       </div>
@@ -71,6 +71,23 @@ export default {
   name: 'App',
   data() {
     return {
+      account: {
+        'firm_type' : '',
+        'firm_full_namer' : '',
+        'taxpayer_number' : '',
+        'birthplace' : '',
+        'tax_department' : '',
+        'firm_address' : '',
+        'firm_key_contact_personnel' : '',
+        'sector' : '',
+        'city' : '',
+        'district' : '',
+        'phone_number' : '',
+        'fax' : '',
+        'web_url' : '',
+        'email_addr' : '',
+      },
+
       accounts: []
     }
   },

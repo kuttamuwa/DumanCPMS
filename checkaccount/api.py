@@ -1,8 +1,9 @@
 from rest_framework import viewsets
 
-from checkaccount.models import CheckAccount, AccountDocuments, PartnershipDocuments, SysPersonnel, Sectors
+from checkaccount.models import CheckAccount, AccountDocuments, PartnershipDocuments, SysPersonnel, Sectors, Cities, \
+    Districts
 from checkaccount.serializers import CheckAccountSerializer, AccountDocumentsSerializer, PartnershipDocumentsSerializer
-from checkaccount.serializers import SysPersonnelSerializer, SectorsSerializer
+from checkaccount.serializers import SysPersonnelSerializer, SectorsSerializer, CitySerializer, DistrictSerializer
 
 
 class CheckAccountAPI(viewsets.ModelViewSet):
@@ -30,3 +31,17 @@ class SectorsAPI(viewsets.ModelViewSet):
     serializer_class = SectorsSerializer
 
 
+class CitiesAPI(viewsets.ModelViewSet):
+    queryset = Cities.objects.all().order_by('name')
+    serializer_class = CitySerializer
+
+
+class DistrictAPI(viewsets.ModelViewSet):
+    queryset = Districts.objects.all()
+    serializer_class = DistrictSerializer
+
+    def get_queryset(self):
+        city_pk = self.request.query_params.get('city_pk')
+        city = Cities.objects.filter(pk=city_pk)
+
+        return city

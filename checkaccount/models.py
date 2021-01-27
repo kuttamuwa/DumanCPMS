@@ -97,7 +97,8 @@ class CheckAccount(BaseModel):
     dummy_creator = DummyCreator()
     objects = models.Manager()
 
-    firm_type = models.CharField(max_length=50, choices=[('t', 'TUZEL_KISILIK'), ('s', 'SAHIS_ISLETMESI')],
+    firm_type = models.CharField(max_length=50, choices=[('Tüzel Kişilik', 'TUZEL_KISILIK'),
+                                                         ('Şahıs İşletmesi', 'SAHIS_ISLETMESI')],
                                  verbose_name='FIRM TYPE', help_text='Business type of the firm',
                                  db_column='FIRM_TYPE', null=True, default='t')
     firm_full_name = models.CharField(max_length=70, verbose_name='FIRM FULLNAME',

@@ -214,7 +214,10 @@ class DataSetModel(BaseModel):
 
     @staticmethod
     def x_y_z(x, y):
-        value = ((x - y) / y) * 100
+        value = None
+        if x is not None and y is not None:
+            value = ((x - y) / y) * 100
+
         return value
 
     def check_last_three_months_payback_comparison(self):

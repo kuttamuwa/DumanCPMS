@@ -189,7 +189,7 @@ class UploadRiskAnalysisDataView(FormView):
                 avg_order_amount_last_three_months=avg_order_amount_last_three_months,
                 last_3_months_aberration=last_3_months_aberration,
                 last_twelve_months_payback_perc=last_twelve_months_payback_perc,
-                avg_last_three_months_payback_perc=avg_last_three_months_payback_perc,
+                # avg_last_three_months_payback_perc=avg_last_three_months_payback_perc,
                 last_three_months_payback_comparison=last_three_months_payback_comparison,
                 avg_delay_time=avg_delay_time,
                 risk_excluded_warrant_balance=risk_excluded_warrant_balance,
